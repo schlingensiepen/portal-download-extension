@@ -48,4 +48,6 @@ jobs:
           npx --yes web-ext@8.3.0 sign --channel unlisted --source-dir . --artifacts-dir ../signed --api-key "$AMO_JWT_ISSUER" --api-secret "$AMO_JWT_SECRET"
       - name: Release with both files
         env: { GH_TOKEN: "${{ github.token }}" }
-        run: gh release create "$GITHUB_REF_NAME" dist/portal-download-*.zip dist/signed/*.xpi --title "$GITHUB_REF_NAME" --notes "Chrome and Edge: unpack the ZIP and load it under Extensions → Developer mode → Load unpacked. Firefox: open the .xpi file."
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/portal-download-*.zip dist/signed/*.xpi --title "$GITHUB_REF_NAME" \
+            --notes "Chrome and Edge – unpack the ZIP and load it under Extensions, Developer mode, Load unpacked. Firefox – open the .xpi file."
