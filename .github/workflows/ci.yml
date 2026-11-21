@@ -8,7 +8,7 @@ on:
 permissions: { contents: read }
 env:
   # The service whose contract scenarios the local backend passes; same major and minor version.
-  PRODUCT_REF: release-0.8
+  PRODUCT_REF: v0.8.0
 jobs:
   test:
     runs-on: ubuntu-24.04
@@ -54,4 +54,4 @@ jobs:
         env: { GH_TOKEN: "${{ github.token }}" }
         run: |
           gh release create "$GITHUB_REF_NAME" dist/portal-download-*.zip dist/signed/*.xpi --title "$GITHUB_REF_NAME" \
-            --notes "Chrome and Edge – unpack the ZIP and load it under Extensions, Developer mode, Load unpacked. Firefox – open the .xpi file."
+            --notes "Firefox 128 or newer – download the .xpi, then about:addons, gear menu, Install Add-on From File. Chrome and Edge 121 or newer – unpack the ZIP into a folder that stays and load it under Extensions, Developer mode, Load unpacked. Details in the README."
