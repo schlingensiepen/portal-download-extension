@@ -197,8 +197,8 @@ const METHODS = {
 };
 
 export function checkPassword(pw) {
-  if (pw && (pw.length < 8 || pw.length > 200 || !/^[\x20-\x7e]+$/.test(pw))) {
-    throw bad("password_invalid", "The password for the file must have between 8 and 200 characters, only letters A to Z, digits, punctuation and spaces (no umlauts). Choose another and send again.");
+  if (pw && (pw.length < 8 || pw.length > 200 || !/^[\x20-\x7e]+$/.test(pw) || pw.trim() !== pw)) {
+    throw bad("password_invalid", "The password for the file must have between 8 and 200 characters, only letters A to Z, digits, punctuation and spaces (no umlauts, no space at either end). Choose another and send again.");
   }
 }
 
@@ -252,7 +252,7 @@ export function parseFile(content) {
   if (head.version !== VERSION) throw bad("file_version", `The file has format version ${JSON.stringify(head.version ?? null)}; this reads version ${VERSION}, which portal-download 0.8 writes. Files of older versions are not read.`);
   if (head.kind !== "jobs" && head.kind !== "full") throw lineError(1, "the head names neither jobs nor full");
   const f = { kind: head.kind, jobs: [], runs: [], deleted: [] };
-  const jobGuids = new Set(), runGuids = new Set();
+  const jobGuids = new Set(), runGuids = new Set(), replaced = new Set();
   for (const [n, line] of lines.slice(1)) {
     let v;
     try { v = JSON.parse(line); } catch { throw lineError(n, "it is no JSON"); }
@@ -261,6 +261,7 @@ export function parseFile(content) {
       if (v.replaces != null && !guidOk(v.replaces)) throw lineError(n, "the GUID a job replaces is no GUID");
       if (jobGuids.has(v.guid)) throw lineError(n, "a job with this GUID came earlier in the file");
       jobGuids.add(v.guid);
+      if (v.replaces != null) { if (replaced.has(v.replaces)) throw lineError(n, "another job of the file replaces the same job"); replaced.add(v.replaces); }
       try { checkUrl(str(v, "entry_url")); validateJob(jobInput(v), true); } catch (e) { throw lineError(n, e.message); }
       v.title = String(v.title).trim();
       for (const fld of FIELDS) if (!(v.changed && typeof v.changed === "object" && normField(v.changed, fld))) throw lineError(n, `a job lacks the time its field ${fld} changed`);
@@ -336,7 +337,9 @@ function plan(data, f) {
     let c;
     const known = byGuid(data, rec.guid);
     const succ = known ? null : successor(data, rec.guid);
-    const deletedAt = known || succ ? null : deletedAtChainEnd(data, rec.guid);
+    let deletedAt = known || succ ? null : deletedAtChainEnd(data, rec.guid);
+    // A job with a new address for one deleted here is a deleted job too.
+    if (!known && !succ && !deletedAt && rec.replaces && !byGuid(data, rec.replaces) && !successor(data, rec.replaces)) deletedAt = deletedAtChainEnd(data, rec.replaces);
     let replacedTarget = null;
     if (!known && !succ && !deletedAt && rec.replaces) replacedTarget = byGuid(data, rec.replaces) || successor(data, rec.replaces);
     if (known) c = { kind: "known", target: known, viaOld: false };
