@@ -51,5 +51,6 @@
       "id": "portal-download@schlingensiepen.github.io",
       "strict_min_version": "128.0"
     }
-  }
+  },
+  "minimum_chrome_version": "116"
 }

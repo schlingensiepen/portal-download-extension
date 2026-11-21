@@ -12,6 +12,13 @@ The browser extension for Portal-Download services, for Chrome, Edge and Firefox
 | `src/zipaes.js` | The exchange file: a ZIP with one entry, WinZip AES-256, with WebCrypto and CompressionStream. No third-party code. |
 | `test/` | `contract.mjs` runs the service's contract scenarios against the local backend; `zip.test.mjs` reads files the service wrote (`fixtures/`); `messages.test.mjs` holds the text keys. |
 
+Working on it:
+- **Load from source:** Chrome and Edge: *Extensions → Developer mode → Load unpacked* on this folder; reload the card after a change. Firefox: `about:debugging` → *This Firefox* → *Load Temporary Add-on* → `manifest.json`.
+- **Tests:** `node test/contract.mjs ../product/contract-tests` (with the service checked out beside this repository, as in the workshop, or cloned as the CI does), `node test/zip.test.mjs`, `node test/messages.test.mjs`. `node build.mjs` packs `dist/` with `build/zip.mjs`, a plain ZIP writer, the same bytes for the same sources.
+- **A new text:** add the key with its message to every `_locales/<lang>/messages.json`, with the same `$1`… placeholders; `messages.test.mjs` fails on a key used but missing, or kept but unused.
+- **Releasing:** set `version` in `manifest.json`, commit, tag `v<version>` (the CI refuses a tag that differs from the manifest), push the tag. The CI tests, packs, has Mozilla sign the file as unlisted (secrets `AMO_JWT_ISSUER`, `AMO_JWT_SECRET`) and creates the GitHub release with the ZIP and the `.xpi`. Set `PRODUCT_REF` in the CI to the tag of the service whose scenarios the release passes.
+- **What is kept:** `storage.local` holds `services` (a list of `{id, name, base, token}`) while no local store exists. With one, it holds only `vault`: `{salt, iterations, sealed: {iv, data}}`, where `data` is AES-GCM of `{services, local}`; `local` is `{next_id, jobs: {id: job with changed times}, runs: [...], deleted: {guid: …}}`. The unlocked key lies in `storage.session` as `vaultKey`.
+
 Rules that hold:
 - **The local backend behaves as the service does** for every scenario in the service's `contract-tests/`, of the same major and minor version (`PRODUCT_REF` in the CI). A change of the merge or the file format goes into the service first, with a scenario, then here.
 - **One backend cannot reach another:** nothing a backend sends is put into the page as HTML; instructions are shown as text.
