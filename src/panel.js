@@ -35,6 +35,7 @@ function explain(e) {
   if (["device_revoked", "credential_unknown", "user_deactivated"].includes(e.kind)) return t("err_access_gone");
   if (e.kind === "unreadable") return t("err_unreadable");
   if (e.kind === "locked") return t("err_locked");
+  if (e.kind === "vault_exists") return t("err_vault_exists");
   return e.message || String(e);
 }
 const fail = (e) => { console.error(e); toast(explain(e), true); };
@@ -67,6 +68,8 @@ function saveFile(bytes, name) {
   document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
+/** The permission pattern of a service: scheme and host, without the port, which Firefox does not take. */
+const originPattern = (base) => { const u = new URL(base); return `${u.protocol}//${u.hostname}/*`; };
 async function activeTab() { const [tab] = await api.tabs.query({ active: true, currentWindow: true }); return tab; }
 
 // ------------------------------------------------------------------ state
@@ -108,14 +111,22 @@ function renderTop() {
   $("#add").disabled = state.vaultState === "locked";
 }
 
+let renders = 0;
 async function render() {
+  const mine = ++renders;
   renderTop();
   const view = $("#view");
   try {
-    if (state.vaultState === "locked") return view.replaceChildren(viewUnlock());
+    if (state.vaultState === "locked") {
+      // Nothing of the store stays on screen or in memory while it is locked.
+      Object.assign(state, { job: null, preview: null, done: null, view: "list" });
+      return view.replaceChildren(viewUnlock());
+    }
+    if (state.view !== "list" && state.view !== "add" && !current()) state.view = "list";
     const v = state.view;
-    const content = v === "job" ? viewJob() : v === "add" ? viewAdd() : v === "manage" ? await viewManage() : v === "new" ? await viewNew() : await viewList();
-    view.replaceChildren(content);
+    const content = v === "job" ? viewJob() : v === "add" ? viewAdd() : v === "manage" ? await viewManage() : v === "new" || v === "edit" ? await viewNew() : await viewList();
+    // A slower render that started earlier does not cover a later one.
+    if (mine === renders) view.replaceChildren(content);
   } catch (e) { fail(e); }
 }
 const go = (view, extra = {}) => { Object.assign(state, { view }, extra); render(); };
@@ -194,6 +205,9 @@ function viewJob() {
   if (j.username === undefined) login.append(h("p", { class: "small muted" }, t("login_hidden")));
   box.append(login);
   if (j.instructions_md) box.append(h("div", { class: "card pre small" }, j.instructions_md));
+  if (!state.mismatch[b.id]) box.append(h("div", { class: "row", style: "margin:6px 0" },
+    h("button", { class: "btn", type: "button", onclick: () => go("edit", { choice: b.id }) }, t("edit")),
+    confirmButton(t("delete"), t("really"), "bad", async () => { try { await b.call("job.delete", { job_id: j.job_id }); toast(t("deleted")); go("list", { job: null }); } catch (e) { fail(e); } })));
   if (state.mismatch[b.id]) box.append(h("p", { class: "card alert small" }, t("contract_blocks")));
   else if (!state.done) {
     const note = h("textarea", { placeholder: t("note_placeholder") });
@@ -213,21 +227,39 @@ function viewJob() {
 
 async function viewNew() {
   const b = current();
+  const editing = state.view === "edit" && state.job ? state.job.j : null;
   const f = { title: h("input", { type: "text", required: true, maxlength: "200" }), url: h("input", { type: "url", required: true }), weeks: h("input", { type: "number", min: "1", max: "520", value: "4" }),
-    user: h("input", { type: "text", autocomplete: "off", spellcheck: "false" }), pass: h("input", { type: "text", autocomplete: "off", spellcheck: "false" }) };
+    retry: h("input", { type: "number", min: "1", max: "365", value: "2" }), due: h("input", { type: "date" }),
+    user: h("input", { type: "text", autocomplete: "off", spellcheck: "false" }), pass: h("input", { type: "text", autocomplete: "off", spellcheck: "false" }), text: h("textarea", {}) };
+  if (editing) {
+    Object.assign(f.title, { value: editing.title }); f.url.value = editing.entry_url; f.weeks.value = editing.interval_weeks; f.retry.value = editing.retry_days;
+    f.due.value = editing.next_due; f.user.value = editing.username || ""; f.pass.value = editing.password || ""; f.text.value = editing.instructions_md || "";
+  }
   if (state.fromTab && /^https?:/.test(state.tabUrl)) {
     // An invitation in the fragment does not belong into a job.
     const u = new URL(state.tabUrl); if (/invite=/.test(u.hash)) u.hash = "";
     f.url.value = u.href; f.title.value = state.tabTitle || u.host;
   }
-  const form = h("form", { class: "card" }, h("h1", {}, t("new_job")), h("label", {}, t("title")), f.title, h("label", {}, t("entry_url")), f.url, h("label", {}, t("every_weeks")), f.weeks,
-    h("label", {}, t("username")), f.user, h("label", {}, t("password")), f.pass, h("p", { class: "small muted" }, t("login_plain")),
-    h("div", { class: "row" }, h("button", { class: "btn primary", type: "submit" }, t("create")), h("button", { class: "btn", type: "button", onclick: () => go("list") }, t("cancel"))));
+  const form = h("form", { class: "card" }, h("h1", {}, editing ? t("edit_job") : t("new_job")), h("label", {}, t("title")), f.title, h("label", {}, t("entry_url")), f.url,
+    editing ? h("p", { class: "small muted" }, t("url_hint")) : null,
+    h("label", {}, t("every_weeks")), f.weeks, h("label", {}, t("retry_days")), f.retry, editing ? h("label", {}, t("next_due")) : null, editing ? f.due : null,
+    h("label", {}, t("username")), f.user, h("label", {}, t("password")), f.pass, h("p", { class: "small muted" }, b.id === "local" ? t("login_local") : t("login_plain")),
+    h("label", {}, t("instructions_md")), f.text,
+    h("div", { class: "row" }, h("button", { class: "btn primary", type: "submit" }, editing ? t("save") : t("create")), h("button", { class: "btn", type: "button", onclick: () => go(editing ? "job" : "list") }, t("cancel"))));
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const all = { title: f.title.value, entry_url: f.url.value.trim(), interval_weeks: Number(f.weeks.value), retry_days: Number(f.retry.value), username: f.user.value, password: f.pass.value, instructions_md: f.text.value };
     try {
-      await b.call("job.create", { title: f.title.value, entry_url: f.url.value.trim(), interval_weeks: Number(f.weeks.value), username: f.user.value, password: f.pass.value });
-      toast(t("created")); go("list");
+      if (editing) {
+        if (f.due.value) all.next_due = f.due.value;
+        // Only what changed, so that a change by somebody else meanwhile survives.
+        const changed = Object.fromEntries(Object.entries(all).filter(([k, v]) => editing[k] !== v));
+        const j = await b.call("job.update", { job_id: editing.job_id, ...changed });
+        toast(t("saved")); go("job", { job: { b, j }, done: null });
+      } else {
+        await b.call("job.create", all);
+        toast(t("created")); go("list");
+      }
     } catch (err) { fail(err); }
   });
   return form;
@@ -258,10 +290,11 @@ function viewAdd() {
 async function addFromTab() {
   const inv = parseInvitation(state.tabUrl);
   if (!inv) return toast(t("no_invitation"), true);
+  const pattern = originPattern(inv.base);
   let granted = false;
   try {
     // The first thing the click awaits, as Firefox requires: access to this one service only.
-    granted = await api.permissions.request({ origins: [`${inv.origin}/*`] });
+    granted = await api.permissions.request({ origins: [pattern] });
     if (!granted) return toast(t("permission_refused"), true);
     const content = await vault.read();
     if (content.services.some((s) => s.base === inv.base)) { toast(t("already_added"), true); return; }
@@ -282,7 +315,7 @@ async function addFromTab() {
     go("list");
   } catch (e) {
     // A permission for a service that was not added is given back.
-    if (granted && !(state.content && state.content.services.some((s) => s.base === inv.base))) api.permissions.remove({ origins: [`${inv.origin}/*`] }).catch(() => {});
+    if (granted && !(state.content && state.content.services.some((s) => originPattern(s.base) === pattern))) api.permissions.remove({ origins: [pattern] }).catch(() => {});
     fail(e);
   }
 }
@@ -304,8 +337,8 @@ async function viewManage() {
         const content = await vault.read();
         content.services = content.services.filter((s) => s.id !== b.id);
         await vault.write(content);
-        const origin = new URL(b.service.base).origin;
-        if (!content.services.some((s) => new URL(s.base).origin === origin)) api.permissions.remove({ origins: [`${origin}/*`] }).catch(() => {});
+        const pattern = originPattern(b.service.base);
+        if (!content.services.some((s) => originPattern(s.base) === pattern)) api.permissions.remove({ origins: [pattern] }).catch(() => {});
         await loadBackends(); state.choice = "all"; go("list");
       })));
   } else {
@@ -340,6 +373,7 @@ function exchangeCard(b) {
   const preview = async () => {
     const f = file.files[0];
     if (!f) return toast(t("choose_file"), true);
+    if (f.size > 48 * 1024 * 1024) return toast(t("file_too_large"), true);
     try {
       checkPassword(pwIn.value || null);
       const bytes = new Uint8Array(await f.arrayBuffer());
@@ -409,5 +443,5 @@ $("#manage").addEventListener("click", () => go("manage"));
 document.documentElement.lang = api.i18n.getUILanguage();
 $("#choose").setAttribute("aria-label", t("backend"));
 // Another panel of this browser may unlock, lock or add a service.
-api.storage.onChanged.addListener(async (_, area) => { if (area === "local" || area === "session") { await loadBackends(); if (state.view === "list" || state.vaultState === "locked") render(); else renderTop(); } });
+api.storage.onChanged.addListener(async (_, area) => { if (area === "local" || area === "session") { await loadBackends(); if (state.view === "list" || state.view === "add" || state.vaultState === "locked") render(); else renderTop(); } });
 loadBackends().then(render, fail);

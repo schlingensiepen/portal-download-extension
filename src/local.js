@@ -144,12 +144,13 @@ const METHODS = {
     const j = stored(data, job_id);
     const ts = nowIso();
     if (input.title !== undefined) input.title = String(input.title).trim();
+    const oldTitle = j.title;
     for (const f of FIELDS) if (input[f] !== undefined && input[f] !== j[f]) { j[f] = input[f]; j.changed[f] = ts; }
     if (input.entry_url !== undefined) {
       const u = checkUrl(input.entry_url);
       if (u !== j.entry_url) {
         const guid = newGuid();
-        data.deleted[j.guid] = { title: j.title, entry_url: j.entry_url, deleted_at: ts, replaced_by: guid };
+        data.deleted[j.guid] = { title: oldTitle, entry_url: j.entry_url, deleted_at: ts, replaced_by: guid };
         j.replaces = j.guid; j.guid = guid; j.entry_url = u;
       }
     }
@@ -207,6 +208,7 @@ export function checkPassword(pw) {
 export function toBase64(bytes) { let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000)); return btoa(s); }
 export function fromBase64(b64) { let s; try { s = atob(String(b64).trim()); } catch { throw bad("file_invalid", "`zip_base64` is not base64. Send the file's bytes base64-encoded, as job.export returns them."); } const b = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) b[i] = s.charCodeAt(i); return b; }
 async function unzip(b64, password) {
+  checkPassword(password);
   try { return await unzipText(fromBase64(b64), ENTRY, password); }
   catch (e) { if (e instanceof ZipError) throw new OpError(400, e.kind, e.message); throw e; }
 }
@@ -250,6 +252,7 @@ export function parseFile(content) {
   if (!lines.length) throw lineError(1, "the file is empty");
   let head;
   try { head = JSON.parse(lines[0][1]); } catch { throw lineError(1, "the head is no JSON"); }
+  if (!head || typeof head !== "object") throw lineError(1, "the head is no JSON object");
   if (head.format !== FORMAT) throw lineError(1, "the head does not name the format portal-download");
   if (head.version !== VERSION) throw bad("file_version", `The file has format version ${JSON.stringify(head.version ?? null)}; this reads version ${VERSION}, which portal-download 0.8 writes. Files of older versions are not read.`);
   if (head.kind !== "jobs" && head.kind !== "full") throw lineError(1, "the head names neither jobs nor full");
@@ -258,12 +261,14 @@ export function parseFile(content) {
   for (const [n, line] of lines.slice(1)) {
     let v;
     try { v = JSON.parse(line); } catch { throw lineError(n, "it is no JSON"); }
+    if (!v || typeof v !== "object" || Array.isArray(v)) throw lineError(n, "it is no JSON object");
     if (v.type === "job") {
       if (!guidOk(v.guid) || !normField(v, "created_at")) throw lineError(n, "a job lacks a GUID, an entry address or its creation time");
       if (v.replaces != null && !guidOk(v.replaces)) throw lineError(n, "the GUID a job replaces is no GUID");
       if (jobGuids.has(v.guid)) throw lineError(n, "a job with this GUID came earlier in the file");
       jobGuids.add(v.guid);
       if (v.replaces != null) { if (replaced.has(v.replaces)) throw lineError(n, "another job of the file replaces the same job"); replaced.add(v.replaces); }
+      if (typeof v.title !== "string" || v.retry_days === undefined || v.next_due === undefined) throw lineError(n, "a job lacks its title, its retry days or its due date");
       try { checkUrl(str(v, "entry_url")); validateJob(jobInput(v), true); } catch (e) { throw lineError(n, e.message); }
       v.title = String(v.title).trim();
       for (const fld of FIELDS) if (!(v.changed && typeof v.changed === "object" && normField(v.changed, fld))) throw lineError(n, `a job lacks the time its field ${fld} changed`);
@@ -441,6 +446,8 @@ function apply(data, f, decisionsIn) {
     } else if (it.c.kind === "deleted_here") {
       if (action(["reactivate", "skip"], "skip") === "reactivate") {
         delete work.deleted[it.rec.guid];
+        // Brought back as the replacement of a job deleted here: the old GUID now leads to it.
+        if (it.rec.replaces && work.deleted[it.rec.replaces] && !work.deleted[it.rec.replaces].replaced_by) work.deleted[it.rec.replaces].replaced_by = it.rec.guid;
         const id = insertJob(work, it.rec); done.runs_added += insertRuns(work, id, it.newRuns); done.reactivated++;
       } else done.skipped++;
     } else {

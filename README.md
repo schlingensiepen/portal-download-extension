@@ -2,7 +2,7 @@
 
 The due portal downloads of every [Portal-Download](https://github.com/schlingensiepen/portal-download) service you belong to, and of a store in this browser, in one list in the browser's side panel. The portal opens in a normal tab beside it; the login is copied with one click; a run is closed as succeeded or failed.
 
-For Chrome and Edge 116 or newer, and Firefox 128 or newer. A **backend** below is one source of jobs: a Portal-Download service, or the local store in this browser.
+For Chrome and Edge 121 or newer, and Firefox 128 or newer. A **backend** below is one source of jobs: a Portal-Download service, or the local store in this browser.
 
 ## Installing
 
@@ -31,11 +31,11 @@ The extension gets a device access of its own, named after the browser and the s
 
 ## The list
 
-**All** at the top shows the jobs of every backend in one list, most urgent first, each with the name of its backend. Choosing one backend shows its jobs only and enables what concerns that backend: *Add the current page as a job*, and under ⚙ the exchange of jobs as a file and the backend's management (for a service: open its web application, remove it; for the local store: passphrase, lock, delete). Under **All** these are greyed out.
+**All** at the top shows the jobs of every backend in one list, most urgent first, each with the name of its backend. Choosing one backend shows its jobs only and enables what concerns that backend: *Add the current page as a job*, editing and deleting a job, and under ⚙ the exchange of jobs as a file and the backend's management (for a service: open its web application, remove it; for the local store: passphrase, lock, delete). Under **All** these are greyed out.
 
 ## The local store
 
-Under **+**, *Keep jobs in this browser* creates a store of jobs in this browser only, encrypted with a **passphrase** of at least ten characters (the passphrase protects the store; a **password** below protects an exported file). From then on the tokens of the services lie under the passphrase as well, and the extension asks for it once after every start of the browser; *Lock now* under ⚙ locks it at once. Everything lies in the browser's storage for this extension, encrypted with the passphrase. **A forgotten passphrase cannot be recovered**: the unlock card then offers only to delete the store with its jobs and the services kept with it. Export the jobs now and then.
+Under **+**, *Keep jobs in this browser* creates a store of jobs in this browser only, encrypted with a **passphrase** of at least ten characters (the passphrase protects the store; a **password** below protects an exported file). From then on the tokens of the services lie under the passphrase as well, and the extension asks for it once after every start of the browser; *Lock now* under ⚙ locks it at once. Everything lies in the browser's storage for this extension, encrypted with the passphrase. Without a local store, the tokens of the services lie there unencrypted, as a browser keeps its cookies. **A forgotten passphrase cannot be recovered**: the unlock card then offers only to delete the store with its jobs and the services kept with it. Export the jobs now and then.
 
 ## Exchanging jobs
 

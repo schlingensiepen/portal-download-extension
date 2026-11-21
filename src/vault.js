@@ -11,7 +11,7 @@ import { emptyData } from "./local.js";
 const api = globalThis.browser ?? globalThis.chrome;
 const ITERATIONS = 600000;
 const te = new TextEncoder(), td = new TextDecoder();
-const b64 = (bytes) => btoa(String.fromCharCode(...bytes));
+const b64 = (bytes) => { let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000)); return btoa(s); };
 const unb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 
 async function deriveKey(passphrase, salt, iterations = ITERATIONS) {
@@ -75,7 +75,9 @@ export class Vault {
 
   /** Creates the local backend: from now on everything lies under the passphrase. */
   async createLocal(passphrase) {
-    const { services } = await api.storage.local.get("services");
+    const { services, vault } = await api.storage.local.get(["services", "vault"]);
+    // Another panel may have created it meanwhile; never write over a store.
+    if (vault) throw Object.assign(new Error("exists"), { kind: "vault_exists" });
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const key = await deriveKey(passphrase, salt);
     const content = { services: services || [], local: emptyData() };

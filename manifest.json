@@ -41,7 +41,8 @@
   ],
   "optional_host_permissions": [
     "https://*/*",
-    "http://*/*"
+    "http://localhost/*",
+    "http://127.0.0.1/*"
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
@@ -49,8 +50,13 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "portal-download@schlingensiepen.github.io",
-      "strict_min_version": "128.0"
+      "strict_min_version": "128.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
     }
   },
-  "minimum_chrome_version": "116"
+  "minimum_chrome_version": "121"
 }

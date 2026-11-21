@@ -86,6 +86,12 @@
   "created": {
     "message": "Created."
   },
+  "delete": {
+    "message": "Delete"
+  },
+  "deleted": {
+    "message": "Deleted."
+  },
   "device_label": {
     "message": "$1 extension $2"
   },
@@ -101,6 +107,12 @@
   "due_tomorrow": {
     "message": "due tomorrow"
   },
+  "edit": {
+    "message": "Edit"
+  },
+  "edit_job": {
+    "message": "Edit job"
+  },
   "entry_url": {
     "message": "Entry page (URL)"
   },
@@ -115,6 +127,9 @@
   },
   "err_unreadable": {
     "message": "The service answers unintelligibly."
+  },
+  "err_vault_exists": {
+    "message": "Another window has created the local store meanwhile."
   },
   "every_weeks": {
     "message": "Every how many weeks?"
@@ -151,6 +166,9 @@
   },
   "file_password_in": {
     "message": "Password of the file, if it has one"
+  },
+  "file_too_large": {
+    "message": "The file is larger than 48 MB; that is no exchange file."
   },
   "forgot_button": {
     "message": "Delete the store and the services"
@@ -217,6 +235,9 @@
   },
   "login_hidden": {
     "message": "This backend shows no logins to this device."
+  },
+  "login_local": {
+    "message": "The login is kept in this browser, encrypted with the passphrase."
   },
   "login_plain": {
     "message": "The login is kept in plain text, visible to everybody who uses this backend."
@@ -335,6 +356,12 @@
   "runs_one": {
     "message": "+1 run"
   },
+  "save": {
+    "message": "Save"
+  },
+  "saved": {
+    "message": "Saved."
+  },
   "schedule": {
     "message": "due $1 · every $2 weeks"
   },
@@ -361,6 +388,9 @@
   },
   "unlock_title": {
     "message": "Locked"
+  },
+  "url_hint": {
+    "message": "A new address makes this a new job for the exchange; its history stays."
   },
   "username": {
     "message": "Username"

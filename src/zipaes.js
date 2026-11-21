@@ -5,6 +5,8 @@
 
 const te = new TextEncoder();
 const td = new TextDecoder();
+// The text of a file: invalid UTF-8 or a byte order mark is no file of ours, as for the service.
+const strict = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true });
 
 let CRC_TABLE = null;
 export function crc32(bytes) {
@@ -113,6 +115,11 @@ const NOT_OURS = () => new ZipError("file_invalid", "This is not a file of porta
 
 /** Reads the named entry as text; an encrypted one needs its password. */
 export async function unzipText(bytes, name, password, maxBytes = 64 * 1024 * 1024) {
+  try { return await readEntry(bytes, name, password, maxBytes); }
+  catch (e) { if (e instanceof ZipError) throw e; throw NOT_OURS(); }
+}
+
+async function readEntry(bytes, name, password, maxBytes) {
   const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   let eocd = -1;
   for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 22 - 65535); i--) if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
@@ -145,8 +152,8 @@ export async function unzipText(bytes, name, password, maxBytes = 64 * 1024 * 10
         i += 4 + len;
       }
       if (method !== 99 || !aes) throw new ZipError("file_encryption", "The file is encrypted with the old ZIP method, which is not safe and not read here. Pack it anew with AES-256 encryption.");
-      if (!password) throw new ZipError("password_required", "The file is encrypted. Enter its password.");
       if (aes[4] !== 3) throw new ZipError("file_encryption", "The file is encrypted with an AES strength other than 256 bits, which is not read here.");
+      if (!password) throw new ZipError("password_required", "The file is encrypted. Enter its password.");
       ae = aes[0] | (aes[1] << 8);
       real = aes[5] | (aes[6] << 8);
       const salt = data.subarray(0, 16), check = data.subarray(16, 18), tag = data.subarray(data.length - 10), cipher = data.subarray(18, data.length - 10);
@@ -165,7 +172,8 @@ export async function unzipText(bytes, name, password, maxBytes = 64 * 1024 * 10
     if (raw.length > maxBytes) throw new ZipError("file_too_large", "The file holds more than 64 MiB of text; at most that is read.");
     // AE-2 leaves the checksum out; AE-1 and unencrypted entries carry it.
     if (ae !== 2 && crc32(raw) !== crc) throw new ZipError("file_invalid", "The file is damaged: its checksum does not match.");
-    return td.decode(raw);
+    if (raw[0] === 0xef && raw[1] === 0xbb && raw[2] === 0xbf) throw NOT_OURS();
+    return strict.decode(raw);
   }
   throw NOT_OURS();
 }

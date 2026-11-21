@@ -2,8 +2,9 @@
 // (unpack and load) and for Firefox (signed by Mozilla before it is offered).
 import { readFileSync, readdirSync, statSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { zipFiles } from "./build/zip.mjs";
-const root = new URL(".", import.meta.url).pathname;
+const root = fileURLToPath(new URL(".", import.meta.url));
 const version = JSON.parse(readFileSync(root + "manifest.json", "utf8")).version;
 const files = [];
 const walk = (dir) => { for (const n of readdirSync(join(root, dir)).sort()) { const p = join(dir, n); if (statSync(join(root, p)).isDirectory()) walk(p); else files.push(p); } };

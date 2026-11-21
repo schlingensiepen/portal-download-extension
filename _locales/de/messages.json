@@ -86,6 +86,12 @@
   "created": {
     "message": "Angelegt."
   },
+  "delete": {
+    "message": "Löschen"
+  },
+  "deleted": {
+    "message": "Gelöscht."
+  },
   "device_label": {
     "message": "$1-Erweiterung $2"
   },
@@ -101,6 +107,12 @@
   "due_tomorrow": {
     "message": "morgen fällig"
   },
+  "edit": {
+    "message": "Bearbeiten"
+  },
+  "edit_job": {
+    "message": "Vorgang bearbeiten"
+  },
   "entry_url": {
     "message": "Einstiegsseite (URL)"
   },
@@ -115,6 +127,9 @@
   },
   "err_unreadable": {
     "message": "Der Dienst antwortet unverständlich."
+  },
+  "err_vault_exists": {
+    "message": "Ein anderes Fenster hat den lokalen Speicher inzwischen angelegt."
   },
   "every_weeks": {
     "message": "Alle wie viele Wochen?"
@@ -151,6 +166,9 @@
   },
   "file_password_in": {
     "message": "Passwort der Datei, falls sie eines hat"
+  },
+  "file_too_large": {
+    "message": "Die Datei ist größer als 48 MB; das ist keine Austauschdatei."
   },
   "forgot_button": {
     "message": "Speicher und Dienste löschen"
@@ -217,6 +235,9 @@
   },
   "login_hidden": {
     "message": "Dieses Backend zeigt diesem Gerät keine Zugangsdaten."
+  },
+  "login_local": {
+    "message": "Die Zugangsdaten liegen in diesem Browser, verschlüsselt mit der Passphrase."
   },
   "login_plain": {
     "message": "Die Zugangsdaten liegen im Klartext, sichtbar für alle, die dieses Backend nutzen."
@@ -335,6 +356,12 @@
   "runs_one": {
     "message": "+1 Lauf"
   },
+  "save": {
+    "message": "Speichern"
+  },
+  "saved": {
+    "message": "Gespeichert."
+  },
   "schedule": {
     "message": "fällig $1 · alle $2 Wochen"
   },
@@ -361,6 +388,9 @@
   },
   "unlock_title": {
     "message": "Gesperrt"
+  },
+  "url_hint": {
+    "message": "Eine neue Adresse macht daraus für den Austausch einen neuen Vorgang; der Verlauf bleibt."
   },
   "username": {
     "message": "Benutzername"

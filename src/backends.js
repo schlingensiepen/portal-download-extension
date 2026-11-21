@@ -17,6 +17,8 @@ export class ServiceBackend {
         headers: { "Content-Type": "application/json", ...(this.service.token ? { Authorization: `Bearer ${this.service.token}` } : {}), ...headers },
         // A redirect would carry the token elsewhere.
         redirect: "error",
+        // An unreachable service must not hold up the list of the others.
+        signal: AbortSignal.timeout(15000),
         body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
       });
     } catch {
