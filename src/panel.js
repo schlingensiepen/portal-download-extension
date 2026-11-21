@@ -71,13 +71,20 @@ async function activeTab() { const [tab] = await api.tabs.query({ active: true, 
 const state = { choice: "all", view: "list", job: null, done: null, backends: [], content: null, vaultState: "plain", problems: {}, preview: null };
 const current = () => state.backends.find((b) => b.id === state.choice) || null;
 
+// Loads may overlap (a change in storage while the panel itself loads); the last one started wins.
+let loads = 0;
 async function loadBackends() {
-  state.vaultState = await vault.state();
-  state.backends = [];
-  if (state.vaultState === "locked") return;
-  state.content = await vault.read();
-  for (const s of state.content.services) state.backends.push(new ServiceBackend(s));
-  if (state.content.local) { const b = localBackend(vault); b.name = t("local_name"); state.backends.push(b); }
+  const mine = ++loads;
+  const vaultState = await vault.state();
+  const backends = [];
+  let content = null;
+  if (vaultState !== "locked") {
+    content = await vault.read();
+    for (const s of content.services) backends.push(new ServiceBackend(s));
+    if (content.local) { const b = localBackend(vault); b.name = t("local_name"); backends.push(b); }
+  }
+  if (mine !== loads) return;
+  Object.assign(state, { vaultState, backends, content });
   if (state.choice !== "all" && !current()) state.choice = "all";
 }
 
@@ -184,8 +191,8 @@ function viewJob() {
       } catch (e) { fail(e); }
     };
     box.append(h("label", {}, t("note")), note, h("div", { class: "row", style: "margin-top:8px" },
-      confirmButton(t("succeeded"), t("really"), "ok grow", () => finish("succeeded")),
-      confirmButton(t("failed"), t("really"), "bad grow", () => finish("failed"))));
+      confirmButton(t("btn_succeeded"), t("really"), "ok grow", () => finish("succeeded")),
+      confirmButton(t("btn_failed"), t("really"), "bad grow", () => finish("failed"))));
   }
   return box;
 }

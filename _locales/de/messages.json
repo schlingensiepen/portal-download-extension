@@ -32,6 +32,12 @@
   "back": {
     "message": "← Zurück"
   },
+  "btn_failed": {
+    "message": "Hat nicht geklappt"
+  },
+  "btn_succeeded": {
+    "message": "Hat geklappt"
+  },
   "cancel": {
     "message": "Abbrechen"
   },
