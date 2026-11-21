@@ -196,9 +196,9 @@ const METHODS = {
   },
 };
 
-function checkPassword(pw) {
-  if (pw && (chars(pw) < 8 || chars(pw) > 200 || /[\u0000-\u001f\u007f-\u009f]/.test(pw))) {
-    throw bad("password_invalid", "The password for the file must have between 8 and 200 characters, in one line. Choose another and send again.");
+export function checkPassword(pw) {
+  if (pw && (pw.length < 8 || pw.length > 200 || !/^[\x20-\x7e]+$/.test(pw))) {
+    throw bad("password_invalid", "The password for the file must have between 8 and 200 characters, only letters A to Z, digits, punctuation and spaces (no umlauts). Choose another and send again.");
   }
 }
 
@@ -227,7 +227,15 @@ export function exchangeText(data) {
 }
 
 const guidOk = (g) => typeof g === "string" && g.length === 36 && /^[0-9a-fA-F-]+$/.test(g);
-const tsOk = (t) => typeof t === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/.test(t) && !Number.isNaN(Date.parse(t));
+const RFC3339 = /^\d{4}-\d{2}-\d{2}[Tt]\d{2}:\d{2}:\d{2}(\.\d+)?([Zz]|[+-]\d{2}:\d{2})$/;
+/** A time from a file in the one form the store compares: UTC, whole seconds, with Z; null when it is no time. */
+export function normTs(t) {
+  if (typeof t !== "string" || !RFC3339.test(t)) return null;
+  const ms = Date.parse(t.replace(/(\.\d{3})\d+/, "$1"));
+  if (Number.isNaN(ms)) return null;
+  return new Date(Math.floor(ms / 1000) * 1000).toISOString().replace(".000Z", "Z");
+}
+const normField = (o, k) => { const t = normTs(o[k]); if (t === null) return false; o[k] = t; return true; };
 const str = (v, k) => (typeof v[k] === "string" ? v[k] : "");
 const lineError = (n, why) => bad("file_invalid", `Line ${n} of the file is not valid: ${why}. Nothing was read in; choose a file this service or the browser extension wrote.`);
 function jobInput(v) {
@@ -244,21 +252,28 @@ export function parseFile(content) {
   if (head.version !== VERSION) throw bad("file_version", `The file has format version ${JSON.stringify(head.version ?? null)}; this reads version ${VERSION}, which portal-download 0.8 writes. Files of older versions are not read.`);
   if (head.kind !== "jobs" && head.kind !== "full") throw lineError(1, "the head names neither jobs nor full");
   const f = { kind: head.kind, jobs: [], runs: [], deleted: [] };
+  const jobGuids = new Set(), runGuids = new Set();
   for (const [n, line] of lines.slice(1)) {
     let v;
     try { v = JSON.parse(line); } catch { throw lineError(n, "it is no JSON"); }
     if (v.type === "job") {
-      if (!guidOk(v.guid) || !tsOk(v.created_at)) throw lineError(n, "a job lacks a GUID, an entry address or its creation time");
+      if (!guidOk(v.guid) || !normField(v, "created_at")) throw lineError(n, "a job lacks a GUID, an entry address or its creation time");
+      if (v.replaces != null && !guidOk(v.replaces)) throw lineError(n, "the GUID a job replaces is no GUID");
+      if (jobGuids.has(v.guid)) throw lineError(n, "a job with this GUID came earlier in the file");
+      jobGuids.add(v.guid);
       try { checkUrl(str(v, "entry_url")); validateJob(jobInput(v), true); } catch (e) { throw lineError(n, e.message); }
-      for (const fld of FIELDS) if (!tsOk(v.changed && v.changed[fld])) throw lineError(n, `a job lacks the time its field ${fld} changed`);
+      v.title = String(v.title).trim();
+      for (const fld of FIELDS) if (!(v.changed && typeof v.changed === "object" && normField(v.changed, fld))) throw lineError(n, `a job lacks the time its field ${fld} changed`);
       f.jobs.push(v);
     } else if (v.type === "run") {
-      let ok = guidOk(v.guid) && guidOk(v.job_guid) && (v.outcome === "succeeded" || v.outcome === "failed") && tsOk(v.finished_at);
+      let ok = guidOk(v.guid) && guidOk(v.job_guid) && (v.outcome === "succeeded" || v.outcome === "failed") && normField(v, "finished_at");
       try { parseDate("due_before", str(v, "due_before")); parseDate("due_after", str(v, "due_after")); text("by", str(v, "by"), 1, 200); text("note", str(v, "note"), 0, 2000); } catch { ok = false; }
       if (!ok) throw lineError(n, "a run lacks its GUID, its job, its outcome or its dates");
+      if (runGuids.has(v.guid)) throw lineError(n, "a run with this GUID came earlier in the file");
+      runGuids.add(v.guid);
       f.runs.push(v);
     } else if (v.type === "deleted_job") {
-      if (!guidOk(v.guid) || !tsOk(v.deleted_at) || (v.replaced_by != null && !guidOk(v.replaced_by))) throw lineError(n, "a deleted job lacks its GUID or the time it was deleted");
+      if (!guidOk(v.guid) || !normField(v, "deleted_at") || (v.replaced_by != null && !guidOk(v.replaced_by))) throw lineError(n, "a deleted job lacks its GUID or the time it was deleted");
       f.deleted.push(v);
     } else if (["user", "invitation", "device", "agent"].includes(v.type) && f.kind === "full") {
       // People and accesses of a full backup stay with the service; the local store takes jobs only.
@@ -283,6 +298,18 @@ function successor(data, guid) {
   }
   return null;
 }
+/** When a chain of replacements from this GUID ends in a deleted job, when that was deleted. */
+function deletedAtChainEnd(data, guid) {
+  let g = guid;
+  for (let i = 0; i < 50; i++) {
+    const d = data.deleted[g];
+    if (!d) return null;
+    if (!d.replaced_by) return d.deleted_at;
+    if (byGuid(data, d.replaced_by)) return null;
+    g = d.replaced_by;
+  }
+  return null;
+}
 const runKnown = (data, g) => data.runs.some((r) => r.guid === g);
 function newestLocalRun(data, id) {
   const r = data.runs.map((x, i) => [x, i]).filter(([x]) => x.job_id === id).sort((a, b) => cmp(b[0].finished_at, a[0].finished_at) || b[1] - a[1])[0];
@@ -294,7 +321,7 @@ function compare(local, rec, newest) {
   for (const f of FIELDS) {
     const lv = local[f], lt = local.changed[f], iv = rec[f] ?? "", it = rec.changed[f];
     if (f === "next_due") {
-      if (newest && newest[0] >= lt && newest[0] >= it) { if (newest[1] !== local.next_due) dueFromRun = newest[1]; continue; }
+      if (newest && newest[0] >= lt && newest[0] >= it) { if (newest[1] !== local.next_due) dueFromRun = newest; continue; }
       if (lv !== iv) diffs.push({ field: f, local: lv, incoming: iv, local_changed_at: lt, incoming_changed_at: it, preselect: iv < lv ? "incoming" : "local" });
       continue;
     }
@@ -309,12 +336,12 @@ function plan(data, f) {
     let c;
     const known = byGuid(data, rec.guid);
     const succ = known ? null : successor(data, rec.guid);
-    const del = data.deleted[rec.guid];
+    const deletedAt = known || succ ? null : deletedAtChainEnd(data, rec.guid);
     let replacedTarget = null;
-    if (!known && !succ && !(del && !del.replaced_by) && rec.replaces) replacedTarget = byGuid(data, rec.replaces) || successor(data, rec.replaces);
+    if (!known && !succ && !deletedAt && rec.replaces) replacedTarget = byGuid(data, rec.replaces) || successor(data, rec.replaces);
     if (known) c = { kind: "known", target: known, viaOld: false };
     else if (succ) c = { kind: "known", target: succ, viaOld: true };
-    else if (del && !del.replaced_by) c = { kind: "deleted_here", deleted_at: del.deleted_at };
+    else if (deletedAt) c = { kind: "deleted_here", deleted_at: deletedAt };
     else if (replacedTarget) c = { kind: "replaces", target: replacedTarget };
     else c = { kind: "new" };
     const newRuns = (runsOf[rec.guid] || []).filter((r) => !runKnown(data, r.guid));
@@ -335,7 +362,7 @@ function previewJson(f, items) {
     if (it.c.kind === "known") { v.job_id = it.c.target.id; v.case = it.c.viaOld ? "old_address" : "known"; if (it.c.viaOld) v.local_entry_url = it.c.target.entry_url; }
     if (it.c.kind === "deleted_here") { v.case = "deleted_here"; v.deleted_at = it.c.deleted_at; }
     if (it.c.kind === "replaces") { v.case = "replaces"; v.job_id = it.c.target.id; v.replaces_title = it.c.target.title; v.local_entry_url = it.c.target.entry_url; }
-    if (it.dueFromRun) v.next_due_from_run = it.dueFromRun;
+    if (it.dueFromRun) v.next_due_from_run = it.dueFromRun[1];
     if (it.diffs.length) v.fields = it.diffs;
     if (it.c.kind === "deleted_here") { v.actions = ["reactivate", "skip"]; v.preselect = "skip"; }
     if (it.c.kind === "replaces") { v.actions = ["replace", "keep_both", "skip"]; v.preselect = "replace"; }
@@ -363,6 +390,9 @@ function apply(data, f, decisionsIn) {
   const decisions = decisionsIn && typeof decisionsIn === "object" ? decisionsIn : {};
   if (decisionsIn != null && (typeof decisionsIn !== "object" || Array.isArray(decisionsIn))) throw bad("decision_invalid", "`decisions` must be an object keyed by GUID.");
   const items = plan(data, f);
+  for (const [g, d] of Object.entries(decisions)) {
+    if (!d || typeof d !== "object" || (d.accept !== "preselected" && d.action === undefined && d.fields === undefined)) throw bad("decision_invalid", `The decision for ${g} names nothing to do.`);
+  }
   const missing = items.filter((i) => i.group === "decide" && !(i.rec.guid in decisions)).map((i) => i.rec.guid);
   if (missing.length) throw bad("decision_missing", `The jobs ${missing.join(", ")} need a decision; call the preview again and send one for each of them. Nothing was read in.`);
   // Work on a copy, so that an error leaves the store as it was.
@@ -370,23 +400,26 @@ function apply(data, f, decisionsIn) {
   const done = { added: 0, updated: 0, unchanged: 0, reactivated: 0, replaced: 0, skipped: 0, runs_added: 0 };
   for (const it of plan(work, f)) {
     const d = decisions[it.rec.guid];
+    // A side per field, unless the whole preselection was accepted.
     const take = (field, pre) => {
-      if (!d || d.accept === "preselected" || d.action) return pre === "incoming";
-      if (d.fields && typeof d.fields === "object") {
+      if (d && d.fields !== undefined) {
+        if (!d.fields || typeof d.fields !== "object") throw bad("decision_invalid", `The fields for ${it.rec.guid} are no object.`);
         const side = d.fields[field];
         if (side === "incoming") return true;
         if (side === "local") return false;
         if (side === undefined) throw bad("decision_missing", `The decision for ${it.rec.guid} names no side for its field ${field}. Nothing was read in.`);
         throw bad("decision_invalid", `The side for field ${field} of ${it.rec.guid} is neither local nor incoming.`);
       }
-      throw bad("decision_invalid", `The decision for ${it.rec.guid} names nothing to do.`);
+      if (!d || d.accept === "preselected") return pre === "incoming";
+      throw bad("decision_missing", `The decision for ${it.rec.guid} names no side for its field ${field}; send fields with a side for each field the preview lists. Nothing was read in.`);
     };
     const action = (offered, pre) => {
       if (d && d.action !== undefined) {
         if (offered.includes(d.action)) return d.action;
         throw bad("decision_invalid", `"${d.action}" is not offered for ${it.rec.guid}; the preview offers ${offered.join(", ")}. Nothing was read in.`);
       }
-      return pre;
+      if (d && d.accept === "preselected") return pre;
+      throw bad("decision_missing", `The decision for ${it.rec.guid} names no action; the preview offers ${offered.join(", ")}. Nothing was read in.`);
     };
     const setField = (j, field, value, at) => { j[field] = value; j.changed[field] = at; };
     if (it.c.kind === "new") {
@@ -396,7 +429,7 @@ function apply(data, f, decisionsIn) {
       let ch = false;
       for (const x of it.diffs) if (take(x.field, x.preselect)) { setField(j, x.field, x.incoming, x.incoming_changed_at); ch = true; }
       done.runs_added += insertRuns(work, j.id, it.newRuns);
-      if (it.dueFromRun) { j.next_due = it.dueFromRun; j.changed.next_due = nowIso(); ch = true; }
+      if (it.dueFromRun) { j.next_due = it.dueFromRun[1]; j.changed.next_due = it.dueFromRun[0]; ch = true; }
       done[ch || it.newRuns.length ? "updated" : "unchanged"]++;
     } else if (it.c.kind === "deleted_here") {
       if (action(["reactivate", "skip"], "skip") === "reactivate") {
@@ -411,7 +444,7 @@ function apply(data, f, decisionsIn) {
         j.replaces = j.guid; j.guid = it.rec.guid; j.entry_url = it.rec.entry_url;
         for (const x of it.diffs) if (take(x.field, x.preselect)) setField(j, x.field, x.incoming, x.incoming_changed_at);
         done.runs_added += insertRuns(work, j.id, it.newRuns);
-        if (it.dueFromRun) { j.next_due = it.dueFromRun; j.changed.next_due = nowIso(); }
+        if (it.dueFromRun) { j.next_due = it.dueFromRun[1]; j.changed.next_due = it.dueFromRun[0]; }
         done.replaced++;
       } else if (a === "keep_both") {
         const id = insertJob(work, it.rec); done.runs_added += insertRuns(work, id, it.newRuns); done.added++;

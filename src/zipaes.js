@@ -118,6 +118,8 @@ export async function unzipText(bytes, name, password, maxBytes = 64 * 1024 * 10
   for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 22 - 65535); i--) if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
   if (eocd < 0) throw NOT_OURS();
   const count = dv.getUint16(eocd + 10, true);
+  // Exactly the one entry; anything beside it is no file of ours.
+  if (count !== 1) throw NOT_OURS();
   let p = dv.getUint32(eocd + 16, true);
   for (let n = 0; n < count; n++) {
     if (p + 46 > bytes.length || dv.getUint32(p, true) !== 0x02014b50) throw NOT_OURS();

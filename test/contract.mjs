@@ -8,7 +8,7 @@ if (!dir) { console.error("usage: node test/contract.mjs <contract-tests directo
 const addDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return todayIso(d); };
 function substitute(v, saved) {
   if (typeof v === "string") {
-    if (v === "$any") return v;
+    if (v === "$any" || v === "$uuid") return v;
     if (v.startsWith("$today")) return addDays(Number(v.slice(6) || 0));
     if (v.startsWith("$")) { if (!(v.slice(1) in saved)) throw new Error(`nothing saved as ${v}`); return saved[v.slice(1)]; }
     return v;
@@ -23,6 +23,7 @@ function substitute(v, saved) {
 }
 function matches(e, a, at) {
   if (e === "$any") return;
+  if (e === "$uuid") { if (typeof a === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(a)) return; throw new Error(`${at} is ${JSON.stringify(a)}, expected a GUID`); }
   if (e && typeof e === "object" && !Array.isArray(e)) {
     if (!a || typeof a !== "object") throw new Error(`${at} is ${JSON.stringify(a)}, expected an object`);
     for (const [k, v] of Object.entries(e)) { if (!(k in a)) throw new Error(`${at}/${k} is missing`); matches(v, a[k], `${at}/${k}`); }

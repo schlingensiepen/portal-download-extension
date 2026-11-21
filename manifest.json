@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_ext_name__",
+  "short_name": "Portal-Download",
+  "version": "0.8.0",
+  "description": "__MSG_ext_description__",
+  "default_locale": "en",
+  "icons": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" },
+  "action": { "default_title": "__MSG_ext_name__", "default_icon": { "16": "icons/16.png", "48": "icons/48.png" } },
+  "background": { "service_worker": "src/background.js", "scripts": ["src/background.js"], "type": "module" },
+  "side_panel": { "default_path": "src/panel.html" },
+  "sidebar_action": { "default_panel": "src/panel.html", "default_title": "__MSG_ext_name__", "default_icon": "icons/48.png", "open_at_install": false },
+  "permissions": ["storage", "tabs", "sidePanel"],
+  "optional_host_permissions": ["https://*/*", "http://*/*"],
+  "content_security_policy": { "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'" },
+  "browser_specific_settings": { "gecko": { "id": "portal-download@schlingensiepen.github.io", "strict_min_version": "128.0" } }
+}
