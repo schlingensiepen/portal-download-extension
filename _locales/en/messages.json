@@ -1,0 +1,323 @@
+{
+  "action_keep_both": {
+    "message": "keep both"
+  },
+  "action_reactivate": {
+    "message": "bring it back"
+  },
+  "action_replace": {
+    "message": "replace the job here, keep its history"
+  },
+  "action_skip": {
+    "message": "leave it out"
+  },
+  "add_from_tab": {
+    "message": "Take the invitation from the current tab"
+  },
+  "add_page": {
+    "message": "Add the current page as a job"
+  },
+  "add_service_text": {
+    "message": "Open an invitation link of the service in a tab, or “Add to the browser extension” under My devices of its web application, and press this button while that tab is shown. The extension asks for permission to reach that service only."
+  },
+  "add_service_title": {
+    "message": "Add a service"
+  },
+  "add_title": {
+    "message": "Add a service or a local store"
+  },
+  "all": {
+    "message": "All"
+  },
+  "back": {
+    "message": "← Back"
+  },
+  "cancel": {
+    "message": "Cancel"
+  },
+  "case_deleted": {
+    "message": "Deleted here on $1."
+  },
+  "case_known": {
+    "message": "Changed on both sides; choose per field."
+  },
+  "case_old_address": {
+    "message": "Here under the new address $1; choose per field."
+  },
+  "case_replaces": {
+    "message": "New address for “$1” (here still $2)."
+  },
+  "choose_file": {
+    "message": "Choose a file first."
+  },
+  "contract_mismatch": {
+    "message": "$1 speaks version $2 of the interface, this extension $3. Update the one that is older."
+  },
+  "copied": {
+    "message": "Copied ✓"
+  },
+  "copy": {
+    "message": "Copy"
+  },
+  "create": {
+    "message": "Create"
+  },
+  "created": {
+    "message": "Created."
+  },
+  "done": {
+    "message": "Closed – due again on $1."
+  },
+  "due_in": {
+    "message": "due in $1 days"
+  },
+  "due_today": {
+    "message": "due today"
+  },
+  "due_tomorrow": {
+    "message": "due tomorrow"
+  },
+  "entry_url": {
+    "message": "Entry page (URL)"
+  },
+  "err_locked": {
+    "message": "The store of this extension is locked."
+  },
+  "err_unreachable": {
+    "message": "The service cannot be reached. Is it running, and does this computer trust its certificate? Chrome and Edge need the service's certificate authority imported as a trusted root."
+  },
+  "err_unreadable": {
+    "message": "The service answers unintelligibly."
+  },
+  "every_weeks": {
+    "message": "Every how many weeks?"
+  },
+  "exchange_text": {
+    "message": "The file holds every job with its login, its history and the deleted jobs. Every Portal-Download service and this extension read it in."
+  },
+  "exchange_title": {
+    "message": "Export the jobs"
+  },
+  "export_encrypted": {
+    "message": "Download encrypted"
+  },
+  "export_plain": {
+    "message": "Download without password"
+  },
+  "export_plain_really": {
+    "message": "Logins in plain text – really?"
+  },
+  "ext_description": {
+    "message": "The due portal downloads of every Portal-Download service, and of a store in this browser, in the side panel."
+  },
+  "ext_name": {
+    "message": "Portal-Download"
+  },
+  "failed": {
+    "message": "failed"
+  },
+  "file_password": {
+    "message": "Password for the file (8 to 200 characters without umlauts)"
+  },
+  "file_password_in": {
+    "message": "Password of the file, if it has one"
+  },
+  "here": {
+    "message": "Here"
+  },
+  "import_apply": {
+    "message": "Read in"
+  },
+  "import_preview": {
+    "message": "Show what would change"
+  },
+  "import_title": {
+    "message": "Read a file in"
+  },
+  "imported": {
+    "message": "Read in – added: $1, updated: $2, brought back: $3, replaced: $4, left out: $5, runs added: $6."
+  },
+  "in_file": {
+    "message": "In the file"
+  },
+  "instructions_md": {
+    "message": "Instructions"
+  },
+  "interval_weeks": {
+    "message": "Every … weeks"
+  },
+  "last_run": {
+    "message": "Last: $1, $2, by $3"
+  },
+  "local_create": {
+    "message": "Create the local store"
+  },
+  "local_created": {
+    "message": "The local store is ready."
+  },
+  "local_name": {
+    "message": "This browser"
+  },
+  "local_remove": {
+    "message": "Delete the local store"
+  },
+  "local_remove_text": {
+    "message": "Deletes the local store with its jobs; the services stay. Export the jobs first."
+  },
+  "local_text": {
+    "message": "A store of jobs in this browser only, encrypted with a passphrase. Once it exists, the tokens of the services lie under the passphrase too, and the extension asks for it after every start of the browser."
+  },
+  "local_title": {
+    "message": "Keep jobs in this browser"
+  },
+  "lock": {
+    "message": "Lock now"
+  },
+  "login_hidden": {
+    "message": "This backend shows no logins to this device."
+  },
+  "login_plain": {
+    "message": "The login is kept in plain text, visible to everybody who uses this backend."
+  },
+  "manage_title": {
+    "message": "Manage the chosen backend"
+  },
+  "new_job": {
+    "message": "New job"
+  },
+  "next_due": {
+    "message": "Next due date"
+  },
+  "next_job": {
+    "message": "Next job"
+  },
+  "no_invitation": {
+    "message": "The current tab shows no invitation link of a Portal-Download service."
+  },
+  "no_jobs": {
+    "message": "No jobs."
+  },
+  "no_login": {
+    "message": "No login stored."
+  },
+  "not_encrypted": {
+    "message": "The file came back unencrypted; nothing was saved."
+  },
+  "note": {
+    "message": "Note (optional)"
+  },
+  "note_placeholder": {
+    "message": "e.g. what was missing"
+  },
+  "open_portal": {
+    "message": "Open the portal in a new tab"
+  },
+  "overdue": {
+    "message": "overdue by $1 days"
+  },
+  "passphrase": {
+    "message": "Passphrase"
+  },
+  "passphrase_again": {
+    "message": "Passphrase again"
+  },
+  "passphrase_change": {
+    "message": "Change the passphrase"
+  },
+  "passphrase_differs": {
+    "message": "The two passphrases differ."
+  },
+  "passphrase_new": {
+    "message": "New passphrase"
+  },
+  "passphrase_short": {
+    "message": "The passphrase needs at least 10 characters."
+  },
+  "passphrase_warning": {
+    "message": "A forgotten passphrase cannot be recovered: the jobs of this browser are then lost, unless you exported them. Export them now and then."
+  },
+  "passphrase_wrong": {
+    "message": "The passphrase is wrong."
+  },
+  "password": {
+    "message": "Password"
+  },
+  "password_needed": {
+    "message": "Enter a password, or download without one."
+  },
+  "permission_refused": {
+    "message": "Without the permission the extension cannot reach the service."
+  },
+  "preview_decide": {
+    "message": "Please decide: $1"
+  },
+  "preview_new": {
+    "message": "Taken over, because new: $1"
+  },
+  "preview_same": {
+    "message": "Taken over, because the same: $1"
+  },
+  "preview_title": {
+    "message": "What reading the file in does"
+  },
+  "really": {
+    "message": "Really?"
+  },
+  "remove_service": {
+    "message": "Remove the service"
+  },
+  "remove_service_text": {
+    "message": "Removes the service from this extension and revokes this extension's access there."
+  },
+  "retry_days": {
+    "message": "After a failure, days"
+  },
+  "runs_more": {
+    "message": "+$1 runs"
+  },
+  "saved": {
+    "message": "Saved."
+  },
+  "schedule": {
+    "message": "due $1 · every $2 weeks"
+  },
+  "service_added": {
+    "message": "Added; signed in as $1."
+  },
+  "show": {
+    "message": "Show"
+  },
+  "signed_out": {
+    "message": "$1: this extension's access is no longer valid. Remove the service and add it again with a new link."
+  },
+  "succeeded": {
+    "message": "succeeded"
+  },
+  "title": {
+    "message": "Title"
+  },
+  "unlock": {
+    "message": "Unlock"
+  },
+  "unlock_text": {
+    "message": "Enter the passphrase of this extension's store."
+  },
+  "unlock_title": {
+    "message": "Locked"
+  },
+  "username": {
+    "message": "Username"
+  },
+  "webapp_open": {
+    "message": "Open the web application"
+  },
+  "webapp_text": {
+    "message": "People, devices, agents and the full backup of this service are managed in its web application."
+  },
+  "welcome_text": {
+    "message": "Add a Portal-Download service with an invitation link, or keep jobs in this browser only."
+  },
+  "welcome_title": {
+    "message": "No backend yet"
+  }
+}

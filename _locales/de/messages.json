@@ -1,0 +1,323 @@
+{
+  "action_keep_both": {
+    "message": "beide behalten"
+  },
+  "action_reactivate": {
+    "message": "zurückholen"
+  },
+  "action_replace": {
+    "message": "den Vorgang hier ersetzen, Verlauf behalten"
+  },
+  "action_skip": {
+    "message": "weglassen"
+  },
+  "add_from_tab": {
+    "message": "Einladung aus dem aktuellen Tab übernehmen"
+  },
+  "add_page": {
+    "message": "Aktuelle Seite als Vorgang eintragen"
+  },
+  "add_service_text": {
+    "message": "Öffne einen Einladungslink des Dienstes in einem Tab, oder „Zur Erweiterung hinzufügen“ unter Meine Geräte in seiner Web-App, und drücke diesen Knopf, während dieser Tab angezeigt wird. Die Erweiterung bittet um die Erlaubnis, nur diesen Dienst zu erreichen."
+  },
+  "add_service_title": {
+    "message": "Dienst hinzufügen"
+  },
+  "add_title": {
+    "message": "Dienst oder lokalen Speicher hinzufügen"
+  },
+  "all": {
+    "message": "Alle"
+  },
+  "back": {
+    "message": "← Zurück"
+  },
+  "cancel": {
+    "message": "Abbrechen"
+  },
+  "case_deleted": {
+    "message": "Hier gelöscht am $1."
+  },
+  "case_known": {
+    "message": "Auf beiden Seiten geändert; wähle je Feld."
+  },
+  "case_old_address": {
+    "message": "Hier unter der neuen Adresse $1; wähle je Feld."
+  },
+  "case_replaces": {
+    "message": "Neue Adresse für „$1“ (hier noch $2)."
+  },
+  "choose_file": {
+    "message": "Wähle zuerst eine Datei."
+  },
+  "contract_mismatch": {
+    "message": "$1 spricht Version $2 der Schnittstelle, diese Erweiterung $3. Aktualisiere die ältere Seite."
+  },
+  "copied": {
+    "message": "Kopiert ✓"
+  },
+  "copy": {
+    "message": "Kopieren"
+  },
+  "create": {
+    "message": "Anlegen"
+  },
+  "created": {
+    "message": "Angelegt."
+  },
+  "done": {
+    "message": "Erledigt – wieder fällig am $1."
+  },
+  "due_in": {
+    "message": "fällig in $1 Tagen"
+  },
+  "due_today": {
+    "message": "heute fällig"
+  },
+  "due_tomorrow": {
+    "message": "morgen fällig"
+  },
+  "entry_url": {
+    "message": "Einstiegsseite (URL)"
+  },
+  "err_locked": {
+    "message": "Der Speicher dieser Erweiterung ist gesperrt."
+  },
+  "err_unreachable": {
+    "message": "Der Dienst ist nicht erreichbar. Läuft er, und vertraut dieser Rechner seinem Zertifikat? Chrome und Edge brauchen die Zertifizierungsstelle des Dienstes als vertrauenswürdige Stammzertifizierungsstelle."
+  },
+  "err_unreadable": {
+    "message": "Der Dienst antwortet unverständlich."
+  },
+  "every_weeks": {
+    "message": "Alle wie viele Wochen?"
+  },
+  "exchange_text": {
+    "message": "Die Datei enthält alle Vorgänge mit ihren Zugangsdaten, ihren Verlauf und die gelöschten Vorgänge. Jeder Portal-Download-Dienst und diese Erweiterung lesen sie ein."
+  },
+  "exchange_title": {
+    "message": "Vorgänge exportieren"
+  },
+  "export_encrypted": {
+    "message": "Verschlüsselt herunterladen"
+  },
+  "export_plain": {
+    "message": "Ohne Passwort herunterladen"
+  },
+  "export_plain_really": {
+    "message": "Zugangsdaten im Klartext – wirklich?"
+  },
+  "ext_description": {
+    "message": "Die fälligen Portal-Downloads aller Portal-Download-Dienste und eines Speichers in diesem Browser, in der Seitenleiste."
+  },
+  "ext_name": {
+    "message": "Portal-Download"
+  },
+  "failed": {
+    "message": "hat nicht geklappt"
+  },
+  "file_password": {
+    "message": "Passwort für die Datei (8 bis 200 Zeichen ohne Umlaute)"
+  },
+  "file_password_in": {
+    "message": "Passwort der Datei, falls sie eines hat"
+  },
+  "here": {
+    "message": "Hier"
+  },
+  "import_apply": {
+    "message": "Einlesen"
+  },
+  "import_preview": {
+    "message": "Zeigen, was sich ändern würde"
+  },
+  "import_title": {
+    "message": "Datei einlesen"
+  },
+  "imported": {
+    "message": "Eingelesen – hinzugefügt: $1, aktualisiert: $2, zurückgeholt: $3, ersetzt: $4, weggelassen: $5, Läufe hinzugefügt: $6."
+  },
+  "in_file": {
+    "message": "In der Datei"
+  },
+  "instructions_md": {
+    "message": "Anleitung"
+  },
+  "interval_weeks": {
+    "message": "Alle … Wochen"
+  },
+  "last_run": {
+    "message": "Zuletzt: $1, $2, von $3"
+  },
+  "local_create": {
+    "message": "Lokalen Speicher anlegen"
+  },
+  "local_created": {
+    "message": "Der lokale Speicher ist bereit."
+  },
+  "local_name": {
+    "message": "Dieser Browser"
+  },
+  "local_remove": {
+    "message": "Lokalen Speicher löschen"
+  },
+  "local_remove_text": {
+    "message": "Löscht den lokalen Speicher mit seinen Vorgängen; die Dienste bleiben. Exportiere die Vorgänge vorher."
+  },
+  "local_text": {
+    "message": "Ein Speicher für Vorgänge nur in diesem Browser, verschlüsselt mit einer Passphrase. Sobald er existiert, liegen auch die Tokens der Dienste unter der Passphrase, und die Erweiterung fragt nach jedem Browserstart danach."
+  },
+  "local_title": {
+    "message": "Vorgänge in diesem Browser halten"
+  },
+  "lock": {
+    "message": "Jetzt sperren"
+  },
+  "login_hidden": {
+    "message": "Dieses Backend zeigt diesem Gerät keine Zugangsdaten."
+  },
+  "login_plain": {
+    "message": "Die Zugangsdaten liegen im Klartext, sichtbar für alle, die dieses Backend nutzen."
+  },
+  "manage_title": {
+    "message": "Gewähltes Backend verwalten"
+  },
+  "new_job": {
+    "message": "Neuer Vorgang"
+  },
+  "next_due": {
+    "message": "Nächste Fälligkeit"
+  },
+  "next_job": {
+    "message": "Weiter zum nächsten"
+  },
+  "no_invitation": {
+    "message": "Der aktuelle Tab zeigt keinen Einladungslink eines Portal-Download-Dienstes."
+  },
+  "no_jobs": {
+    "message": "Keine Vorgänge."
+  },
+  "no_login": {
+    "message": "Keine Zugangsdaten hinterlegt."
+  },
+  "not_encrypted": {
+    "message": "Die Datei kam unverschlüsselt zurück; es wurde nichts gespeichert."
+  },
+  "note": {
+    "message": "Notiz (optional)"
+  },
+  "note_placeholder": {
+    "message": "z. B. was gefehlt hat"
+  },
+  "open_portal": {
+    "message": "Portal in neuem Tab öffnen"
+  },
+  "overdue": {
+    "message": "$1 Tage überfällig"
+  },
+  "passphrase": {
+    "message": "Passphrase"
+  },
+  "passphrase_again": {
+    "message": "Passphrase wiederholen"
+  },
+  "passphrase_change": {
+    "message": "Passphrase ändern"
+  },
+  "passphrase_differs": {
+    "message": "Die beiden Passphrasen sind verschieden."
+  },
+  "passphrase_new": {
+    "message": "Neue Passphrase"
+  },
+  "passphrase_short": {
+    "message": "Die Passphrase braucht mindestens 10 Zeichen."
+  },
+  "passphrase_warning": {
+    "message": "Eine vergessene Passphrase lässt sich nicht wiederherstellen: Die Vorgänge dieses Browsers sind dann verloren, außer du hast sie exportiert. Exportiere sie ab und zu."
+  },
+  "passphrase_wrong": {
+    "message": "Die Passphrase ist falsch."
+  },
+  "password": {
+    "message": "Passwort"
+  },
+  "password_needed": {
+    "message": "Gib ein Passwort ein, oder lade ohne herunter."
+  },
+  "permission_refused": {
+    "message": "Ohne die Erlaubnis erreicht die Erweiterung den Dienst nicht."
+  },
+  "preview_decide": {
+    "message": "Entscheide bitte: $1"
+  },
+  "preview_new": {
+    "message": "Übernommen, weil neu: $1"
+  },
+  "preview_same": {
+    "message": "Übernommen, weil gleich: $1"
+  },
+  "preview_title": {
+    "message": "Was das Einlesen bewirkt"
+  },
+  "really": {
+    "message": "Wirklich?"
+  },
+  "remove_service": {
+    "message": "Dienst entfernen"
+  },
+  "remove_service_text": {
+    "message": "Entfernt den Dienst aus dieser Erweiterung und widerruft dort den Zugang dieser Erweiterung."
+  },
+  "retry_days": {
+    "message": "Nach Fehlschlag, Tage"
+  },
+  "runs_more": {
+    "message": "+$1 Läufe"
+  },
+  "saved": {
+    "message": "Gespeichert."
+  },
+  "schedule": {
+    "message": "fällig $1 · alle $2 Wochen"
+  },
+  "service_added": {
+    "message": "Hinzugefügt; angemeldet als $1."
+  },
+  "show": {
+    "message": "Anzeigen"
+  },
+  "signed_out": {
+    "message": "$1: Der Zugang dieser Erweiterung gilt nicht mehr. Entferne den Dienst und füge ihn mit einem neuen Link wieder hinzu."
+  },
+  "succeeded": {
+    "message": "hat geklappt"
+  },
+  "title": {
+    "message": "Titel"
+  },
+  "unlock": {
+    "message": "Entsperren"
+  },
+  "unlock_text": {
+    "message": "Gib die Passphrase des Speichers dieser Erweiterung ein."
+  },
+  "unlock_title": {
+    "message": "Gesperrt"
+  },
+  "username": {
+    "message": "Benutzername"
+  },
+  "webapp_open": {
+    "message": "Web-App öffnen"
+  },
+  "webapp_text": {
+    "message": "Personen, Geräte, Agenten und das volle Backup dieses Dienstes werden in seiner Web-App verwaltet."
+  },
+  "welcome_text": {
+    "message": "Füge einen Portal-Download-Dienst mit einem Einladungslink hinzu, oder halte Vorgänge nur in diesem Browser."
+  },
+  "welcome_title": {
+    "message": "Noch kein Backend"
+  }
+}
