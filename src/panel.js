@@ -32,6 +32,7 @@ function toast(text, err) {
 /** What an error means for the user, in the panel's language where it is the extension's own. */
 function explain(e) {
   if (e.kind === "unreachable") return t("err_unreachable");
+  if (["device_revoked", "credential_unknown", "user_deactivated"].includes(e.kind)) return t("err_access_gone");
   if (e.kind === "unreadable") return t("err_unreadable");
   if (e.kind === "locked") return t("err_locked");
   return e.message || String(e);
@@ -40,13 +41,14 @@ const fail = (e) => { console.error(e); toast(explain(e), true); };
 const fmtDate = (iso) => (iso ? new Date(iso.length === 10 ? iso + "T00:00:00" : iso).toLocaleDateString(undefined, { day: "2-digit", month: "2-digit", year: "numeric" }) : "–");
 const fmtDateTime = (iso) => (iso ? new Date(iso).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" }) : "–");
 function urgency(days) {
+  if (days === -1) return h("span", { class: "chip bad" }, t("overdue_one"));
   if (days < 0) return h("span", { class: "chip bad" }, t("overdue", -days));
   if (days === 0) return h("span", { class: "chip warn" }, t("due_today"));
   if (days === 1) return h("span", { class: "chip warn" }, t("due_tomorrow"));
   return h("span", { class: "chip" }, t("due_in", days));
 }
 async function copy(text, btn) {
-  await navigator.clipboard.writeText(text);
+  try { await navigator.clipboard.writeText(text); } catch { return toast(t("copy_refused"), true); }
   const old = btn.textContent; btn.textContent = t("copied"); setTimeout(() => (btn.textContent = old), 1500);
 }
 /** A button that asks once more in place before it acts. */
@@ -68,7 +70,13 @@ function saveFile(bytes, name) {
 async function activeTab() { const [tab] = await api.tabs.query({ active: true, currentWindow: true }); return tab; }
 
 // ------------------------------------------------------------------ state
-const state = { choice: "all", view: "list", job: null, done: null, backends: [], content: null, vaultState: "plain", problems: {}, preview: null };
+const state = { choice: "all", view: "list", job: null, done: null, backends: [], content: null, vaultState: "plain", problems: {}, mismatch: {}, preview: null, tabUrl: "", tabTitle: "" };
+// The address of the active tab, kept up to date, so that a click can ask for a permission
+// before anything else waits: Firefox grants permissions only directly in the click.
+async function followTab() { try { const tab = await activeTab(); state.tabUrl = (tab && tab.url) || ""; state.tabTitle = (tab && tab.title) || ""; } catch { /* no tab */ } }
+api.tabs.onActivated.addListener(followTab);
+api.tabs.onUpdated.addListener((_, info) => { if (info.url || info.title || info.status === "complete") followTab(); });
+followTab();
 const current = () => state.backends.find((b) => b.id === state.choice) || null;
 
 // Loads may overlap (a change in storage while the panel itself loads); the last one started wins.
@@ -116,7 +124,10 @@ const go = (view, extra = {}) => { Object.assign(state, { view }, extra); render
 function viewUnlock() {
   const pw = h("input", { type: "password", autocomplete: "current-password" });
   const form = h("form", { class: "card" }, h("h1", {}, t("unlock_title")), h("p", { class: "small" }, t("unlock_text")), h("label", {}, t("passphrase")), pw,
-    h("div", { class: "row", style: "margin-top:10px" }, h("button", { class: "btn primary", type: "submit" }, t("unlock"))));
+    h("div", { class: "row", style: "margin-top:10px" }, h("button", { class: "btn primary", type: "submit" }, t("unlock"))),
+    h("p", { class: "small muted" }, t("export_reminder")),
+    h("details", { class: "small" }, h("summary", {}, t("forgot_title")), h("p", {}, t("forgot_text")),
+      confirmButton(t("forgot_button"), t("really"), "bad", async () => { await vault.forget(); await loadBackends(); state.choice = "all"; go("list"); })));
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (await vault.unlock(pw.value)) { await loadBackends(); go("list"); } else toast(t("passphrase_wrong"), true);
@@ -133,19 +144,21 @@ async function viewList() {
       h("button", { class: "btn primary", type: "button", onclick: () => go("add") }, t("add_title"))));
     return box;
   }
-  if (state.choice !== "all") box.append(h("div", { class: "row", style: "margin-bottom:8px" }, h("button", { class: "btn", type: "button", onclick: () => go("new", { fromTab: true }) }, t("add_page"))));
+  // What concerns one backend is greyed out under "All".
+  box.append(h("div", { class: "row", style: "margin-bottom:8px" }, h("button", { class: "btn", type: "button", disabled: state.choice === "all" || !!state.mismatch[state.choice], title: state.choice === "all" ? t("choose_backend") : null, onclick: () => go("new", { fromTab: true }) }, t("add_page"))));
   const all = [];
   await Promise.all(chosen.map(async (b) => {
+    delete state.problems[b.id];
+    delete state.mismatch[b.id];
     try {
-      if (b instanceof ServiceBackend && !state.problems[b.id + ":checked"]) {
+      if (b instanceof ServiceBackend) {
         const st = await b.call("service.status");
-        state.problems[b.id + ":checked"] = true;
-        if (st.contract !== CONTRACT) state.problems[b.id] = t("contract_mismatch", b.name, st.contract || "?", CONTRACT);
-        else if (!st.signed_in) state.problems[b.id] = t("signed_out", b.name);
+        if (st.contract !== CONTRACT) { state.mismatch[b.id] = true; state.problems[b.id] = t("contract_mismatch", b.name, st.contract || "?", CONTRACT); }
+        else if (!st.signed_in) { state.problems[b.id] = t("signed_out", b.name); return; }
       }
       const r = await b.call("job.list");
       for (const j of r.jobs) all.push({ b, j });
-    } catch (e) { state.problems[b.id] = `${b.name}: ${explain(e)}`; }
+    } catch (e) { state.problems[b.id] = ["device_revoked", "credential_unknown", "user_deactivated"].includes(e.kind) ? t("signed_out", b.name) : `${b.name}: ${explain(e)}`; }
   }));
   for (const b of chosen) if (state.problems[b.id]) box.append(h("div", { class: "card alert small" }, state.problems[b.id]));
   all.sort((x, y) => (x.j.next_due < y.j.next_due ? -1 : x.j.next_due > y.j.next_due ? 1 : x.j.title.localeCompare(y.j.title)));
@@ -168,20 +181,21 @@ function viewJob() {
       h("div", { style: "margin-top:6px" }, h("button", { class: "btn primary", type: "button", onclick: () => go("list", { done: null }) }, t("next_job")))));
   }
   if (j.last_run) box.append(h("p", { class: "small muted" }, t("last_run", t(j.last_run.outcome), fmtDateTime(j.last_run.finished_at), j.last_run.by), j.last_run.note ? h("div", { class: "pre" }, j.last_run.note) : null));
-  box.append(h("button", { class: "btn primary wide", type: "button", onclick: () => api.tabs.create({ url: j.entry_url }) }, t("open_portal")));
+  box.append(h("button", { class: "btn primary wide", type: "button", onclick: () => { if (/^https?:\/\//i.test(j.entry_url)) api.tabs.create({ url: j.entry_url }); } }, t("open_portal")));
   const login = h("div", { class: "card" });
   for (const [k, v] of [["username", j.username], ["password", j.password]]) {
     if (!v) continue;
     const shown = k === "username";
     const value = h("span", { class: "value grow" }, shown ? v : "••••••••");
-    const toggle = shown ? null : h("button", { class: "btn", type: "button", onclick: () => { value.textContent = value.textContent === v ? "••••••••" : v; } }, t("show"));
+    const toggle = shown ? null : h("button", { class: "btn", type: "button", onclick: (e) => { const open = value.textContent !== v; value.textContent = open ? v : "••••••••"; e.currentTarget.textContent = open ? t("hide") : t("show"); } }, t("show"));
     login.append(h("label", {}, t(k)), h("div", { class: "row" }, value, toggle, h("button", { class: "btn", type: "button", onclick: (e) => copy(v, e.currentTarget) }, t("copy"))));
   }
   if (!j.username && !j.password && j.username !== undefined) login.append(h("p", { class: "small muted" }, t("no_login")));
   if (j.username === undefined) login.append(h("p", { class: "small muted" }, t("login_hidden")));
   box.append(login);
   if (j.instructions_md) box.append(h("div", { class: "card pre small" }, j.instructions_md));
-  if (!state.done) {
+  if (state.mismatch[b.id]) box.append(h("p", { class: "card alert small" }, t("contract_blocks")));
+  else if (!state.done) {
     const note = h("textarea", { placeholder: t("note_placeholder") });
     const finish = async (outcome) => {
       try {
@@ -201,7 +215,11 @@ async function viewNew() {
   const b = current();
   const f = { title: h("input", { type: "text", required: true, maxlength: "200" }), url: h("input", { type: "url", required: true }), weeks: h("input", { type: "number", min: "1", max: "520", value: "4" }),
     user: h("input", { type: "text", autocomplete: "off", spellcheck: "false" }), pass: h("input", { type: "text", autocomplete: "off", spellcheck: "false" }) };
-  if (state.fromTab) { const tab = await activeTab(); if (tab && /^https?:/.test(tab.url || "")) { f.url.value = tab.url; f.title.value = tab.title || new URL(tab.url).host; } }
+  if (state.fromTab && /^https?:/.test(state.tabUrl)) {
+    // An invitation in the fragment does not belong into a job.
+    const u = new URL(state.tabUrl); if (/invite=/.test(u.hash)) u.hash = "";
+    f.url.value = u.href; f.title.value = state.tabTitle || u.host;
+  }
   const form = h("form", { class: "card" }, h("h1", {}, t("new_job")), h("label", {}, t("title")), f.title, h("label", {}, t("entry_url")), f.url, h("label", {}, t("every_weeks")), f.weeks,
     h("label", {}, t("username")), f.user, h("label", {}, t("password")), f.pass, h("p", { class: "small muted" }, t("login_plain")),
     h("div", { class: "row" }, h("button", { class: "btn primary", type: "submit" }, t("create")), h("button", { class: "btn", type: "button", onclick: () => go("list") }, t("cancel"))));
@@ -217,6 +235,7 @@ async function viewNew() {
 
 function viewAdd() {
   const box = h("div", {});
+  followTab();
   box.append(h("button", { class: "btn", type: "button", onclick: () => go("list") }, t("back")));
   box.append(h("div", { class: "card" }, h("h1", {}, t("add_service_title")), h("p", { class: "small" }, t("add_service_text")),
     h("button", { class: "btn primary wide", type: "button", onclick: addFromTab }, t("add_from_tab"))));
@@ -237,18 +256,23 @@ function viewAdd() {
 }
 
 async function addFromTab() {
+  const inv = parseInvitation(state.tabUrl);
+  if (!inv) return toast(t("no_invitation"), true);
+  let granted = false;
   try {
-    const tab = await activeTab();
-    const inv = tab && parseInvitation(tab.url || "");
-    if (!inv) return toast(t("no_invitation"), true);
-    // Asked in the click itself, as the browsers require: access to this one service only.
-    if (!(await api.permissions.request({ origins: [`${inv.origin}/*`] }))) return toast(t("permission_refused"), true);
+    // The first thing the click awaits, as Firefox requires: access to this one service only.
+    granted = await api.permissions.request({ origins: [`${inv.origin}/*`] });
+    if (!granted) return toast(t("permission_refused"), true);
+    const content = await vault.read();
+    if (content.services.some((s) => s.base === inv.base)) { toast(t("already_added"), true); return; }
     const probe = new ServiceBackend({ id: "probe", name: inv.origin, base: inv.base, token: "" });
     const st = await probe.call("service.status");
-    if (st.contract !== CONTRACT) return toast(t("contract_mismatch", inv.origin, st.contract || "?", CONTRACT), true);
-    const label = `${/Firefox\//.test(navigator.userAgent) ? "Firefox" : /Edg\//.test(navigator.userAgent) ? "Edge" : "Chrome"} extension`;
+    if (st.contract !== CONTRACT) throw Object.assign(new Error(t("contract_mismatch", inv.origin, st.contract || "?", CONTRACT)), { kind: "contract" });
+    const ua = navigator.userAgent;
+    const browser = /Firefox\//.test(ua) ? "Firefox" : /Edg\//.test(ua) ? "Edge" : "Chrome";
+    const os = /Windows/.test(ua) ? "Windows" : /Mac OS/.test(ua) ? "macOS" : /Linux/.test(ua) ? "Linux" : "";
+    const label = t("device_label", browser, os).trim();
     const r = await probe.call("invitation.redeem", { token: inv.token, label, kind: "extension" });
-    const content = await vault.read();
     const id = `s${Date.now().toString(36)}`;
     content.services.push({ id, name: `${new URL(inv.base).host} (${r.name})`, base: inv.base, token: r.device_token });
     await vault.write(content);
@@ -256,7 +280,11 @@ async function addFromTab() {
     state.choice = id;
     toast(t("service_added", r.name));
     go("list");
-  } catch (e) { fail(e); }
+  } catch (e) {
+    // A permission for a service that was not added is given back.
+    if (granted && !(state.content && state.content.services.some((s) => s.base === inv.base))) api.permissions.remove({ origins: [`${inv.origin}/*`] }).catch(() => {});
+    fail(e);
+  }
 }
 
 async function viewManage() {
@@ -272,17 +300,24 @@ async function viewManage() {
   if (b instanceof ServiceBackend) {
     box.append(h("div", { class: "card" }, h("p", { class: "small" }, t("remove_service_text")),
       confirmButton(t("remove_service"), t("really"), "bad", async () => {
-        try { const d = await b.call("device.list"); await b.call("device.revoke", { device_id: d.current_device_id }); } catch (e) { console.error(e); }
+        try { const d = await b.call("device.list"); await b.call("device.revoke", { device_id: d.current_device_id }); } catch (e) { console.error(e); toast(t("revoke_failed"), true); }
         const content = await vault.read();
         content.services = content.services.filter((s) => s.id !== b.id);
         await vault.write(content);
+        const origin = new URL(b.service.base).origin;
+        if (!content.services.some((s) => new URL(s.base).origin === origin)) api.permissions.remove({ origins: [`${origin}/*`] }).catch(() => {});
         await loadBackends(); state.choice = "all"; go("list");
       })));
   } else {
-    const p1 = h("input", { type: "password", autocomplete: "new-password" });
-    const change = h("form", { class: "card" }, h("label", {}, t("passphrase_new")), p1, h("div", { class: "row", style: "margin-top:8px" }, h("button", { class: "btn", type: "submit" }, t("passphrase_change")),
+    const p1 = h("input", { type: "password", autocomplete: "new-password" }), p2 = h("input", { type: "password", autocomplete: "new-password" });
+    const change = h("form", { class: "card" }, h("p", { class: "small muted" }, t("export_reminder")), h("label", {}, t("passphrase_new")), p1, h("label", {}, t("passphrase_again")), p2, h("div", { class: "row", style: "margin-top:8px" }, h("button", { class: "btn", type: "submit" }, t("passphrase_change")),
       h("button", { class: "btn", type: "button", onclick: async () => { await vault.lock(); await loadBackends(); go("list"); } }, t("lock"))));
-    change.addEventListener("submit", async (e) => { e.preventDefault(); if (p1.value.length < 10) return toast(t("passphrase_short"), true); await vault.changePassphrase(p1.value); toast(t("saved")); });
+    change.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (p1.value.length < 10) return toast(t("passphrase_short"), true);
+      if (p1.value !== p2.value) return toast(t("passphrase_differs"), true);
+      await vault.changePassphrase(p1.value); p1.value = ""; p2.value = ""; toast(t("passphrase_changed"));
+    });
     box.append(change, h("div", { class: "card" }, h("p", { class: "small" }, t("local_remove_text")),
       confirmButton(t("local_remove"), t("really"), "bad", async () => { await vault.removeLocal(); await loadBackends(); state.choice = "all"; go("list"); })));
   }
@@ -306,6 +341,7 @@ function exchangeCard(b) {
     const f = file.files[0];
     if (!f) return toast(t("choose_file"), true);
     try {
+      checkPassword(pwIn.value || null);
       const bytes = new Uint8Array(await f.arrayBuffer());
       let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
       const zip = btoa(s);
@@ -327,8 +363,9 @@ function previewCard(b) {
   const P = state.preview, R = P.result;
   const box = h("div", { class: "card" }, h("h2", {}, t("preview_title")));
   const line = (x, extra) => h("div", { class: "small" }, h("strong", {}, x.title), " ", h("span", { class: "muted" }, extra || ""));
-  box.append(h("h2", {}, t("preview_new", R.new.length)), ...R.new.map((x) => line(x, x.new_runs ? t("runs_more", x.new_runs) : "")));
-  box.append(h("h2", {}, t("preview_same", R.same.length)), ...R.same.map((x) => line(x, x.new_runs ? t("runs_more", x.new_runs) : "")));
+  if (R.people_left_out || (R.people && b.id === "local")) box.append(h("p", { class: "small" }, t("people_left_out")));
+  box.append(h("h2", {}, t("preview_new", R.new.length)), ...R.new.map((x) => line(x, x.new_runs === 1 ? t("runs_one") : x.new_runs ? t("runs_more", x.new_runs) : "")));
+  box.append(h("h2", {}, t("preview_same", R.same.length)), ...R.same.map((x) => line(x, x.new_runs === 1 ? t("runs_one") : x.new_runs ? t("runs_more", x.new_runs) : "")));
   box.append(h("h2", {}, t("preview_decide", R.decide.length)));
   for (const x of R.decide) {
     const fields = Object.fromEntries((x.fields || []).map((f) => [f.field, f.preselect]));
@@ -338,7 +375,7 @@ function previewCard(b) {
     if (x.fields && x.fields.length) {
       const rows = x.fields.map((f) => {
         const radio = (side) => { const r = h("input", { type: "radio", name: `${x.guid}:${f.field}` }); r.checked = choice.fields[f.field] === side; r.addEventListener("change", () => { if (r.checked) choice.fields[f.field] = side; }); return r; };
-        const show = (v) => (f.field === "next_due" ? fmtDate(v) : String(v));
+        const show = (v) => (f.field === "next_due" ? fmtDate(v) : f.field === "password" && v !== "•••" ? "••••••••" : String(v));
         return h("tr", {}, h("td", {}, t(f.field)), h("td", {}, h("label", {}, radio("local"), " ", show(f.local))), h("td", {}, h("label", {}, radio("incoming"), " ", show(f.incoming))));
       });
       card.append(h("table", {}, h("tr", {}, h("th", {}), h("th", {}, t("here")), h("th", {}, t("in_file"))), ...rows));
@@ -351,8 +388,9 @@ function previewCard(b) {
     }
     box.append(card);
   }
+  if (R.decide.length) box.append(h("p", { class: "small muted" }, t("preselected_hint")));
   box.append(h("div", { class: "row", style: "margin-top:8px" },
-    h("button", { class: "btn primary", type: "button", onclick: async () => {
+    h("button", { class: "btn primary", type: "button", disabled: !!state.mismatch[b.id], onclick: async () => {
       try {
         const r = await b.call("job.import", { zip_base64: P.zip, decisions: P.choices }, P.pw ? { "X-Backup-Password": P.pw } : {});
         state.preview = null;
@@ -369,6 +407,7 @@ $("#choose").addEventListener("change", (e) => { state.choice = e.target.value; 
 $("#add").addEventListener("click", () => go("add"));
 $("#manage").addEventListener("click", () => go("manage"));
 document.documentElement.lang = api.i18n.getUILanguage();
+$("#choose").setAttribute("aria-label", t("backend"));
 // Another panel of this browser may unlock, lock or add a service.
-api.storage.onChanged.addListener(async (_, area) => { if (area === "local" || area === "session") { await loadBackends(); if (state.view === "list") render(); else renderTop(); } });
+api.storage.onChanged.addListener(async (_, area) => { if (area === "local" || area === "session") { await loadBackends(); if (state.view === "list" || state.vaultState === "locked") render(); else renderTop(); } });
 loadBackends().then(render, fail);

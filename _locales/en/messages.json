@@ -29,8 +29,14 @@
   "all": {
     "message": "All"
   },
+  "already_added": {
+    "message": "This service is added already."
+  },
   "back": {
     "message": "← Back"
+  },
+  "backend": {
+    "message": "Backend"
   },
   "btn_failed": {
     "message": "Failed"
@@ -45,7 +51,7 @@
     "message": "Deleted here on $1."
   },
   "case_known": {
-    "message": "Changed on both sides; choose per field."
+    "message": "Differs from here; choose per field."
   },
   "case_old_address": {
     "message": "Here under the new address $1; choose per field."
@@ -53,8 +59,14 @@
   "case_replaces": {
     "message": "New address for “$1” (here still $2)."
   },
+  "choose_backend": {
+    "message": "Choose one backend first."
+  },
   "choose_file": {
     "message": "Choose a file first."
+  },
+  "contract_blocks": {
+    "message": "This service speaks another version of the interface; closing runs and reading files in stay locked until the older side is updated."
   },
   "contract_mismatch": {
     "message": "$1 speaks version $2 of the interface, this extension $3. Update the one that is older."
@@ -65,11 +77,17 @@
   "copy": {
     "message": "Copy"
   },
+  "copy_refused": {
+    "message": "The browser did not allow copying."
+  },
   "create": {
     "message": "Create"
   },
   "created": {
     "message": "Created."
+  },
+  "device_label": {
+    "message": "$1 extension $2"
   },
   "done": {
     "message": "Closed – due again on $1."
@@ -85,6 +103,9 @@
   },
   "entry_url": {
     "message": "Entry page (URL)"
+  },
+  "err_access_gone": {
+    "message": "This extension's access to the service was revoked or the person deactivated. Remove the service and add it again with a new link."
   },
   "err_locked": {
     "message": "The store of this extension is locked."
@@ -113,6 +134,9 @@
   "export_plain_really": {
     "message": "Logins in plain text – really?"
   },
+  "export_reminder": {
+    "message": "Export the jobs of this browser now and then: a forgotten passphrase cannot be recovered."
+  },
   "ext_description": {
     "message": "The due portal downloads of every Portal-Download service, and of a store in this browser, in the side panel."
   },
@@ -128,8 +152,20 @@
   "file_password_in": {
     "message": "Password of the file, if it has one"
   },
+  "forgot_button": {
+    "message": "Delete the store and the services"
+  },
+  "forgot_text": {
+    "message": "The passphrase cannot be recovered. You can only delete the local store with its jobs and the services kept with it, and add the services again with new links."
+  },
+  "forgot_title": {
+    "message": "Forgot the passphrase?"
+  },
   "here": {
     "message": "Here"
+  },
+  "hide": {
+    "message": "Hide"
   },
   "import_apply": {
     "message": "Read in"
@@ -168,7 +204,7 @@
     "message": "Delete the local store"
   },
   "local_remove_text": {
-    "message": "Deletes the local store with its jobs; the services stay. Export the jobs first."
+    "message": "Deletes the local store with its jobs; the services stay, and their tokens lie unencrypted again. Export the jobs first."
   },
   "local_text": {
     "message": "A store of jobs in this browser only, encrypted with a passphrase. Once it exists, the tokens of the services lie under the passphrase too, and the extension asks for it after every start of the browser."
@@ -221,6 +257,9 @@
   "overdue": {
     "message": "overdue by $1 days"
   },
+  "overdue_one": {
+    "message": "overdue by 1 day"
+  },
   "passphrase": {
     "message": "Passphrase"
   },
@@ -229,6 +268,9 @@
   },
   "passphrase_change": {
     "message": "Change the passphrase"
+  },
+  "passphrase_changed": {
+    "message": "The passphrase is changed. Use the new one from now on."
   },
   "passphrase_differs": {
     "message": "The two passphrases differ."
@@ -251,8 +293,14 @@
   "password_needed": {
     "message": "Enter a password, or download without one."
   },
+  "people_left_out": {
+    "message": "The file is a full backup: this store reads its jobs only, not its people, devices and tokens."
+  },
   "permission_refused": {
     "message": "Without the permission the extension cannot reach the service."
+  },
+  "preselected_hint": {
+    "message": "The newer side of each field is chosen, for a due date the nearer one; change what you want, then read in."
   },
   "preview_decide": {
     "message": "Please decide: $1"
@@ -278,11 +326,14 @@
   "retry_days": {
     "message": "After a failure, days"
   },
+  "revoke_failed": {
+    "message": "The access there could not be revoked; revoke it in the service's web application under My devices."
+  },
   "runs_more": {
     "message": "+$1 runs"
   },
-  "saved": {
-    "message": "Saved."
+  "runs_one": {
+    "message": "+1 run"
   },
   "schedule": {
     "message": "due $1 · every $2 weeks"

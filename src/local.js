@@ -8,6 +8,8 @@
 import { zipText, unzipText, ZipError } from "./zipaes.js";
 
 export const FORMAT = "portal-download";
+/** The major and minor version of the interface this extension speaks. */
+export const CONTRACT = "0.8";
 export const VERSION = 3;
 const ENTRY = "portal-download.jsonl";
 const FIELDS = ["title", "interval_weeks", "retry_days", "next_due", "username", "password", "instructions_md"];
@@ -116,7 +118,7 @@ const changed = (o) => Object.assign(o, { __changed: true });
 
 const METHODS = {
   "service.status"() {
-    return { name: "portal-download", version: "local", contract: "0.8", setup_required: false, signed_in: true, me: { kind: "local" } };
+    return { name: "portal-download", version: "local", contract: CONTRACT, setup_required: false, signed_in: true, me: { kind: "local" } };
   },
   "job.list"(data) {
     const today = todayIso();
@@ -360,6 +362,8 @@ function plan(data, f) {
 }
 function previewJson(f, items) {
   const out = { kind: f.kind, new: [], same: [], decide: [] };
+  // People and accesses of a full backup stay with services; this store takes the jobs only.
+  if (f.kind === "full") out.people_left_out = true;
   for (const it of items) {
     const v = { guid: it.rec.guid, title: it.rec.title, entry_url: it.rec.entry_url, new_runs: it.newRuns.length };
     if (it.c.kind === "known") { v.job_id = it.c.target.id; v.case = it.c.viaOld ? "old_address" : "known"; if (it.c.viaOld) v.local_entry_url = it.c.target.entry_url; }

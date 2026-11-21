@@ -14,9 +14,9 @@ const te = new TextEncoder(), td = new TextDecoder();
 const b64 = (bytes) => btoa(String.fromCharCode(...bytes));
 const unb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 
-async function deriveKey(passphrase, salt) {
+async function deriveKey(passphrase, salt, iterations = ITERATIONS) {
   const base = await crypto.subtle.importKey("raw", te.encode(passphrase), "PBKDF2", false, ["deriveKey"]);
-  return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: ITERATIONS, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
 }
 async function seal(key, value) {
   const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -64,7 +64,8 @@ export class Vault {
 
   async unlock(passphrase) {
     const { vault } = await api.storage.local.get("vault");
-    const key = await deriveKey(passphrase, unb64(vault.salt));
+    if (!vault) return true;
+    const key = await deriveKey(passphrase, unb64(vault.salt), vault.iterations || ITERATIONS);
     try { await open(key, vault.sealed); } catch { return false; }
     await remember(key);
     return true;
@@ -78,7 +79,7 @@ export class Vault {
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const key = await deriveKey(passphrase, salt);
     const content = { services: services || [], local: emptyData() };
-    await api.storage.local.set({ vault: { salt: b64(salt), sealed: await seal(key, content) } });
+    await api.storage.local.set({ vault: { salt: b64(salt), iterations: ITERATIONS, sealed: await seal(key, content) } });
     await api.storage.local.remove("services");
     await remember(key);
   }
@@ -87,8 +88,14 @@ export class Vault {
     const content = await this.read();
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const key = await deriveKey(passphrase, salt);
-    await api.storage.local.set({ vault: { salt: b64(salt), sealed: await seal(key, content) } });
+    await api.storage.local.set({ vault: { salt: b64(salt), iterations: ITERATIONS, sealed: await seal(key, content) } });
     await remember(key);
+  }
+
+  /** For a forgotten passphrase: deletes the local store and every service kept with it. */
+  async forget() {
+    await api.storage.local.remove(["vault", "services"]);
+    await this.lock();
   }
 
   /** Removes the local backend and its jobs; the services stay, without the passphrase. */

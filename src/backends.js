@@ -2,9 +2,9 @@
 // Every backend answers call(method, params, headers) with the result, or throws an error
 // with code, kind and message, as the service's API does.
 
-import { LocalBackend, OpError } from "./local.js";
+import { LocalBackend, OpError, CONTRACT } from "./local.js";
 
-export const CONTRACT = "0.8";
+export { CONTRACT };
 
 /** A service, reached at its base address with the extension's own device token. */
 export class ServiceBackend {
@@ -14,7 +14,9 @@ export class ServiceBackend {
     try {
       res = await fetch(new URL("api/", this.service.base), {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${this.service.token}`, ...headers },
+        headers: { "Content-Type": "application/json", ...(this.service.token ? { Authorization: `Bearer ${this.service.token}` } : {}), ...headers },
+        // A redirect would carry the token elsewhere.
+        redirect: "error",
         body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
       });
     } catch {

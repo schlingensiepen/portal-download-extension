@@ -29,8 +29,14 @@
   "all": {
     "message": "Alle"
   },
+  "already_added": {
+    "message": "Dieser Dienst ist schon hinzugefügt."
+  },
   "back": {
     "message": "← Zurück"
+  },
+  "backend": {
+    "message": "Backend"
   },
   "btn_failed": {
     "message": "Hat nicht geklappt"
@@ -45,7 +51,7 @@
     "message": "Hier gelöscht am $1."
   },
   "case_known": {
-    "message": "Auf beiden Seiten geändert; wähle je Feld."
+    "message": "Weicht von hier ab; wähle je Feld."
   },
   "case_old_address": {
     "message": "Hier unter der neuen Adresse $1; wähle je Feld."
@@ -53,8 +59,14 @@
   "case_replaces": {
     "message": "Neue Adresse für „$1“ (hier noch $2)."
   },
+  "choose_backend": {
+    "message": "Wähle zuerst ein Backend."
+  },
   "choose_file": {
     "message": "Wähle zuerst eine Datei."
+  },
+  "contract_blocks": {
+    "message": "Dieser Dienst spricht eine andere Version der Schnittstelle; Abschließen und Einlesen bleiben gesperrt, bis die ältere Seite aktualisiert ist."
   },
   "contract_mismatch": {
     "message": "$1 spricht Version $2 der Schnittstelle, diese Erweiterung $3. Aktualisiere die ältere Seite."
@@ -65,11 +77,17 @@
   "copy": {
     "message": "Kopieren"
   },
+  "copy_refused": {
+    "message": "Der Browser hat das Kopieren nicht erlaubt."
+  },
   "create": {
     "message": "Anlegen"
   },
   "created": {
     "message": "Angelegt."
+  },
+  "device_label": {
+    "message": "$1-Erweiterung $2"
   },
   "done": {
     "message": "Erledigt – wieder fällig am $1."
@@ -85,6 +103,9 @@
   },
   "entry_url": {
     "message": "Einstiegsseite (URL)"
+  },
+  "err_access_gone": {
+    "message": "Der Zugang dieser Erweiterung zum Dienst wurde widerrufen oder die Person deaktiviert. Entferne den Dienst und füge ihn mit einem neuen Link wieder hinzu."
   },
   "err_locked": {
     "message": "Der Speicher dieser Erweiterung ist gesperrt."
@@ -113,6 +134,9 @@
   "export_plain_really": {
     "message": "Zugangsdaten im Klartext – wirklich?"
   },
+  "export_reminder": {
+    "message": "Exportiere die Vorgänge dieses Browsers ab und zu: Eine vergessene Passphrase lässt sich nicht wiederherstellen."
+  },
   "ext_description": {
     "message": "Die fälligen Portal-Downloads aller Portal-Download-Dienste und eines Speichers in diesem Browser, in der Seitenleiste."
   },
@@ -128,8 +152,20 @@
   "file_password_in": {
     "message": "Passwort der Datei, falls sie eines hat"
   },
+  "forgot_button": {
+    "message": "Speicher und Dienste löschen"
+  },
+  "forgot_text": {
+    "message": "Die Passphrase lässt sich nicht wiederherstellen. Du kannst nur den lokalen Speicher mit seinen Vorgängen und den darin gespeicherten Diensten löschen und die Dienste mit neuen Links wieder hinzufügen."
+  },
+  "forgot_title": {
+    "message": "Passphrase vergessen?"
+  },
   "here": {
     "message": "Hier"
+  },
+  "hide": {
+    "message": "Verbergen"
   },
   "import_apply": {
     "message": "Einlesen"
@@ -168,7 +204,7 @@
     "message": "Lokalen Speicher löschen"
   },
   "local_remove_text": {
-    "message": "Löscht den lokalen Speicher mit seinen Vorgängen; die Dienste bleiben. Exportiere die Vorgänge vorher."
+    "message": "Löscht den lokalen Speicher mit seinen Vorgängen; die Dienste bleiben, ihre Tokens liegen dann wieder unverschlüsselt. Exportiere die Vorgänge vorher."
   },
   "local_text": {
     "message": "Ein Speicher für Vorgänge nur in diesem Browser, verschlüsselt mit einer Passphrase. Sobald er existiert, liegen auch die Tokens der Dienste unter der Passphrase, und die Erweiterung fragt nach jedem Browserstart danach."
@@ -221,6 +257,9 @@
   "overdue": {
     "message": "$1 Tage überfällig"
   },
+  "overdue_one": {
+    "message": "1 Tag überfällig"
+  },
   "passphrase": {
     "message": "Passphrase"
   },
@@ -229,6 +268,9 @@
   },
   "passphrase_change": {
     "message": "Passphrase ändern"
+  },
+  "passphrase_changed": {
+    "message": "Die Passphrase ist geändert. Nutze ab jetzt die neue."
   },
   "passphrase_differs": {
     "message": "Die beiden Passphrasen sind verschieden."
@@ -251,8 +293,14 @@
   "password_needed": {
     "message": "Gib ein Passwort ein, oder lade ohne herunter."
   },
+  "people_left_out": {
+    "message": "Die Datei ist ein volles Backup: Dieser Speicher liest nur die Vorgänge, nicht Personen, Geräte und Tokens."
+  },
   "permission_refused": {
     "message": "Ohne die Erlaubnis erreicht die Erweiterung den Dienst nicht."
+  },
+  "preselected_hint": {
+    "message": "Gewählt ist je Feld die neuere Seite, bei der Fälligkeit die nähere; ändere, was du willst, und lies dann ein."
   },
   "preview_decide": {
     "message": "Entscheide bitte: $1"
@@ -278,11 +326,14 @@
   "retry_days": {
     "message": "Nach Fehlschlag, Tage"
   },
+  "revoke_failed": {
+    "message": "Der Zugang dort ließ sich nicht widerrufen; widerrufe ihn in der Web-App des Dienstes unter Meine Geräte."
+  },
   "runs_more": {
     "message": "+$1 Läufe"
   },
-  "saved": {
-    "message": "Gespeichert."
+  "runs_one": {
+    "message": "+1 Lauf"
   },
   "schedule": {
     "message": "fällig $1 · alle $2 Wochen"
