@@ -9,7 +9,7 @@ The extension collects no data. It has no analytics, no telemetry, no advertisin
 ### What the extension does
 
 - **What it keeps, and where:** the services you add (their address and the extension's own access token) and, if you create one, the local store of jobs (titles, portal addresses, logins, notes, history). All of it lies in the browser's storage for this extension on your computer.
-- **With a local store,** all of it is encrypted with your passphrase (AES-GCM, key from PBKDF2-SHA256). The unlocked key is kept only until the browser closes.
+- **With a local store,** all of it is encrypted (AES-GCM) with a random key, which in turn is encrypted with your passphrase (PBKDF2-SHA256), as password managers do it. The unlocked key is kept only until the browser closes.
 - **Without a local store,** the access tokens of your services lie unencrypted in the browser's storage, as a browser keeps its cookies. Whoever can read your browser profile can use them.
 - **What it sends, and to whom:** requests go only to the Portal-Download services you added yourself, with that service's token, to list and change your jobs there. Nothing goes to anyone else.
 - **Your language choice** is kept in the browser's storage for this extension, unencrypted, as it is no secret.
@@ -44,7 +44,7 @@ Die Erweiterung erhebt keine Daten. Es gibt keine Analyse, keine Telemetrie, kei
 ### Was die Erweiterung tut
 
 - **Was sie speichert, und wo:** die Dienste, die Du hinzufügst (deren Adresse und den eigenen Zugangstoken der Erweiterung), und, wenn Du ihn anlegst, den lokalen Speicher mit Vorgängen (Titel, Portaladressen, Zugangsdaten, Notizen, Verlauf). Alles liegt im Speicher des Browsers für diese Erweiterung auf Deinem Computer.
-- **Mit lokalem Speicher** ist alles mit Deiner Passphrase verschlüsselt (AES-GCM, Schlüssel aus PBKDF2-SHA256). Der entsperrte Schlüssel bleibt nur, bis der Browser geschlossen wird.
+- **Mit lokalem Speicher** ist alles mit einem zufälligen Schlüssel verschlüsselt (AES-GCM), der seinerseits mit Deiner Passphrase verschlüsselt ist (PBKDF2-SHA256), wie es Passwortmanager machen. Der entsperrte Schlüssel bleibt nur, bis der Browser geschlossen wird.
 - **Ohne lokalen Speicher** liegen die Zugangstoken Deiner Dienste unverschlüsselt im Speicher des Browsers, so wie ein Browser seine Cookies aufbewahrt. Wer Dein Browserprofil lesen kann, kann sie benutzen.
 - **Was sie sendet, und an wen:** Anfragen gehen nur an die Portal-Download-Dienste, die Du selbst hinzugefügt hast, mit dem Token dieses Dienstes, um Deine Vorgänge dort zu lesen und zu ändern. An niemanden sonst.
 - **Deine Sprachwahl** liegt unverschlüsselt im Speicher des Browsers für diese Erweiterung, denn sie ist kein Geheimnis.

@@ -2,9 +2,13 @@
 // jobs of the local backend.
 //
 // Without a local backend the list of services lies in storage.local as it is. Once a local
-// backend exists, everything lies encrypted under the passphrase (AES-GCM with a key from
-// PBKDF2-SHA256, 600 000 iterations); the unlocked key lives in storage.session only, which
-// the browser forgets when it closes.
+// backend exists, everything lies encrypted in one object, as password managers do it: a random
+// data key encrypts the content (AES-GCM), and the passphrase only wraps that data key (AES-GCM
+// with a key from PBKDF2-SHA256, 600 000 iterations). The unlocked data key lives in
+// storage.session only, which the browser forgets when it closes.
+//
+// A change of passphrase therefore wraps the same data key anew in a single write; the content
+// and the unlocked key stay as they are, so no other window can see a key that does not fit.
 
 import { emptyData } from "./local.js";
 
@@ -13,28 +17,40 @@ const ITERATIONS = 600000;
 const te = new TextEncoder(), td = new TextDecoder();
 const b64 = (bytes) => { let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000)); return btoa(s); };
 const unb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+const failure = (kind) => Object.assign(new Error(kind), { kind });
 
 async function deriveKey(passphrase, salt, iterations = ITERATIONS) {
   const base = await crypto.subtle.importKey("raw", te.encode(passphrase), "PBKDF2", false, ["deriveKey"]);
-  return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
 }
-async function seal(key, value) {
+const importDataKey = (raw) => crypto.subtle.importKey("raw", raw, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+async function encrypt(key, bytes) {
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const data = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, te.encode(JSON.stringify(value))));
-  return { iv: b64(iv), data: b64(data) };
+  return { iv: b64(iv), data: b64(new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, bytes))) };
 }
-async function open(key, sealed) {
-  const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64(sealed.iv) }, key, unb64(sealed.data));
-  return JSON.parse(td.decode(plain));
-}
-async function sessionKey() {
+const decrypt = async (key, box) => new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64(box.iv) }, key, unb64(box.data)));
+const seal = (key, value) => encrypt(key, te.encode(JSON.stringify(value)));
+const open = async (key, sealed) => JSON.parse(td.decode(await decrypt(key, sealed)));
+
+/** The unlocked data key, if it belongs to this store (same kid); else null. */
+async function sessionKey(vault) {
   const { vaultKey } = await api.storage.session.get("vaultKey");
-  if (!vaultKey) return null;
-  return crypto.subtle.importKey("raw", unb64(vaultKey), { name: "AES-GCM" }, true, ["encrypt", "decrypt"]);
+  if (!vaultKey || typeof vaultKey !== "object" || vaultKey.kid !== vault.kid) return null;
+  return importDataKey(unb64(vaultKey.key));
 }
-async function remember(key) {
-  const raw = new Uint8Array(await crypto.subtle.exportKey("raw", key));
-  await api.storage.session.set({ vaultKey: b64(raw) });
+const remember = (kid, raw) => api.storage.session.set({ vaultKey: { kid, key: b64(raw) } });
+
+/** Unwraps the data key with the passphrase key; null if the passphrase does not fit. */
+async function unwrap(kek, vault) {
+  try { return await decrypt(kek, vault.wrapped); } catch { return null; }
+}
+
+/** A new store record for this content, under the passphrase key kek of this salt. */
+async function newRecord(kek, salt, iterations, content) {
+  const raw = crypto.getRandomValues(new Uint8Array(32));
+  const kid = b64(crypto.getRandomValues(new Uint8Array(12)));
+  const record = { v: 2, kid, rev: 1, salt, iterations, wrapped: await encrypt(kek, raw), sealed: await seal(await importDataKey(raw), content) };
+  return { record, raw };
 }
 
 /** One change of the stored content at a time, across every panel of this browser. */
@@ -42,58 +58,62 @@ const VAULT_LOCK = "portal-download-vault";
 export const withVaultLock = (fn) => (globalThis.navigator?.locks ? navigator.locks.request(VAULT_LOCK, fn) : fn());
 
 export class Vault {
+  // The revision each content object was read at; a write of an older one is refused.
+  #revs = new WeakMap();
+
   /** "plain" (no local backend), "locked" or "open". */
   async state() {
     const { vault } = await api.storage.local.get("vault");
     if (!vault) return "plain";
-    return (await sessionKey()) ? "open" : "locked";
+    return vault.v === 2 && (await sessionKey(vault)) ? "open" : "locked";
   }
 
   /** Everything kept: { services: [...], local: data or null }. */
   async read() {
     const { vault, services } = await api.storage.local.get(["vault", "services"]);
-    if (!vault) return { services: services || [], local: null };
-    const key = await sessionKey();
-    if (!key) throw Object.assign(new Error("locked"), { kind: "locked" });
-    // A key that does not open the store (a change of passphrase cut short) counts as locked:
-    // the passphrase then opens it again.
-    try { return await open(key, vault.sealed); }
-    catch {
-      // Either a change is under way (a passphrase change between its two writes), or the key no
-      // longer fits (such a change was cut short). Only under the lock, where no change runs, is
-      // that decided: read both anew; if they still do not fit, the store counts as locked.
-      const busy = () => Object.assign(new Error("busy"), { kind: "busy" });
-      if (!globalThis.navigator?.locks) throw busy();
-      return navigator.locks.request(VAULT_LOCK, { ifAvailable: true }, async (held) => {
-        if (!held) throw busy();
-        const { vault: now } = await api.storage.local.get("vault");
-        const k = await sessionKey();
-        if (!now || !k) throw Object.assign(new Error("locked"), { kind: "locked" });
-        try { return await open(k, now.sealed); } catch { /* still does not fit */ }
-        await api.storage.session.remove("vaultKey");
-        throw Object.assign(new Error("locked"), { kind: "locked" });
-      });
-    }
+    if (!vault) { const c = { services: services || [], local: null }; this.#revs.set(c, 0); return c; }
+    // A store of an older version, or a key of another store (one deleted and made anew in
+    // another window), counts as locked: the passphrase opens it.
+    const key = vault.v === 2 ? await sessionKey(vault) : null;
+    if (!key) throw failure("locked");
+    const c = await open(key, vault.sealed);
+    this.#revs.set(c, vault.rev);
+    return c;
   }
 
+  /** Writes content got from read(); refused if the store changed since that read. */
   async write(content) {
     const { vault } = await api.storage.local.get("vault");
+    const rev = this.#revs.get(content);
+    if (rev !== (vault ? vault.rev : 0)) throw failure("busy");
     if (!vault) { await api.storage.local.set({ services: content.services }); return; }
-    const key = await sessionKey();
-    if (!key) throw Object.assign(new Error("locked"), { kind: "locked" });
-    await api.storage.local.set({ vault: { ...vault, sealed: await seal(key, content) } });
+    const key = await sessionKey(vault);
+    if (!key) throw failure("locked");
+    await api.storage.local.set({ vault: { ...vault, rev: vault.rev + 1, sealed: await seal(key, content) } });
+    this.#revs.set(content, vault.rev + 1);
   }
 
   async unlock(passphrase) {
     const { vault } = await api.storage.local.get("vault");
     if (!vault) return true;
-    const key = await deriveKey(passphrase, unb64(vault.salt), vault.iterations || ITERATIONS);
-    // Kept only if it still opens the store under the lock: a passphrase change may have come between.
+    // The slow derivation outside the lock; what it opens is checked under the lock.
+    const kek = await deriveKey(passphrase, unb64(vault.salt), vault.iterations || ITERATIONS);
     return withVaultLock(async () => {
       const { vault: now } = await api.storage.local.get("vault");
       if (!now || now.salt !== vault.salt) return false;
-      try { await open(key, now.sealed); } catch { return false; }
-      await remember(key);
+      if (now.v === 2) {
+        const raw = await unwrap(kek, now);
+        if (!raw) return false;
+        await remember(now.kid, raw);
+        return true;
+      }
+      // A store of version 0.8, sealed with the passphrase key itself: brought into the form
+      // with a data key once, under the same passphrase.
+      let content;
+      try { content = await open(kek, now.sealed); } catch { return false; }
+      const { record, raw } = await newRecord(kek, now.salt, now.iterations || ITERATIONS, content);
+      await api.storage.local.set({ vault: record });
+      await remember(record.kid, raw);
       return true;
     });
   }
@@ -107,31 +127,32 @@ export class Vault {
   }
 
   /** Creates the local backend: from now on everything lies under the passphrase. */
-  async createLocal(passphrase) { return withVaultLock(() => this.#createLocal(passphrase)); }
-  async #createLocal(passphrase) {
-    const { services, vault } = await api.storage.local.get(["services", "vault"]);
-    // Another panel may have created it meanwhile; never write over a store.
-    if (vault) throw Object.assign(new Error("exists"), { kind: "vault_exists" });
+  async createLocal(passphrase) {
     const salt = crypto.getRandomValues(new Uint8Array(16));
-    const key = await deriveKey(passphrase, salt);
-    const content = { services: services || [], local: emptyData() };
-    await api.storage.local.set({ vault: { salt: b64(salt), iterations: ITERATIONS, sealed: await seal(key, content) } });
-    await api.storage.local.remove("services");
-    await remember(key);
+    const kek = await deriveKey(passphrase, salt);
+    return withVaultLock(async () => {
+      const { services, vault } = await api.storage.local.get(["services", "vault"]);
+      // Another panel may have created it meanwhile; never write over a store.
+      if (vault) throw failure("vault_exists");
+      const { record, raw } = await newRecord(kek, b64(salt), ITERATIONS, { services: services || [], local: emptyData() });
+      await api.storage.local.set({ vault: record });
+      await api.storage.local.remove("services");
+      await remember(record.kid, raw);
+    });
   }
 
-  async changePassphrase(passphrase) { return withVaultLock(() => this.#changePassphrase(passphrase)); }
-  async #changePassphrase(passphrase) {
-    const content = await this.read();
+  /** Wraps the data key under a new passphrase: one write; content and unlocked key stay. */
+  async changePassphrase(passphrase) {
     const salt = crypto.getRandomValues(new Uint8Array(16));
-    const key = await deriveKey(passphrase, salt);
-    const sealed = await seal(key, content);
-    // The key first: another panel reading between the two writes then fails once instead of with the old key.
-    const { vaultKey: oldKey } = await api.storage.session.get("vaultKey");
-    if (!oldKey) throw Object.assign(new Error("locked"), { kind: "locked" });
-    await remember(key);
-    try { await api.storage.local.set({ vault: { salt: b64(salt), iterations: ITERATIONS, sealed } }); }
-    catch (e) { await api.storage.session.set({ vaultKey: oldKey }); throw e; }
+    const kek = await deriveKey(passphrase, salt);
+    return withVaultLock(async () => {
+      const { vault } = await api.storage.local.get("vault");
+      if (!vault || vault.v !== 2) throw failure("locked");
+      const { vaultKey } = await api.storage.session.get("vaultKey");
+      if (!(await sessionKey(vault))) throw failure("locked");
+      const wrapped = await encrypt(kek, unb64(vaultKey.key));
+      await api.storage.local.set({ vault: { ...vault, rev: vault.rev + 1, salt: b64(salt), iterations: ITERATIONS, wrapped } });
+    });
   }
 
   /** For a forgotten passphrase: deletes the local store and every service kept with it. */
@@ -141,12 +162,12 @@ export class Vault {
   }
 
   /** Removes the local backend and its jobs; the services stay, without the passphrase. */
-  async removeLocal() { return withVaultLock(() => this.#removeLocal()); }
-  async #removeLocal() {
-    const content = await this.read();
-    await api.storage.local.set({ services: content.services });
-    await api.storage.local.remove("vault");
-    // Already under the lock: remove the key directly.
-    await api.storage.session.remove("vaultKey");
+  async removeLocal() {
+    return withVaultLock(async () => {
+      const content = await this.read();
+      await api.storage.local.set({ services: content.services });
+      await api.storage.local.remove("vault");
+      await api.storage.session.remove("vaultKey");
+    });
   }
 }
