@@ -42,7 +42,11 @@ jobs:
           v=$(node -p 'require("./manifest.json").version')
           [ "$GITHUB_REF_NAME" = "v$v" ] || { echo "::error::tag $GITHUB_REF_NAME, manifest version $v"; exit 1; }
       - run: node build.mjs
-      - name: Signed file for Firefox (listed on addons.mozilla.org)
+      - name: Firefox – submitted to addons.mozilla.org (listed)
+        id: amo
+        # Mozilla reviews listed versions; the signed file comes back only once approved, within
+        # the wait. A refusal or a longer review must not hold up the release for Chrome and Edge.
+        continue-on-error: true
         env:
           AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
           AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
@@ -50,10 +54,17 @@ jobs:
           if [ -z "$AMO_JWT_ISSUER" ] || [ -z "$AMO_JWT_SECRET" ]; then echo "::error::the secrets AMO_JWT_ISSUER and AMO_JWT_SECRET are missing"; exit 1; fi
           mkdir -p dist/unpacked && cd dist/unpacked && unzip -q ../portal-download-*.zip
           npx --yes web-ext@10.7.0 sign --channel listed --amo-metadata ../../store/amo-metadata.json --source-dir . --artifacts-dir ../signed --api-key "$AMO_JWT_ISSUER" --api-secret "$AMO_JWT_SECRET"
-      - name: Release with both files
-        env: { GH_TOKEN: "${{ github.token }}" }
+      - name: Release, with the signed file when Mozilla returned it
+        env: { GH_TOKEN: "${{ github.token }}", AMO: "${{ steps.amo.outcome }}" }
         run: |
           v=$(node -p 'require("./manifest.json").version')
-          mv dist/signed/*.xpi "dist/portal-download-$v.xpi"
-          gh release create "$GITHUB_REF_NAME" dist/portal-download-*.zip dist/portal-download-*.xpi --title "$GITHUB_REF_NAME" \
-            --notes "Firefox 140 or newer – download the .xpi, then about:addons, gear menu, Install Add-on From File. Chrome and Edge 121 or newer – unpack the ZIP into a folder that stays and load it under Extensions, Developer mode, Load unpacked. Details in the README."
+          files="dist/portal-download-$v.zip"
+          firefox="Firefox 140 or newer – install it from addons.mozilla.org (search for Portal-Download) once Mozilla has reviewed this version."
+          if ls dist/signed/*.xpi >/dev/null 2>&1; then
+            mv dist/signed/*.xpi "dist/portal-download-$v.xpi"; files="$files dist/portal-download-$v.xpi"
+            firefox="Firefox 140 or newer – install it from addons.mozilla.org, or download the .xpi, then about:addons, gear menu, Install Add-on From File."
+          fi
+          [ "$AMO" = success ] || echo "::warning::the submission to addons.mozilla.org failed; see the step above"
+          # shellcheck disable=SC2086
+          gh release create "$GITHUB_REF_NAME" $files --title "$GITHUB_REF_NAME" \
+            --notes "$firefox Chrome and Edge 121 or newer – unpack the ZIP into a folder that stays and load it under Extensions, Developer mode, Load unpacked. Details in the README."

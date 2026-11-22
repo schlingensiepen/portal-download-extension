@@ -1,7 +1,9 @@
 {
-  "categories": [
-    "download-management"
-  ],
+  "categories": {
+    "firefox": [
+      "download-management"
+    ]
+  },
   "summary": {
     "en-US": "Keeps the due downloads from your customer portals in one list in the side panel: which portal is due, its login copied with one click, the run closed as done. For Portal-Download services and a local, encrypted store.",
     "de": "Hält die fälligen Downloads Deiner Kundenportale in einer Liste im Seitenpanel: welches Portal dran ist, Zugangsdaten per Klick kopiert, der Lauf als erledigt abgeschlossen. Für Portal-Download-Dienste und einen lokalen, verschlüsselten Speicher."
