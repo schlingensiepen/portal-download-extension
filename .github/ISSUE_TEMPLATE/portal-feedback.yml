@@ -30,9 +30,12 @@ body:
     id: element
     attributes:
       label: The element
-      description: What does the link or button say, or what icon does it show? Is it a link, a button, or something in a menu? Did it open a new tab?
-    validations:
-      required: true
+      description: What does the link or button say, or what icon does it show? Is it a link, a button, or something in a menu? Did it open a new tab? Write "see below" if you paste the text from the panel below.
+  - type: textarea
+    id: observation
+    attributes:
+      label: The text from the panel (optional)
+      description: In the panel, "Something missing or wrong? Show me how you download" writes the details for you. Read it before you paste it, and delete anything personal.
   - type: textarea
     id: panel
     attributes:

@@ -236,6 +236,16 @@ A document that failed stays ticked, so that *Start downloading* tries it again.
 
 **A portal where it goes wrong:** if it misses a document, ticks something that is no document, or a download fails, please tell us with the form [Feedback on a portal](https://github.com/schlingensiepen/portal-download-extension/issues/new?template=portal-feedback.yml). The rules for what counts as a document can only get better with real portals. Everything else goes to the [discussions](https://github.com/schlingensiepen/portal-download-extension/discussions). Do not include your name, customer numbers, addresses with session parameters, or screenshots with personal data.
 
+The extension can write the details for you:
+
+1. In the page, click *Something missing or wrong? Show me how you download* in the panel (below *Find documents on this page*, and below a list of found documents). The panel says what will be noted.
+2. Click *Start watching*. The first time, the browser asks for access to the site and to the downloads.
+3. Download one document in the page, as you always do. Watching ends at the first download, after two minutes, or when you click *Stop and show the text*.
+4. **Read the text.** For each click it names the kind of element, its words, the form of its address, any script in its markup, and what the search made of it; then what followed, such as a new tab and the download. Numbers, e-mail addresses, the values in addresses and long keys are blacked out. A name in the words of a link cannot be recognised: delete anything personal. Untick *Name the portal* to leave its address out.
+5. Click *Copy the text*, then *Open the feedback form*, and paste it there. Nothing is sent before you do; the issue is public.
+
+Scripts a portal attaches to an element are invisible to an extension; the text shows only what the markup says and what happened after the click.
+
 **Close the run** afterwards as before, with *Succeeded* or *Failed*; downloading does not close it.
 
 ## Languages

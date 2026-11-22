@@ -26,6 +26,7 @@ Invoices, notices and statements more and more often sit in a company's own web 
 - One list of every due download in the browser's side panel, the most urgent first; the portal opens in a normal tab beside it.
 - The login is copied with one click; a short note says what to file where.
 - On click it finds the documents in the portal page, highlights them in yellow with numbers, and downloads the ticked ones one after the other into a folder of the job; it remembers what was downloaded and offers only new documents.
+- Where it misses a document, it can watch you download one, with your consent, and write a feedback text for you, with numbers and addresses blacked out; nothing is sent unless you copy and post it.
 - Close a run as succeeded or failed; the next due date follows the job's interval.
 - Works with several Portal-Download services at once (self-hosted, for a household or a small team) and with a local store in this browser, encrypted with a passphrase.
 - In English, German, French, Spanish, Portuguese and Chinese, chosen in the panel.
@@ -46,6 +47,7 @@ Rechnungen, Bescheide und Abrechnungen liegen immer öfter im eigenen Portal ein
 - Eine Liste aller fälligen Downloads im Seitenpanel des Browsers, das dringendste zuerst; das Portal öffnet sich daneben in einem normalen Tab.
 - Die Zugangsdaten sind mit einem Klick kopiert; eine kurze Notiz sagt, was wohin abgelegt wird.
 - Auf Klick findet sie die Dokumente in der Portalseite, markiert sie gelb und nummeriert und lädt die angehakten nacheinander in einen Ordner des Vorgangs; sie merkt sich, was geladen ist, und bietet nur neue Dokumente an.
+- Wo sie ein Dokument übersieht, kann sie Dir mit Deiner Zustimmung beim Herunterladen zuschauen und einen Rückmeldetext schreiben, Zahlen und Adressen geschwärzt; gesendet wird nichts, außer Du kopierst und veröffentlichst ihn.
 - Einen Lauf als erfolgreich oder gescheitert abschließen; die nächste Fälligkeit folgt dem Intervall des Vorgangs.
 - Arbeitet mit mehreren Portal-Download-Diensten zugleich (selbst betrieben, für einen Haushalt oder ein kleines Team) und mit einem lokalen Speicher in diesem Browser, verschlüsselt mit einer Passphrase.
 - Auf Deutsch, Englisch, Französisch, Spanisch, Portugiesisch und Chinesisch, wählbar im Panel.
