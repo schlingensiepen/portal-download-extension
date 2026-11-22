@@ -41,7 +41,10 @@ export function observe(token) {
     // no words. Neither for the page itself.
     if ((target && target.closest(FIELD)) || el.closest(FIELD) || el.querySelector(FIELD) || el === document.body || el === document.documentElement) return "";
     const t = (el.innerText || "").replace(/\s+/g, " ").trim();
-    if (clickable) return t.slice(0, 200);
+    // A link or button says what it does; another clickable element (a row with onclick, a card)
+    // may hold a whole line of someone's data, so only a short text of it.
+    if (clickable && el.matches("a, button")) return t.slice(0, 200);
+    if (clickable) return t.length <= 60 ? t : "";
     return el.children.length === 0 && t.length <= 40 ? t : "";
   };
   const describe = (path) => {
@@ -50,7 +53,10 @@ export function observe(token) {
     const el = hit || els[0];
     const icons = [];
     for (const c of [...el.querySelectorAll("i, svg, img, span, use")].slice(0, 6)) {
-      const d = { cls: cls(c), title: attr(c, "title"), aria: attr(c, "aria-label"), alt: attr(c, "alt"), url: attr(c, "href") || attr(c, "xlink:href") || attr(c, "src") };
+      let url = attr(c, "href") || attr(c, "xlink:href") || attr(c, "src");
+      // Resolved, so that the panel can take it apart as an address (a relative one would stay whole).
+      if (url && !url.startsWith("#")) { try { url = new URL(url, document.baseURI).href; } catch { /* as written */ } }
+      const d = { cls: cls(c), title: attr(c, "title"), aria: attr(c, "aria-label"), alt: attr(c, "alt"), url };
       if (d.cls || d.title || d.aria || d.alt || d.url) icons.push(d);
     }
     const chain = [];

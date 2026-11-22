@@ -578,15 +578,19 @@ async function startWatching() {
         w.again = setTimeout(() => { if (w.phase === "watching") inject(tabId); }, 1500);
       },
       updated: (tabId, info, tab) => {
-        if (!w.tabs.has(tabId) || info.status !== "complete") return;
+        // At "loading" with a new address too: the observer goes in once the document can take it,
+        // without waiting for slow pictures; at "complete" once more.
+        if (!w.tabs.has(tabId) || !(info.status === "complete" || (info.status === "loading" && info.url))) return;
         // A page loaded anew needs the observer again; only a new address is worth telling.
-        const url = (tab && tab.url) || "", bare = url.split("#")[0];
+        const url = info.url || (tab && tab.url) || "", bare = url.split("#")[0];
         if (url && w.seen.get(tabId) !== bare) w.events.push({ at: Date.now(), kind: "page", url });
         w.seen.set(tabId, bare);
         // Downloads count from the sites of the portal's own tab only: Chrome names the active tab as
         // the opener of a tab the user opens themselves, so a new tab's site is no proof.
         if (tabId === w.tabId && originOf(url)) w.origins.add(originOf(url));
-        inject(tabId).then((ok) => { if (tabId === w.tabId && w.blind !== !ok) { w.blind = !ok; if (state.view === "watch" && w.phase === "watching") render(); } });
+        // Only the latest injection tells whether the page can be watched.
+        const n = (w.injections = (w.injections || 0) + 1);
+        inject(tabId).then((ok) => { if (tabId === w.tabId && n === w.injections && w.blind !== !ok) { w.blind = !ok; if (state.view === "watch" && w.phase === "watching") render(); } });
       },
       created: (tab) => {
         // Only a tab the portal opened right after a click of the user. The click's message may
@@ -603,15 +607,27 @@ async function startWatching() {
       removed: (tabId) => { if (tabId === w.tabId) endWatching(w, "gone"); },
       download: (d) => {
         // The first download from the watched pages only: not another extension's, not one of another tab.
-        if (w.download || (d.byExtensionId && d.byExtensionId !== api.runtime.id)) return;
+        // Neither this extension's own nor another's.
+        if (w.download || d.byExtensionId) return;
         const ours = [d.referrer, d.url, d.finalUrl].some((u) => u && w.origins.has(originOf(u)));
-        const originless = !d.referrer && /^(data|blob):/i.test(d.url || "") && Date.now() - w.lastClick < 10000;
+        // A data: address names no site; one right after a click counts.
+        const originless = !d.referrer && /^data:/i.test(d.url || "") && Date.now() - w.lastClick < 10000;
         if (!ours && !originless) return;
-        const got = { mime: d.mime, filename: d.filename, url: d.url, finalUrl: d.finalUrl, referrer: d.referrer, id: d.id };
+        // Only kind and size go into the text; the name serves for the kind when the type says nothing.
+        const got = { mime: d.mime, filename: d.filename, bytes: d.totalBytes, id: d.id };
         w.download = got;
-        // The file name is decided a moment later.
+        // Type, name and size are known a moment later; the size only once the file is complete (up to 10 seconds).
         setTimeout(async () => {
-          try { const [x] = await api.downloads.search({ id: got.id }); if (x) Object.assign(got, { mime: x.mime || got.mime, filename: x.filename || got.filename }); } catch { /* as it came */ }
+          for (let k = 0; k < 20; k++) {
+            try {
+              const [x] = await api.downloads.search({ id: got.id });
+              if (x) Object.assign(got, { mime: x.mime || got.mime, filename: x.filename || got.filename, bytes: x.fileSize > 0 ? x.fileSize : x.totalBytes > 0 ? x.totalBytes : got.bytes });
+              if (!x || x.state !== "in_progress") break;
+            } catch { break; }
+            await new Promise((r) => setTimeout(r, 500));
+          }
+          // Ended meanwhile (stop, two minutes): the text is made anew with the file's type and ending.
+          if (w.phase === "done" && w.text === undefined && state.watch === w && state.view === "watch") render();
           endWatching(w, "download");
         }, 1500);
       },

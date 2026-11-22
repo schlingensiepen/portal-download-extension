@@ -25,7 +25,8 @@ export function redactCode(s, max = 120) {
   // Pairs of quotes first, then an unpaired one to the end.
   const pairs = [];
   let r = String(s ?? "").replace(/(["'`])(?:\\.|(?!\1)[^\\])*\1/g, (_, q) => { pairs.push(q); return `\u0000${pairs.length - 1}\u0000`; });
-  r = r.replace(/["'`].*$/s, (m) => `${m[0]}…`).replace(/\u0000(\d+)\u0000/g, (_, i) => `${pairs[i]}…${pairs[i]}`);
+  // Comments go too: what follows "//" or "/*" may be anything.
+  r = r.replace(/["'`].*$/s, (m) => `${m[0]}…`).replace(/\/[/*].*$/s, "/…").replace(/\u0000(\d+)\u0000/g, (_, i) => `${pairs[i]}…${pairs[i]}`);
   return redactText(r, max);
 }
 
@@ -53,7 +54,8 @@ const segment = (raw) => {
   const [d, ...matrix] = raw.split(";");
   const tail = matrix.length ? ";…" : "";
   if (d.includes("@")) return `…${tail}`;
-  const m = /^(.*?)(\.[A-Za-z0-9]{1,8})$/.exec(d);
+  // A file ending is kept beside a key only when it is a short one of letters.
+  const m = /^(.*?)(\.[A-Za-z]{1,5})$/.exec(d);
   const [stem, ending] = m ? [m[1], m[2]] : [d, ""];
   return `${opaque(stem) ? `…${ending}` : redactText(d, 40)}${tail}`;
 };
@@ -65,13 +67,15 @@ const segment = (raw) => {
 export function redactUrl(u, portalOrigin, namePortal = true) {
   u = String(u ?? "");
   if (!u) return "";
-  if (/^javascript:/i.test(u)) return redactCode(u);
+  if (/^javascript:/i.test(u)) { let d = u; try { d = decodeURIComponent(u); } catch { /* as it is */ } return redactCode(d); }
   if (u.startsWith("#")) return "#…";
   let x;
-  try { x = new URL(u); } catch { return redactCode(u, 60); }
+  try { x = new URL(u); } catch { return "(unreadable address)"; }
   if (x.protocol === "data:") return `data:${redactText(x.pathname.split(/[;,]/)[0], 40)}`;
   if (x.protocol === "blob:") return "blob: (made in the page)";
   if (/-extension:$/.test(x.protocol)) return "[extension]";
+  // Other schemes (view-source:, mailto:, ftp:) by their name only.
+  if (!/^https?:$/.test(x.protocol)) return `${redactText(x.protocol, 20)} (…)`;
   const site = x.origin === portalOrigin ? "" : namePortal ? `${x.protocol}//${redactText(x.host, 60)}` : "[another site]";
   const path = x.pathname.split("/").map((seg) => {
     let d = seg;
@@ -132,6 +136,23 @@ function endingOf(name) {
   return /^[A-Za-z]{1,5}$/.test(m[1]) ? `.${m[1].toLowerCase()}` : "other";
 }
 
+const KIND = { "application/pdf": "a PDF", "application/zip": "a ZIP file", "text/csv": "a CSV file", "application/xml": "an XML file", "text/xml": "an XML file", "image/tiff": "a TIFF image", "image/jpeg": "a JPEG image", "image/png": "a PNG image" };
+/** The kind of file, from its type, else from its ending. */
+function kindOf(d) {
+  const mime = String(d.mime || "").split(";")[0].trim().toLowerCase();
+  if (KIND[mime]) return KIND[mime];
+  if (/officedocument\.wordprocessingml|msword/.test(mime)) return "a Word document";
+  if (/officedocument\.spreadsheetml|ms-excel/.test(mime)) return "an Excel file";
+  const e = endingOf(d.filename);
+  return e.startsWith(".") ? `a ${e.slice(1).toUpperCase()} file` : "a file";
+}
+/** The size, rounded, from the browser (not from the page). */
+function sizeOf(bytes) {
+  const b = Number(bytes);
+  if (!Number.isFinite(b) || b <= 0) return " (size unknown)";
+  return b < 1024 ? ` of ${b} bytes` : b < 1024 * 1024 ? ` of ${Math.round(b / 1024)} KB` : ` of ${(b / 1024 / 1024).toFixed(1)} MB`;
+}
+
 const ENDED = { download: "a download started", timeout: "no download within two minutes", stopped: "stopped by the user", gone: "the tab was closed" };
 
 /**
@@ -168,11 +189,7 @@ export function buildReport(w, { version = "", browser = "", namePortal = true }
     });
   }
   const d = w.download;
-  if (d) {
-    out.push("", "**Download**", "");
-    const ending = endingOf(d.filename);
-    out.push(`- type ${code(redactText(d.mime || "unknown", 60))}, file ending ${code(ending)}`);
-    out.push(`- address ${code(redactUrl(d.finalUrl || d.url, origin, namePortal))}${d.referrer ? `, started from ${code(redactUrl(d.referrer, origin, namePortal))}` : ", no referrer"}`);
-  }
+  // Of the download only what kind of file and how large: its name and address are not needed.
+  if (d) out.push("", `**Download:** ${kindOf(d)}${sizeOf(d.bytes)} was downloaded.`);
   return out.join("\n");
 }

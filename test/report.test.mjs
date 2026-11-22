@@ -54,7 +54,7 @@ test("the report names the portal only when asked, and leaks no number, token or
   const w = { url: `${P}/kunde/4711/rechnungen?sid=abc`, ended: "download",
     clicks: [click({ at: 1 }), click({ at: 2, tag: "div", cls: "", text: "⤓", href: "", onclick: "", verdict: { finder: "none", clickable: false } })],
     events: [{ at: 1.5, kind: "tab", url: `${P}/view?doc=4711` }],
-    download: { mime: "application/pdf", filename: "/home/u/Downloads/Rechnung_4711.PDF", url: "https://cdn.example/x/9?sig=abc", referrer: `${P}/kunde/4711/rechnungen` } };
+    download: { mime: "application/pdf", filename: "/home/u/Downloads/Rechnung_4711.PDF", bytes: 245760 } };
   const named = buildReport(w, { version: "1.1.0", browser: "Firefox 147", namePortal: true });
   const anon = buildReport(w, { version: "1.1.0", browser: "Firefox 147", namePortal: false });
   assert.match(named, /Portal: `www\.portal\.example`/);
@@ -66,7 +66,8 @@ test("the report names the portal only when asked, and leaks no number, token or
     assert.match(r, /search: found as a link \(its address looks like a download\), ticked/);
     assert.match(r, /no link or button in the markup/);
     assert.match(r, /then a new tab opened: `\/view\?doc=…`/);
-    assert.match(r, /type `application\/pdf`, file ending `\.pdf`/);
+    assert.match(r, /\*\*Download:\*\* a PDF of 240 KB was downloaded\./);
+    assert.ok(!r.includes("cdn.example") && !r.includes("Rechnung_"));
   }
 });
 
@@ -100,10 +101,10 @@ test("short share keys, base64 and runs of capitals go; words with a number and 
 
 test("a file name shows only its ending, and only a short one of letters", () => {
   const r = buildReport({ url: `${P}/`, ended: "download", clicks: [click({ download: "Rechnung_Max_Mustermann_2024.pdf" })], events: [],
-    download: { mime: "application/octet-stream", filename: "/home/u/Downloads/invoice.20240115", url: `${P}/x` } });
+    download: { mime: "application/octet-stream", filename: "/home/u/Downloads/invoice.20240115" } });
   assert.ok(!r.includes("Mustermann"), r);
   assert.match(r, /download attribute `set, \.pdf`/);
-  assert.match(r, /file ending `other`/);
+  assert.match(r, /\*\*Download:\*\* a file \(size unknown\) was downloaded\./);
 });
 
 test("scripts lose an unpaired quote to the end; invisible format characters go", () => {
@@ -116,6 +117,14 @@ test("a new tab without an address yet is still told; the verdict takes only kno
   assert.match(r, /then a new tab opened: `\(no address yet\)`/);
   assert.match(r, /found as a candidate \(other reason\)/);
   assert.ok(!r.includes("@me") && !r.includes("http://e"));
+});
+
+test("odd addresses: an ending of digits beside a key, other schemes, unreadable ones, encoded quotes, comments", () => {
+  assert.equal(redactUrl(`${P}/doc/aBcDe4GhIjK7mNo.20481234`, P), "/doc/…");
+  assert.equal(redactUrl("view-source:https://kunde.portal.example/x", P, false), "view-source: (…)");
+  assert.equal(redactUrl("http://[bad", P), "(unreadable address)");
+  assert.equal(redactUrl("javascript:open(%27max.muster%27)", P), "javascript:open('…')");
+  assert.equal(redactCode("show(); // Kunde Mueller"), "show(); /…");
 });
 
 test("only the last five clicks are told", () => {

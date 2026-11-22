@@ -47,7 +47,7 @@ Rechnungen, Bescheide und Abrechnungen liegen immer öfter im eigenen Portal ein
 - Eine Liste aller fälligen Downloads im Seitenpanel des Browsers, das dringendste zuerst; das Portal öffnet sich daneben in einem normalen Tab.
 - Die Zugangsdaten sind mit einem Klick kopiert; eine kurze Notiz sagt, was wohin abgelegt wird.
 - Auf Klick findet sie die Dokumente in der Portalseite, markiert sie gelb und nummeriert und lädt die angehakten nacheinander in einen Ordner des Vorgangs; sie merkt sich, was geladen ist, und bietet nur neue Dokumente an.
-- Wo sie ein Dokument übersieht, kann sie Dir mit Deiner Zustimmung beim Herunterladen zuschauen und einen Rückmeldetext schreiben, Zahlen und Adressen geschwärzt; gesendet wird nichts, außer Du kopierst und veröffentlichst ihn.
+- Wo sie ein Dokument übersieht, kann sie Dir mit Deiner Zustimmung beim Herunterladen zuschauen und einen Rückmeldetext schreiben, in dem Ziffern, Adressparameter und Schlüssel ersetzt sind; gesendet wird nichts, außer Du kopierst und veröffentlichst ihn.
 - Einen Lauf als erfolgreich oder gescheitert abschließen; die nächste Fälligkeit folgt dem Intervall des Vorgangs.
 - Arbeitet mit mehreren Portal-Download-Diensten zugleich (selbst betrieben, für einen Haushalt oder ein kleines Team) und mit einem lokalen Speicher in diesem Browser, verschlüsselt mit einer Passphrase.
 - Auf Deutsch, Englisch, Französisch, Spanisch, Portugiesisch und Chinesisch, wählbar im Panel.
