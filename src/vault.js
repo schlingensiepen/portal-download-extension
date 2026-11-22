@@ -54,7 +54,10 @@ export class Vault {
     if (!vault) return { services: services || [], local: null };
     const key = await sessionKey();
     if (!key) throw Object.assign(new Error("locked"), { kind: "locked" });
-    return open(key, vault.sealed);
+    // A key that does not open the store (a change of passphrase cut short) counts as locked:
+    // the passphrase then opens it again.
+    try { return await open(key, vault.sealed); }
+    catch { await api.storage.session.remove("vaultKey"); throw Object.assign(new Error("locked"), { kind: "locked" }); }
   }
 
   async write(content) {
@@ -74,7 +77,8 @@ export class Vault {
     return true;
   }
 
-  async lock() { await api.storage.session.remove("vaultKey"); }
+  /** Locks; waits for a change under way, so that it cannot reopen the store afterwards. */
+  async lock() { await withVaultLock(() => api.storage.session.remove("vaultKey")); }
 
   /** Reads, changes and writes the content under the lock; fn changes the content in place. */
   update(fn) {
@@ -102,8 +106,11 @@ export class Vault {
     const key = await deriveKey(passphrase, salt);
     const sealed = await seal(key, content);
     // The key first: another panel reading between the two writes then fails once instead of with the old key.
+    const { vaultKey: oldKey } = await api.storage.session.get("vaultKey");
+    if (!oldKey) throw Object.assign(new Error("locked"), { kind: "locked" });
     await remember(key);
-    await api.storage.local.set({ vault: { salt: b64(salt), iterations: ITERATIONS, sealed } });
+    try { await api.storage.local.set({ vault: { salt: b64(salt), iterations: ITERATIONS, sealed } }); }
+    catch (e) { await api.storage.session.set({ vaultKey: oldKey }); throw e; }
   }
 
   /** For a forgotten passphrase: deletes the local store and every service kept with it. */
@@ -118,6 +125,7 @@ export class Vault {
     const content = await this.read();
     await api.storage.local.set({ services: content.services });
     await api.storage.local.remove("vault");
-    await this.lock();
+    // Already under the lock: remove the key directly.
+    await api.storage.session.remove("vaultKey");
   }
 }

@@ -139,7 +139,7 @@ async function render() {
 // "fromTab" holds for the one view it was given to; a preview of a file only while its backend's management is shown.
 // Something typed or a file previewed, which a reload would lose.
 const typed = () => !!state.preview || [...document.querySelectorAll("#view input, #view textarea")].some((el) => el.type !== "file" && el.value && !el.readOnly && el.defaultValue !== el.value);
-const go = (view, extra = {}) => { Object.assign(state, { view, fromTab: false }, view === "manage" ? {} : { preview: null }, extra); render(); };
+const go = (view, extra = {}) => { if (view !== "job") state.keptNote = ""; Object.assign(state, { view, fromTab: false }, view === "manage" ? {} : { preview: null }, extra); render(); };
 
 // ------------------------------------------------------------------ views
 function viewUnlock() {
@@ -341,16 +341,19 @@ async function addFromTab() {
       latest.services.push({ id, name: `${new URL(inv.base).host} (${r.name})`, base: inv.base, token: r.device_token });
       return id;
     });
+    // From here on the access is either kept or revoked below; no later failure may revoke it.
+    redeemed = null;
+    if (kept !== id) dropDevice(inv.base, r.device_token);
     await loadBackends();
     state.choice = kept;
-    if (kept !== id) { dropDevice(inv.base, r.device_token); toast(t("already_added"), true); }
+    if (kept !== id) toast(t("already_added"), true);
     else toast(t("service_added", r.name));
     go("list");
   } catch (e) {
     // An access redeemed but not kept is revoked on the service again.
     if (redeemed) dropDevice(inv.base, redeemed.device_token);
     // A permission for a service that was not added is given back.
-    if (granted && !(state.content && state.content.services.some((s) => originPattern(s.base) === pattern))) api.permissions.remove({ origins: [pattern] }).catch(() => {});
+    if (granted) vault.read().then((c) => c.services, () => []).then((list) => { if (!list.some((s) => originPattern(s.base) === pattern)) api.permissions.remove({ origins: [pattern] }).catch(() => {}); });
     fail(e);
   }
 }
