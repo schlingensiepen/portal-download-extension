@@ -2,7 +2,7 @@
 
 The due portal downloads of every [Portal-Download](https://github.com/schlingensiepen/portal-download) service you belong to, and of a store in this browser, in one list in the browser's side panel. The portal opens in a normal tab beside it; the login is copied with one click; a run is closed as succeeded or failed.
 
-For Chrome and Edge 121 or newer, and Firefox 128 or newer. A **backend** below is one source of jobs: a Portal-Download service, or the local store in this browser.
+For Chrome and Edge 121 or newer, and Firefox 140 or newer. A **backend** below is one source of jobs: a Portal-Download service, or the local store in this browser.
 
 ## Installing
 
