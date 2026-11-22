@@ -119,6 +119,9 @@
   "err_access_gone": {
     "message": "This extension's access to the service was revoked or the person deactivated. Remove the service and add it again with a new link."
   },
+  "err_deactivated": {
+    "message": "The person this invitation is for is deactivated on the service."
+  },
   "err_locked": {
     "message": "The store of this extension is locked."
   },
@@ -177,7 +180,7 @@
     "message": "Delete the store and the services"
   },
   "forgot_text": {
-    "message": "The passphrase cannot be recovered. You can only delete the local store with its jobs and the services kept with it, and add the services again with new links."
+    "message": "The passphrase cannot be recovered. You can only delete the local store with its jobs and the services kept with it, and add the services again with new links. Their accesses stay valid on the services: revoke them there under “My devices”."
   },
   "forgot_title": {
     "message": "Forgot the passphrase?"
@@ -214,6 +217,9 @@
   },
   "language_auto": {
     "message": "As the browser"
+  },
+  "language_discard": {
+    "message": "Changing the language reloads the panel; what you typed or the file preview will be lost. Continue?"
   },
   "last_run": {
     "message": "Last: $1, $2, by $3"
@@ -376,6 +382,9 @@
   },
   "schedule": {
     "message": "due $1 · every $2 weeks"
+  },
+  "schedule_one": {
+    "message": "due $1 · every week"
   },
   "service_added": {
     "message": "Added; signed in as $1."

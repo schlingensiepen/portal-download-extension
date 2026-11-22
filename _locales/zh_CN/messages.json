@@ -66,7 +66,7 @@
     "message": "请先选择一个文件。"
   },
   "contract_blocks": {
-    "message": "此服务使用的接口版本不同；在较旧的一方更新之前，无法结束运行或读入文件。"
+    "message": "此服务使用的接口版本不同；在较旧的一方更新之前，无法结束运行或导入文件。"
   },
   "contract_mismatch": {
     "message": "$1 使用接口版本 $2，本扩展使用 $3。请更新较旧的一方。"
@@ -119,6 +119,9 @@
   "err_access_gone": {
     "message": "此扩展对该服务的访问权限已被撤销，或该用户已被停用。请移除该服务，并用新链接重新添加。"
   },
+  "err_deactivated": {
+    "message": "此邀请对应的人员已在该服务上被停用。"
+  },
   "err_locked": {
     "message": "此扩展的存储已锁定。"
   },
@@ -135,7 +138,7 @@
     "message": "每隔几周？"
   },
   "exchange_text": {
-    "message": "文件包含所有任务及其登录信息、历史记录和已删除的任务。所有 Portal-Download 服务和本扩展都可读入此文件。"
+    "message": "文件包含所有任务及其登录信息、历史记录和已删除的任务。所有 Portal-Download 服务和本扩展都可导入此文件。"
   },
   "exchange_title": {
     "message": "导出任务"
@@ -177,7 +180,7 @@
     "message": "删除存储和服务"
   },
   "forgot_text": {
-    "message": "口令无法找回。您只能删除本地存储及其中的任务和随之保存的服务，然后用新链接重新添加服务。"
+    "message": "口令无法找回。您只能删除本地存储及其中的任务和随之保存的服务，然后用新链接重新添加服务。这些服务上的访问权限仍然有效：请在服务的“My devices”下撤销。"
   },
   "forgot_title": {
     "message": "忘记口令？"
@@ -189,16 +192,16 @@
     "message": "隐藏"
   },
   "import_apply": {
-    "message": "读入"
+    "message": "导入"
   },
   "import_preview": {
     "message": "预览将有哪些变更"
   },
   "import_title": {
-    "message": "读入文件"
+    "message": "导入文件"
   },
   "imported": {
-    "message": "已读入 – 新增：$1，更新：$2，恢复：$3，替换：$4，跳过：$5，新增运行：$6。"
+    "message": "已导入 – 新增：$1，更新：$2，恢复：$3，替换：$4，跳过：$5，新增运行：$6。"
   },
   "in_file": {
     "message": "文件中"
@@ -214,6 +217,9 @@
   },
   "language_auto": {
     "message": "跟随浏览器"
+  },
+  "language_discard": {
+    "message": "切换语言会重新加载面板；已输入的内容或文件预览将丢失。继续吗？"
   },
   "last_run": {
     "message": "最近：$1，$2，由 $3"
@@ -324,25 +330,25 @@
     "message": "请输入密码，或不设密码下载。"
   },
   "people_left_out": {
-    "message": "此文件是完整备份：本存储只读入其中的任务，不包括用户、设备和令牌。"
+    "message": "此文件是完整备份：本存储只导入其中的任务，不包括用户、设备和令牌。"
   },
   "permission_refused": {
     "message": "没有该权限，扩展无法连接到服务。"
   },
   "preselected_hint": {
-    "message": "每个字段默认选择较新的一方，到期日则选择较近的一个；请按需更改，然后读入。"
+    "message": "每个字段默认选择较新的一方，到期日则选择较近的一个；请按需更改，然后导入。"
   },
   "preview_decide": {
     "message": "请决定：$1"
   },
   "preview_new": {
-    "message": "因为是新的而采用：$1"
+    "message": "因是新的而导入：$1"
   },
   "preview_same": {
-    "message": "因为相同而采用：$1"
+    "message": "因相同而导入：$1"
   },
   "preview_title": {
-    "message": "读入文件将产生的变更"
+    "message": "导入文件将产生的变更"
   },
   "project_page": {
     "message": "项目主页"
@@ -376,6 +382,9 @@
   },
   "schedule": {
     "message": "到期 $1 · 每 $2 周"
+  },
+  "schedule_one": {
+    "message": "到期 $1 · 每周"
   },
   "service_added": {
     "message": "已添加；已以 $1 身份登录。"

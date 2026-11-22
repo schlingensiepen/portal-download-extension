@@ -119,6 +119,9 @@
   "err_access_gone": {
     "message": "El acceso de esta extensión al servicio fue revocado o la persona desactivada. Quita el servicio y añádelo de nuevo con un enlace nuevo."
   },
+  "err_deactivated": {
+    "message": "La persona a la que va dirigida esta invitación está desactivada en el servicio."
+  },
   "err_locked": {
     "message": "El almacén de esta extensión está bloqueado."
   },
@@ -177,7 +180,7 @@
     "message": "Eliminar el almacén y los servicios"
   },
   "forgot_text": {
-    "message": "La frase de contraseña no se puede recuperar. Solo puedes eliminar el almacén local con sus tareas y los servicios guardados en él, y volver a añadir los servicios con enlaces nuevos."
+    "message": "La frase de contraseña no se puede recuperar. Solo puedes eliminar el almacén local con sus tareas y los servicios guardados en él, y volver a añadir los servicios con enlaces nuevos. Sus accesos siguen siendo válidos en los servicios: revócalos allí en «My devices»."
   },
   "forgot_title": {
     "message": "¿Olvidaste la frase de contraseña?"
@@ -214,6 +217,9 @@
   },
   "language_auto": {
     "message": "Como el navegador"
+  },
+  "language_discard": {
+    "message": "Cambiar el idioma recarga el panel; lo que hayas escrito o la vista previa del archivo se perderá. ¿Continuar?"
   },
   "last_run": {
     "message": "Última: $1, $2, por $3"
@@ -336,10 +342,10 @@
     "message": "Decide, por favor: $1"
   },
   "preview_new": {
-    "message": "Tomado, porque es nuevo: $1"
+    "message": "Incorporado, porque es nuevo: $1"
   },
   "preview_same": {
-    "message": "Tomado, porque es igual: $1"
+    "message": "Incorporado, porque es igual: $1"
   },
   "preview_title": {
     "message": "Qué hace la importación del archivo"
@@ -376,6 +382,9 @@
   },
   "schedule": {
     "message": "vence $1 · cada $2 semanas"
+  },
+  "schedule_one": {
+    "message": "vence $1 · cada semana"
   },
   "service_added": {
     "message": "Añadido; sesión iniciada como $1."

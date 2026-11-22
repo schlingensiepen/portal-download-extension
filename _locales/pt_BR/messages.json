@@ -119,6 +119,9 @@
   "err_access_gone": {
     "message": "O acesso desta extensão ao serviço foi revogado ou a pessoa foi desativada. Remova o serviço e adicione-o novamente com um novo link."
   },
+  "err_deactivated": {
+    "message": "A pessoa a quem este convite se destina está desativada no serviço."
+  },
   "err_locked": {
     "message": "O armazenamento desta extensão está bloqueado."
   },
@@ -177,7 +180,7 @@
     "message": "Excluir o armazenamento e os serviços"
   },
   "forgot_text": {
-    "message": "A frase secreta não pode ser recuperada. Você só pode excluir o armazenamento local com as tarefas e os serviços mantidos nele, e adicionar os serviços novamente com novos links."
+    "message": "A frase secreta não pode ser recuperada. Você só pode excluir o armazenamento local com as tarefas e os serviços mantidos nele, e adicionar os serviços novamente com novos links. Os acessos continuam válidos nos serviços: revogue-os lá em “My devices”."
   },
   "forgot_title": {
     "message": "Esqueceu a frase secreta?"
@@ -214,6 +217,9 @@
   },
   "language_auto": {
     "message": "Como o navegador"
+  },
+  "language_discard": {
+    "message": "Mudar o idioma recarrega o painel; o que você digitou ou a pré-visualização do arquivo serão perdidos. Continuar?"
   },
   "last_run": {
     "message": "Última: $1, $2, por $3"
@@ -336,10 +342,10 @@
     "message": "Decida, por favor: $1"
   },
   "preview_new": {
-    "message": "Adotado, porque é novo: $1"
+    "message": "Importado, porque é novo: $1"
   },
   "preview_same": {
-    "message": "Adotado, porque é igual: $1"
+    "message": "Importado, porque é igual: $1"
   },
   "preview_title": {
     "message": "O que a importação do arquivo faz"
@@ -376,6 +382,9 @@
   },
   "schedule": {
     "message": "vence $1 · a cada $2 semanas"
+  },
+  "schedule_one": {
+    "message": "vence $1 · toda semana"
   },
   "service_added": {
     "message": "Adicionado; conectado como $1."

@@ -37,6 +37,7 @@ function toast(text, err) {
 /** What an error means for the user, in the panel's language where it is the extension's own. */
 function explain(e) {
   if (e.kind === "unreachable") return t("err_unreachable");
+  if (e.kind === "user_deactivated" && state.view === "add") return t("err_deactivated");
   if (["device_revoked", "credential_unknown", "user_deactivated"].includes(e.kind)) return t("err_access_gone");
   if (e.kind === "unreadable") return t("err_unreadable");
   if (e.kind === "locked") return t("err_locked");
@@ -127,14 +128,16 @@ async function render() {
       Object.assign(state, { job: null, preview: null, done: null, view: "list" });
       return view.replaceChildren(viewUnlock());
     }
-    if (state.view !== "list" && state.view !== "add" && !current()) state.view = "list";
+    // A job and its editing carry their own backend, also under "All"; management and a new job need one chosen.
+    if ((["manage", "new"].includes(state.view) && !current()) || (["job", "edit"].includes(state.view) && !(state.job && state.backends.some((x) => x.id === state.job.b.id)))) state.view = "list";
     const v = state.view;
     const content = v === "job" ? viewJob() : v === "add" ? viewAdd() : v === "manage" ? await viewManage() : v === "new" || v === "edit" ? await viewNew() : await viewList();
     // A slower render that started earlier does not cover a later one.
     if (mine === renders) view.replaceChildren(content);
   } catch (e) { fail(e); }
 }
-const go = (view, extra = {}) => { Object.assign(state, { view }, extra); render(); };
+// "fromTab" holds for the one view it was given to; a preview of a file only while its backend's management is shown.
+const go = (view, extra = {}) => { Object.assign(state, { view, fromTab: false }, view === "manage" ? {} : { preview: null }, extra); render(); };
 
 // ------------------------------------------------------------------ views
 function viewUnlock() {
@@ -143,7 +146,13 @@ function viewUnlock() {
     h("div", { class: "row", style: "margin-top:10px" }, h("button", { class: "btn primary", type: "submit" }, t("unlock"))),
     h("p", { class: "small muted" }, t("export_reminder")),
     h("details", { class: "small" }, h("summary", {}, t("forgot_title")), h("p", {}, t("forgot_text")),
-      confirmButton(t("forgot_button"), t("really"), "bad", async () => { await vault.forget(); await loadBackends(); state.choice = "all"; go("list"); })));
+      confirmButton(t("forgot_button"), t("really"), "bad", async () => {
+        // The store is locked, so its services are unknown; every host permission belongs to one of them.
+        const { origins = [] } = await api.permissions.getAll();
+        await vault.forget();
+        if (origins.length) api.permissions.remove({ origins }).catch(() => {});
+        await loadBackends(); state.choice = "all"; go("list");
+      })));
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (await vault.unlock(pw.value)) { await loadBackends(); go("list"); } else toast(t("passphrase_wrong"), true);
@@ -178,7 +187,7 @@ async function viewList() {
   }));
   for (const b of chosen) if (state.problems[b.id]) box.append(h("div", { class: "card alert small" }, state.problems[b.id]));
   all.sort((x, y) => (x.j.next_due < y.j.next_due ? -1 : x.j.next_due > y.j.next_due ? 1 : x.j.title.localeCompare(y.j.title)));
-  if (!all.length) box.append(h("p", { class: "muted" }, t("no_jobs")));
+  if (!all.length && !Object.keys(state.problems).length) box.append(h("p", { class: "muted" }, t("no_jobs")));
   for (const { b, j } of all) {
     box.append(h("div", { class: "card job", onclick: () => go("job", { job: { b, j }, done: null }) },
       h("div", { class: "row" }, urgency(j.urgency_days), h("strong", { class: "grow" }, j.title)),
@@ -191,7 +200,7 @@ function viewJob() {
   const { b, j } = state.job;
   const box = h("div", {});
   box.append(h("button", { class: "btn", type: "button", onclick: () => go("list") }, t("back")));
-  box.append(h("h1", {}, j.title), h("div", { class: "muted small" }, `${b.name} · ${t("schedule", fmtDate(j.next_due), j.interval_weeks)}`));
+  box.append(h("h1", {}, j.title), h("div", { class: "muted small" }, `${b.name} · ${(j.interval_weeks === 1 ? t("schedule_one", fmtDate(j.next_due)) : t("schedule", fmtDate(j.next_due), j.interval_weeks))}`));
   if (state.done) {
     box.append(h("div", { class: "card done" }, h("strong", {}, t("done", fmtDate(state.done))),
       h("div", { style: "margin-top:6px" }, h("button", { class: "btn primary", type: "button", onclick: () => go("list", { done: null }) }, t("next_job")))));
@@ -211,17 +220,24 @@ function viewJob() {
   box.append(login);
   if (j.instructions_md) box.append(h("div", { class: "card pre small" }, j.instructions_md));
   if (!state.mismatch[b.id]) box.append(h("div", { class: "row", style: "margin:6px 0" },
-    h("button", { class: "btn", type: "button", onclick: () => go("edit", { choice: b.id }) }, t("edit")),
+    h("button", { class: "btn", type: "button", onclick: () => go("edit") }, t("edit")),
     confirmButton(t("delete"), t("really"), "bad", async () => { try { await b.call("job.delete", { job_id: j.job_id }); toast(t("deleted")); go("list", { job: null }); } catch (e) { fail(e); } })));
   if (state.mismatch[b.id]) box.append(h("p", { class: "card alert small" }, t("contract_blocks")));
   else if (!state.done) {
     const note = h("textarea", { placeholder: t("note_placeholder") });
+    if (state.keptNote) { note.value = state.keptNote; state.keptNote = ""; }
     const finish = async (outcome) => {
       try {
         const r = await b.call("job.complete", { job_id: j.job_id, outcome, note: note.value, expected_next_due: j.next_due });
         const fresh = await b.call("job.get", { job_id: j.job_id });
         go("job", { job: { b, j: fresh }, done: r.next_due });
-      } catch (e) { fail(e); }
+      } catch (e) {
+        fail(e);
+        // Changed elsewhere meanwhile: show the job as it is now, keeping the note.
+        if (e.kind === "job_changed") {
+          try { const kept = note.value; const fresh = await b.call("job.get", { job_id: j.job_id }); state.keptNote = kept; go("job", { job: { b, j: fresh } }); } catch (e2) { fail(e2); }
+        }
+      }
     };
     box.append(h("label", {}, t("note")), note, h("div", { class: "row", style: "margin-top:8px" },
       confirmButton(t("btn_succeeded"), t("really"), "ok grow", () => finish("succeeded")),
@@ -231,8 +247,9 @@ function viewJob() {
 }
 
 async function viewNew() {
-  const b = current();
   const editing = state.view === "edit" && state.job ? state.job.j : null;
+  // A job is edited in its own backend, also under "All".
+  const b = editing ? state.job.b : current();
   const f = { title: h("input", { type: "text", required: true, maxlength: "200" }), url: h("input", { type: "url", required: true }), weeks: h("input", { type: "number", min: "1", max: "520", value: "4" }),
     retry: h("input", { type: "number", min: "1", max: "365", value: "2" }), due: h("input", { type: "date" }),
     user: h("input", { type: "text", autocomplete: "off", spellcheck: "false" }), pass: h("input", { type: "text", autocomplete: "off", spellcheck: "false" }), text: h("textarea", {}) };
@@ -240,7 +257,7 @@ async function viewNew() {
     Object.assign(f.title, { value: editing.title }); f.url.value = editing.entry_url; f.weeks.value = editing.interval_weeks; f.retry.value = editing.retry_days;
     f.due.value = editing.next_due; f.user.value = editing.username || ""; f.pass.value = editing.password || ""; f.text.value = editing.instructions_md || "";
   }
-  if (state.fromTab && /^https?:/.test(state.tabUrl)) {
+  if (!editing && state.fromTab && /^https?:/.test(state.tabUrl)) {
     // An invitation in the fragment does not belong into a job.
     const u = new URL(state.tabUrl); if (/invite=/.test(u.hash)) u.hash = "";
     f.url.value = u.href; f.title.value = state.tabTitle || u.host;
@@ -312,8 +329,10 @@ async function addFromTab() {
     const label = t("device_label", browser, os).trim();
     const r = await probe.call("invitation.redeem", { token: inv.token, label, kind: "extension" });
     const id = `s${Date.now().toString(36)}`;
-    content.services.push({ id, name: `${new URL(inv.base).host} (${r.name})`, base: inv.base, token: r.device_token });
-    await vault.write(content);
+    // Read anew: another window may have changed the store while the service answered.
+    const latest = await vault.read();
+    latest.services.push({ id, name: `${new URL(inv.base).host} (${r.name})`, base: inv.base, token: r.device_token });
+    await vault.write(latest);
     await loadBackends();
     state.choice = id;
     toast(t("service_added", r.name));
@@ -338,7 +357,7 @@ async function viewManage() {
   if (b instanceof ServiceBackend) {
     box.append(h("div", { class: "card" }, h("p", { class: "small" }, t("remove_service_text")),
       confirmButton(t("remove_service"), t("really"), "bad", async () => {
-        try { const d = await b.call("device.list"); await b.call("device.revoke", { device_id: d.current_device_id }); } catch (e) { console.error(e); toast(t("revoke_failed"), true); }
+        try { const d = await b.call("device.list"); await b.call("device.revoke", { device_id: d.current_device_id }); } catch (e) { if (!["device_revoked", "credential_unknown", "user_deactivated"].includes(e.kind)) { console.error(e); toast(t("revoke_failed"), true); } }
         const content = await vault.read();
         content.services = content.services.filter((s) => s.id !== b.id);
         await vault.write(content);
@@ -452,7 +471,12 @@ document.documentElement.lang = locale;
   sel.setAttribute("aria-label", t("language"));
   sel.append(new Option(t("language_auto"), "auto"), ...Object.entries(LANGUAGES).map(([code, name]) => new Option(name, code)));
   sel.value = chosenLanguage;
-  sel.addEventListener("change", async () => { await api.storage.local.set({ language: sel.value }); location.reload(); });
+  sel.addEventListener("change", async () => {
+    // Reloading draws the panel anew; what is typed or previewed would be lost.
+    if ((["new", "edit"].includes(state.view) || state.preview) && !confirm(t("language_discard"))) { sel.value = chosenLanguage; return; }
+    await api.storage.local.set({ language: sel.value });
+    location.reload();
+  });
 }
 $("#choose").setAttribute("aria-label", t("backend"));
 // The links at the foot open in a tab of their own.
@@ -462,5 +486,6 @@ for (const [sel, label] of [["#project", t("project_page")], ["#feedback", t("fe
 }
 $("#version").textContent = `v${api.runtime.getManifest().version}`;
 // Another panel of this browser may unlock, lock or add a service.
-api.storage.onChanged.addListener(async (_, area) => { if (area === "local" || area === "session") { await loadBackends(); if (state.view === "list" || state.view === "add" || state.vaultState === "locked") render(); else renderTop(); } });
+api.storage.onChanged.addListener(async (changes, area) => {
+  if (area === "local" && changes.language && (changes.language.newValue ?? "auto") !== chosenLanguage && !["new", "edit"].includes(state.view) && !state.preview) return location.reload(); if (area === "local" || area === "session") { await loadBackends(); if (state.view === "list" || state.view === "add" || state.vaultState === "locked") render(); else renderTop(); } });
 loadBackends().then(render, fail);

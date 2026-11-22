@@ -22,7 +22,7 @@ export function resolve(ui) {
   const l = lang.toLowerCase(), r = region.toUpperCase();
   if (l === "pt") return r === "BR" ? "pt_BR" : "pt_PT";
   if (l === "zh") return ["TW", "HK", "MO", "HANT"].includes(r) ? "zh_TW" : "zh_CN";
-  return LANGUAGES[l] ? l : "en";
+  return Object.hasOwn(LANGUAGES, l) ? l : "en";
 }
 
 /** The language tag for dates and numbers: "pt_BR" → "pt-BR". */
@@ -35,7 +35,7 @@ export function fill(message, subs) {
 
 /** Loads the chosen language ("auto": the browser's), with English for any key it lacks. */
 export async function load(api, choice) {
-  const code = !choice || choice === "auto" || !LANGUAGES[choice] ? resolve(api.i18n.getUILanguage()) : choice;
+  const code = !choice || choice === "auto" || !Object.hasOwn(LANGUAGES, choice) ? resolve(api.i18n.getUILanguage()) : choice;
   const read = async (c) => {
     try { return await (await fetch(api.runtime.getURL(`_locales/${c}/messages.json`))).json(); } catch { return {}; }
   };

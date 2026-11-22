@@ -119,6 +119,9 @@
   "err_access_gone": {
     "message": "Der Zugang dieser Erweiterung zum Dienst wurde widerrufen oder die Person deaktiviert. Entferne den Dienst und füge ihn mit einem neuen Link wieder hinzu."
   },
+  "err_deactivated": {
+    "message": "Die Person, für die diese Einladung ist, ist auf dem Dienst deaktiviert."
+  },
   "err_locked": {
     "message": "Der Speicher dieser Erweiterung ist gesperrt."
   },
@@ -177,7 +180,7 @@
     "message": "Speicher und Dienste löschen"
   },
   "forgot_text": {
-    "message": "Die Passphrase lässt sich nicht wiederherstellen. Du kannst nur den lokalen Speicher mit seinen Vorgängen und den darin gespeicherten Diensten löschen und die Dienste mit neuen Links wieder hinzufügen."
+    "message": "Die Passphrase lässt sich nicht wiederherstellen. Du kannst nur den lokalen Speicher mit seinen Vorgängen und den darin gespeicherten Diensten löschen und die Dienste mit neuen Links wieder hinzufügen. Ihre Zugänge bleiben auf den Diensten gültig: Widerrufe sie dort unter „Meine Geräte“."
   },
   "forgot_title": {
     "message": "Passphrase vergessen?"
@@ -214,6 +217,9 @@
   },
   "language_auto": {
     "message": "Wie der Browser"
+  },
+  "language_discard": {
+    "message": "Die Sprache zu wechseln lädt das Panel neu; Eingaben oder die Vorschau der Datei gehen verloren. Weiter?"
   },
   "last_run": {
     "message": "Zuletzt: $1, $2, von $3"
@@ -376,6 +382,9 @@
   },
   "schedule": {
     "message": "fällig $1 · alle $2 Wochen"
+  },
+  "schedule_one": {
+    "message": "fällig $1 · jede Woche"
   },
   "service_added": {
     "message": "Hinzugefügt; angemeldet als $1."

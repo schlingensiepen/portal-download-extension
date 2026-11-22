@@ -18,7 +18,7 @@
     "message": "Ajouter la page actuelle comme tâche"
   },
   "add_service_text": {
-    "message": "Ouvrez un lien d'invitation du service dans un onglet, ou « Add to the browser extension » sous « My devices » dans son application web, puis appuyez sur ce bouton pendant que cet onglet est affiché. L'extension demande uniquement l'autorisation d'accéder à ce service."
+    "message": "Ouvrez un lien d’invitation du service dans un onglet, ou « Add to the browser extension » sous « My devices » dans son application web, puis appuyez sur ce bouton pendant que cet onglet est affiché. L’extension demande uniquement l’autorisation d’accéder à ce service."
   },
   "add_service_title": {
     "message": "Ajouter un service"
@@ -119,6 +119,9 @@
   "err_access_gone": {
     "message": "L’accès de cette extension au service a été révoqué ou la personne désactivée. Supprimez le service et ajoutez-le de nouveau avec un nouveau lien."
   },
+  "err_deactivated": {
+    "message": "La personne à qui cette invitation est destinée est désactivée sur le service."
+  },
   "err_locked": {
     "message": "Le stockage de cette extension est verrouillé."
   },
@@ -177,7 +180,7 @@
     "message": "Supprimer le stockage et les services"
   },
   "forgot_text": {
-    "message": "La phrase secrète est irrécupérable. Vous pouvez seulement supprimer le stockage local avec ses tâches et les services qui y sont conservés, puis ajouter de nouveau les services avec de nouveaux liens."
+    "message": "La phrase secrète est irrécupérable. Vous pouvez seulement supprimer le stockage local avec ses tâches et les services qui y sont conservés, puis ajouter de nouveau les services avec de nouveaux liens. Leurs accès restent valides sur les services : révoquez-les sur place sous « My devices »."
   },
   "forgot_title": {
     "message": "Phrase secrète oubliée ?"
@@ -214,6 +217,9 @@
   },
   "language_auto": {
     "message": "Comme le navigateur"
+  },
+  "language_discard": {
+    "message": "Changer de langue recharge le panneau ; ce que vous avez saisi ou l’aperçu du fichier sera perdu. Continuer ?"
   },
   "last_run": {
     "message": "Dernière : $1, $2, par $3"
@@ -360,7 +366,7 @@
     "message": "Après un échec, jours"
   },
   "revoke_failed": {
-    "message": "L'accès n'a pas pu y être révoqué ; révoquez-le dans l'application web du service, sous « My devices »."
+    "message": "L’accès n’a pas pu y être révoqué ; révoquez-le dans l’application web du service, sous « My devices »."
   },
   "runs_more": {
     "message": "+$1 exécutions"
@@ -376,6 +382,9 @@
   },
   "schedule": {
     "message": "à faire le $1 · toutes les $2 semaines"
+  },
+  "schedule_one": {
+    "message": "à faire le $1 · chaque semaine"
   },
   "service_added": {
     "message": "Ajouté ; connecté en tant que $1."

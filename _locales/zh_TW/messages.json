@@ -66,7 +66,7 @@
     "message": "請先選擇一個檔案。"
   },
   "contract_blocks": {
-    "message": "此服務使用的介面版本不同；在較舊的一方更新之前，無法結束執行或讀入檔案。"
+    "message": "此服務使用的介面版本不同；在較舊的一方更新之前，無法結束執行或匯入檔案。"
   },
   "contract_mismatch": {
     "message": "$1 使用介面版本 $2，本擴充功能使用 $3。請更新較舊的一方。"
@@ -119,6 +119,9 @@
   "err_access_gone": {
     "message": "此擴充功能對該服務的存取權限已被撤銷，或該使用者已被停用。請移除該服務，並以新連結重新新增。"
   },
+  "err_deactivated": {
+    "message": "此邀請對應的人員已在該服務上停用。"
+  },
   "err_locked": {
     "message": "此擴充功能的儲存空間已鎖定。"
   },
@@ -135,7 +138,7 @@
     "message": "每隔幾週？"
   },
   "exchange_text": {
-    "message": "檔案包含所有任務及其登入資訊、歷史紀錄和已刪除的任務。所有 Portal-Download 服務和本擴充功能都能讀入此檔案。"
+    "message": "檔案包含所有任務及其登入資訊、歷史紀錄和已刪除的任務。所有 Portal-Download 服務和本擴充功能都能匯入此檔案。"
   },
   "exchange_title": {
     "message": "匯出任務"
@@ -177,7 +180,7 @@
     "message": "刪除儲存空間和服務"
   },
   "forgot_text": {
-    "message": "密碼短語無法找回。您只能刪除本機儲存空間及其中的任務和隨之保存的服務，然後以新連結重新新增服務。"
+    "message": "密碼短語無法找回。您只能刪除本機儲存空間及其中的任務和隨之保存的服務，然後以新連結重新新增服務。這些服務上的存取權限仍然有效：請在服務的「My devices」下撤銷。"
   },
   "forgot_title": {
     "message": "忘記密碼短語？"
@@ -189,16 +192,16 @@
     "message": "隱藏"
   },
   "import_apply": {
-    "message": "讀入"
+    "message": "匯入"
   },
   "import_preview": {
     "message": "預覽將有哪些變更"
   },
   "import_title": {
-    "message": "讀入檔案"
+    "message": "匯入檔案"
   },
   "imported": {
-    "message": "已讀入 – 新增：$1，更新：$2，恢復：$3，取代：$4，略過：$5，新增執行：$6。"
+    "message": "已匯入 – 新增：$1，更新：$2，恢復：$3，取代：$4，略過：$5，新增執行：$6。"
   },
   "in_file": {
     "message": "檔案中"
@@ -214,6 +217,9 @@
   },
   "language_auto": {
     "message": "跟隨瀏覽器"
+  },
+  "language_discard": {
+    "message": "切換語言會重新載入面板；已輸入的內容或檔案預覽將會遺失。要繼續嗎？"
   },
   "last_run": {
     "message": "最近：$1，$2，由 $3"
@@ -324,25 +330,25 @@
     "message": "請輸入密碼，或不設密碼下載。"
   },
   "people_left_out": {
-    "message": "此檔案是完整備份：本儲存空間只讀入其中的任務，不包括使用者、裝置和權杖。"
+    "message": "此檔案是完整備份：本儲存空間只匯入其中的任務，不包括使用者、裝置和權杖。"
   },
   "permission_refused": {
     "message": "沒有該權限，擴充功能無法連線到服務。"
   },
   "preselected_hint": {
-    "message": "每個欄位預設選擇較新的一方，到期日則選擇較近的一個；請依需要變更，然後讀入。"
+    "message": "每個欄位預設選擇較新的一方，到期日則選擇較近的一個；請依需要變更，然後匯入。"
   },
   "preview_decide": {
     "message": "請決定：$1"
   },
   "preview_new": {
-    "message": "因為是新的而採用：$1"
+    "message": "因是新的而匯入：$1"
   },
   "preview_same": {
-    "message": "因為相同而採用：$1"
+    "message": "因相同而匯入：$1"
   },
   "preview_title": {
-    "message": "讀入檔案將產生的變更"
+    "message": "匯入檔案將產生的變更"
   },
   "project_page": {
     "message": "專案首頁"
@@ -376,6 +382,9 @@
   },
   "schedule": {
     "message": "到期 $1 · 每 $2 週"
+  },
+  "schedule_one": {
+    "message": "到期 $1 · 每週"
   },
   "service_added": {
     "message": "已新增；已以 $1 身分登入。"

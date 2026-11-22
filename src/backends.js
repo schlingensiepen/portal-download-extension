@@ -39,6 +39,10 @@ export function localBackend(vault) {
     byName: "Extension",
   });
   b.id = "local";
+  // One change of the store at a time, across every panel of this browser: each call reads,
+  // changes and writes the whole store.
+  const call = b.call.bind(b);
+  b.call = (...args) => (globalThis.navigator?.locks ? navigator.locks.request("portal-download-vault", () => call(...args)) : call(...args));
   return b;
 }
 
