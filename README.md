@@ -8,7 +8,7 @@
 
 ![The extension's side panel beside a portal (made up for the picture)](store/screenshot-1-en.png)
 
-The extension shows your due portal downloads in one list in the browser's side panel. The portal opens in a normal tab beside it. You copy the login with one click and close the run as succeeded or failed.
+The extension shows your due portal downloads in one list in the browser's side panel. The portal opens in a normal tab beside it. You copy the login with one click, let the extension find the documents in the portal page and download them one after the other, and close the run as succeeded or failed.
 
 It works in two ways, also both at once:
 
@@ -48,7 +48,9 @@ The browser reminds you now and then that a developer extension is active. It ma
 | `storage`, `unlimitedStorage` | Keeping your backends and the local store in the browser's storage for this extension. |
 | `sidePanel` | Showing the panel beside the page. |
 | `tabs` | Reading the address and title of the active tab, and opening a portal in a new tab. |
-| access to one address, asked for later | Reaching a service. The browser asks when you add that service, and for that service only. |
+| `scripting` | Searching a portal page for documents and highlighting them, when you click *Find documents on this page*. |
+| access to one address, asked for later | Reaching a service, or searching a portal's pages. The browser asks when you add that service, or the first time you search that portal, and for that address only. |
+| `downloads`, asked for later | Downloading the documents found. The browser asks the first time you click *Download the ticked ones*. |
 
 While the panel is open, it follows the address and title of the tab you are looking at, in memory only. It needs them at hand when you click **+** or *Add the current page as a job*. It neither stores nor sends them. The browser's wording *read your browsing history* is its general text for the `tabs` permission.
 
@@ -95,7 +97,7 @@ You need no service to use the extension.
 5. **Click the job** in the list.
 6. **Click *Open the portal in a new tab*.** The panel stays beside the portal.
 7. **Copy the login.** Click *Copy* beside the username, paste it into the portal, and do the same for the password. *Show* reveals the password.
-8. **Download** what you came for.
+8. **Download** what you came for: see [Documents in the portal](#documents-in-the-portal), or download by hand.
 9. **Close the run.** Click *Succeeded* or *Failed*. The button asks *Really?*; click it again within four seconds. You can write a note first.
 
 The panel then says *Closed – due again on …*. After *Succeeded* that is today plus the weeks; after *Failed*, today plus the retry days. *Next job* returns to the list.
@@ -173,9 +175,9 @@ No run is lost. Reading in copies. To move jobs, read them in on the other backe
 
 Your backends and jobs stay.
 
-**Versions of the interface.** The extension and a service must speak the same version of the interface. This extension speaks version 0.8, as services of version 0.8 and 0.9 do. So extensions 0.8 and 0.9 work with both.
+**Versions of the interface.** The extension and a service must speak the same version of the interface. This extension speaks version 0.8, as services of version 0.8 and 0.9 do. So extensions 0.8, 0.9 and 1.0 work with both.
 
-A later version may change the interface. Suppose a service then speaks a version 1.0 and your extension still speaks 0.8. The panel says so and names both versions. You still see the jobs of that service, but you cannot change them, close runs or read files in. Update the side that is older.
+A later version may change the interface. Suppose a service then speaks a version 1.1 and your extension still speaks 0.8. The panel says so and names both versions. You still see the jobs of that service, but you cannot change them, close runs or read files in. Update the side that is older.
 
 ## Removing
 
@@ -184,6 +186,24 @@ A later version may change the interface. Suppose a service then speaks a versio
 3. Remove the extension on the browser's extension page.
 
 Removing the extension deletes everything it kept in this browser. If you skipped step 1, revoke the device in the service's web application under **My devices**.
+
+## Documents in the portal
+
+Once you are logged in to the portal, the extension can find the documents in the page and download them for you.
+
+1. **Open the page with the documents** in the portal, for example the list of invoices.
+2. **Click *Find documents on this page*** in the job (or in the list). The first time for a portal, the browser asks whether the extension may access that site.
+3. **Look at the page.** Everything that looks like a document is highlighted in yellow and numbered: links to files such as PDF, Word, Excel, TIFF, ZIP or XML, and buttons and icons that look like a download. The panel lists them with the same numbers. Click a name to scroll to it.
+4. **Untick what is no document.** Documents downloaded from this job before are unticked already, with their date.
+5. **Click *Download the ticked ones*.** The first time, the browser asks for the permission to download. The extension then works through the list one document at a time, slowly, and shows for each what happened. *Stop* ends it after the current document.
+
+**Where the files go:** into *Portal-Download/<job title>* in your download folder; from the list without a job, into *Portal-Download/<site>*.
+
+- **Links** are downloaded with the browser's download function and your login cookies of the portal.
+- **Buttons** are clicked in the page, as you would. The first download the browser then starts counts as that document. If the button opens the document in a new tab instead, the extension downloads it from there and closes the tab.
+- **In Firefox,** documents from buttons, and links whose address names no file, land directly in your download folder: Firefox lets an extension choose the folder only when it knows the file name in advance.
+
+**What it does not do:** it never logs in, never fills in forms, and works only when you click. If a click makes the page go to another address, it stops. It remembers which documents were downloaded, per job, as unreadable checksums only; *Forget which documents were downloaded* clears that.
 
 ## Languages
 
