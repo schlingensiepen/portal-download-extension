@@ -8,7 +8,7 @@ on:
 permissions: { contents: read }
 env:
   # The service whose contract scenarios the local backend passes; same major and minor version.
-  PRODUCT_REF: release-0.9
+  PRODUCT_REF: v0.9.0
 jobs:
   test:
     runs-on: ubuntu-24.04
