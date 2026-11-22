@@ -35,9 +35,10 @@ export function observe(token) {
   // The words a person reads on it: of a link or button its text; of another clickable element
   // (a row, a card) only a short text; of a plain element only a short text of its own. Without
   // text, its label (aria-label, title, alt). Nothing of a field, of what holds one, or of the page.
-  const words = (el, clickable, target) => {
+  const words = (el, clickable, path) => {
     if (el.matches("input[type=button], input[type=submit], input[type=reset]")) return attr(el, "value");
-    if ((target && target.closest(FIELD)) || el.closest(FIELD) || el.querySelector(FIELD) || el === document.body || el === document.documentElement) return "";
+    // Along the whole path of the click, also across shadow roots (a list built as a web component).
+    if (path.some((x) => x.matches(FIELD)) || el.closest(FIELD) || el.querySelector(FIELD) || el === document.body || el === document.documentElement) return "";
     const t = (el.innerText || "").replace(/\s+/g, " ").trim();
     const own = clickable && el.matches("a, button") ? t.slice(0, 200) : clickable ? (t.length <= 60 ? t : "") : (el.children.length === 0 && t.length <= 40 ? t : "");
     return own || attr(el, "aria-label") || attr(el, "title") || attr(el, "alt") || "";
@@ -51,7 +52,7 @@ export function observe(token) {
     const form = el.closest("form");
     return {
       at: Date.now(), tag, role: attr(el, "role"), type: attr(el, "type"),
-      words: words(el, !!hit, els[0]),
+      words: words(el, !!hit, els),
       // Yes/no marks only: none of them carries what the page wrote.
       link: !href ? "" : href.startsWith("#") || /^javascript:/i.test(href) ? "script" : "address",
       download: el.hasAttribute("download"),

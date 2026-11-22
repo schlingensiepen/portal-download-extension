@@ -198,6 +198,7 @@ async function viewList() {
   // What concerns one backend is greyed out under "All".
   box.append(h("div", { class: "row", style: "margin-bottom:8px" }, h("button", { class: "btn", type: "button", disabled: state.choice === "all" || !!state.mismatch[state.choice], title: state.choice === "all" ? t("choose_backend") : null, onclick: () => go("new", { fromTab: true }) }, t("add_page")),
     h("button", { class: "btn", type: "button", onclick: findDocuments }, t("docs_find"))));
+  box.append(watchOffer());
   const all = [];
   await Promise.all(chosen.map(async (b) => {
     delete state.problems[b.id];
@@ -530,7 +531,9 @@ const FEEDBACK_FORM = "https://github.com/schlingensiepen/portal-download-extens
 const WATCH_FOR = 2 * 60000;
 const watchOffer = () => h("button", { class: "btn wide small", type: "button", style: "margin-top:6px", onclick: () => {
   if (!/^https?:/i.test(state.tabUrl) || state.tabId == null) return toast(t("docs_no_page"), true);
-  go("watch", { watch: { phase: "ask", tabId: state.tabId, url: state.tabUrl, back: state.view === "job" ? { view: "job", job: state.job } : { view: "list" } } });
+  // Back where it was offered: an open job, the found documents (still highlighted), or the list.
+  const back = state.view === "job" ? { view: "job", job: state.job } : state.view === "docs" && state.docs ? { view: "docs" } : { view: "list" };
+  go("watch", { watch: { phase: "ask", tabId: state.tabId, url: state.tabUrl, back } });
 } }, t("watch_offer"));
 async function startWatching() {
   const w = state.watch;
@@ -562,7 +565,8 @@ async function startWatching() {
         return !!(r && r.some((x) => x.frameId === 0 && x.result === true));
       } catch { return false; }
     };
-    const originOf = (u) => { try { return new URL(u).origin; } catch { return ""; } };
+    // "null" (about:blank, data:) is no site.
+    const originOf = (u) => { try { const o = new URL(u).origin; return o === "null" ? "" : o; } catch { return ""; } };
     w.listeners = {
       message: (msg, sender, reply) => {
         if (!msg || msg.portalDownloadClick !== w.token || sender.id !== api.runtime.id || !sender.tab || !w.tabs.has(sender.tab.id) || state.watch !== w || w.phase !== "watching") return;
@@ -590,7 +594,7 @@ async function startWatching() {
         // the opener of a tab the user opens themselves, so a new tab's site is no proof.
         if (tabId === w.tabId && originOf(url)) w.origins.add(originOf(url));
         // Only the latest injection tells whether the page can be watched.
-        const n = (w.injections = (w.injections || 0) + 1);
+        const n = tabId === w.tabId ? (w.injections = (w.injections || 0) + 1) : 0;
         inject(tabId).then((ok) => { if (tabId === w.tabId && n === w.injections && w.blind !== !ok) { w.blind = !ok; if (state.view === "watch" && w.phase === "watching") render(); } });
       },
       created: (tab) => {

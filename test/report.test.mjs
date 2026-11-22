@@ -17,6 +17,9 @@ test("words lose digits, e-mail addresses and format characters, and stay short"
   assert.equal(redactText("abc\u202Edef\u200B"), "abcdef");
   assert.equal(redactText("Code aB3xY9kLmN0pQ7rS2tUv holen"), "Code [long] holen");
   assert.equal(redactText("Jahresverbrauchsabrechnung"), "Jahresverbrauchsabrechnung");
+  assert.equal(redactText("https://portal.example/share/abcdefghijk"), "[address]");
+  assert.equal(redactText("Link: www.portal.example/u/johnsmith holen"), "Link: [address] holen");
+  assert.equal(redactText("get.php?user=johnsmith"), "[address]");
   assert.equal([...redactText("x".repeat(200))].length, 81);
   assert.ok(!redactText("a `b` c").includes("`"));
 });
