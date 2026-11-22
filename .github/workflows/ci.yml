@@ -53,5 +53,7 @@ jobs:
       - name: Release with both files
         env: { GH_TOKEN: "${{ github.token }}" }
         run: |
-          gh release create "$GITHUB_REF_NAME" dist/portal-download-*.zip dist/signed/*.xpi --title "$GITHUB_REF_NAME" \
+          v=$(node -p 'require("./manifest.json").version')
+          mv dist/signed/*.xpi "dist/portal-download-$v.xpi"
+          gh release create "$GITHUB_REF_NAME" dist/portal-download-*.zip dist/portal-download-*.xpi --title "$GITHUB_REF_NAME" \
             --notes "Firefox 128 or newer – download the .xpi, then about:addons, gear menu, Install Add-on From File. Chrome and Edge 121 or newer – unpack the ZIP into a folder that stays and load it under Extensions, Developer mode, Load unpacked. Details in the README."
