@@ -113,6 +113,7 @@ export function scan() {
   globalThis.__portalDownloadInfo = kept.map(({ kind, reason, sure }) => ({ kind, reason, sure }));
   globalThis.__portalDownloadSkipped = skipped;
   globalThis.__portalDownloadRescan = scan;
+  globalThis.__portalDownloadScanAt = Date.now();
   // Buttons with the same words in the same row are told apart by their order.
   const seen = {};
   return { url: location.href, hidden, items: kept.map(({ kind, reason, label, url, context, sure }, i) => {

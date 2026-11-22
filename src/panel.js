@@ -137,7 +137,7 @@ async function render() {
     if (state.vaultState === "locked") {
       // Nothing of the store stays on screen or in memory while it is locked; a download queue stops.
       if (state.docs) { state.docs.stop = true; unhighlight(state.docs); state.docs = null; }
-      if (state.watch) { endWatching("stopped"); state.watch = null; }
+      if (state.watch) { endWatching(state.watch, "stopped"); state.watch = null; }
       Object.assign(state, { job: null, preview: null, done: null, view: "list" });
       return view.replaceChildren(viewUnlock());
     }
@@ -154,7 +154,7 @@ async function render() {
 // "fromTab" holds for the one view it was given to; a preview of a file only while its backend's management is shown.
 // Something typed or a file previewed, which a reload would lose.
 const typed = () => !!state.preview || [...document.querySelectorAll("#view input, #view textarea")].some((el) => el.type !== "file" && el.value && !el.readOnly && el.defaultValue !== el.value);
-const go = (view, extra = {}) => { if (view !== "docs" && state.docs && state.docs.running) state.docs.stop = true; if (view !== "watch" && state.watch) { endWatching("stopped"); state.watch = null; } if (view !== "job") state.keptNote = ""; Object.assign(state, { view, fromTab: false }, view === "manage" ? {} : { preview: null }, extra); render(); };
+const go = (view, extra = {}) => { if (view !== "docs" && state.docs && state.docs.running) state.docs.stop = true; if (view !== "watch" && state.watch) { endWatching(state.watch, "stopped"); state.watch = null; } if (view !== "job") state.keptNote = ""; Object.assign(state, { view, fromTab: false }, view === "manage" ? {} : { preview: null }, extra); render(); };
 
 // ------------------------------------------------------------------ views
 function viewUnlock() {
@@ -537,46 +537,68 @@ async function startWatching() {
   if (!w || w.phase !== "ask") return;
   const site = new URL(w.url);
   if (site.protocol === "http:" && !["localhost", "127.0.0.1"].includes(site.hostname)) return toast(t("docs_http"), true);
+  // Set before the first await: a second click on Start does nothing.
+  w.phase = "starting";
   try {
     // The first thing the click awaits: access to this portal, and to the browser's downloads (to see one start).
-    if (!(await api.permissions.request({ origins: [originPattern(w.url)], permissions: ["downloads"] }))) return toast(t("watch_refused"), true);
+    const granted = await api.permissions.request({ origins: [originPattern(w.url)], permissions: ["downloads"] });
+    // Left meanwhile (back, another tab's lock): nothing is registered.
+    if (state.watch !== w) return;
+    if (!granted) { w.phase = "ask"; return toast(t("watch_refused"), true); }
     if (state.docs) { const d = state.docs; d.stop = true; state.docs = null; await unhighlight(d); }
-    Object.assign(w, { phase: "watching", token: crypto.randomUUID(), origin: site.origin, clicks: [], events: [], tabs: new Set([w.tabId]), seen: new Map([[w.tabId, w.url.split("#")[0]]]), download: null, ended: "" });
-    const inject = (tabId) => api.scripting.executeScript({ target: { tabId, allFrames: true }, func: scan })
-      .catch(() => api.scripting.executeScript({ target: { tabId }, func: scan }))
-      .then(() => api.scripting.executeScript({ target: { tabId, allFrames: true }, func: observe, args: [w.token] }).catch(() => api.scripting.executeScript({ target: { tabId }, func: observe, args: [w.token] })))
-      .catch(() => { /* a page of another site, or none yet: its clicks are not noted */ });
+    if (state.watch !== w) return;
+    Object.assign(w, { phase: "watching", token: crypto.randomUUID(), origin: site.origin, clicks: [], events: [], tabs: new Set([w.tabId]), seen: new Map([[w.tabId, w.url.split("#")[0]]]), origins: new Set([site.origin]), download: null, ended: "", blind: false, lastClick: 0, again: null });
+    // The observer in every frame of a tab; true when it runs in the tab's page itself.
+    const inject = async (tabId) => {
+      const run = (func, args = []) => api.scripting.executeScript({ target: { tabId, allFrames: true }, func, args }).catch(() => api.scripting.executeScript({ target: { tabId }, func, args }));
+      try { await run(scan); const r = await run(observe, [w.token]); return !!(r && r.some((x) => x.frameId === 0 && x.result === true)); }
+      catch { return false; }
+    };
+    const originOf = (u) => { try { return new URL(u).origin; } catch { return ""; } };
     w.listeners = {
       message: (msg, sender, reply) => {
         if (!msg || msg.portalDownloadClick !== w.token || sender.id !== api.runtime.id || !sender.tab || !w.tabs.has(sender.tab.id) || state.watch !== w || w.phase !== "watching") return;
         w.clicks.push(msg.click);
         if (w.clicks.length > 20) w.clicks.shift();
+        w.lastClick = Date.now();
         reply(true);
         const n = document.querySelector("[data-watch-count]");
         if (n) n.textContent = t("watch_count", String(w.clicks.length));
+        // Frames that appear after a click (a viewer with its own button) are watched too.
+        clearTimeout(w.again);
+        const tabId = sender.tab.id;
+        w.again = setTimeout(() => { if (w.phase === "watching") inject(tabId); }, 1500);
       },
       updated: (tabId, info, tab) => {
         if (!w.tabs.has(tabId) || info.status !== "complete") return;
         // A page loaded anew needs the observer again; only a new address is worth telling.
         const url = (tab && tab.url) || "", bare = url.split("#")[0];
-        if (w.seen.get(tabId) !== bare) w.events.push({ at: Date.now(), kind: "page", url });
+        if (url && w.seen.get(tabId) !== bare) w.events.push({ at: Date.now(), kind: "page", url });
         w.seen.set(tabId, bare);
-        inject(tabId);
+        // Downloads count from the sites of the portal's own tab only: Chrome names the active tab as
+        // the opener of a tab the user opens themselves, so a new tab's site is no proof.
+        if (tabId === w.tabId && originOf(url)) w.origins.add(originOf(url));
+        inject(tabId).then((ok) => { if (tabId === w.tabId && w.blind !== !ok) { w.blind = !ok; if (state.view === "watch" && w.phase === "watching") render(); } });
       },
       created: (tab) => {
-        if (!w.tabs.has(tab.openerTabId)) return;
+        // Only a tab the portal opened right after a click of the user, not one the user opened.
+        if (!w.tabs.has(tab.openerTabId) || Date.now() - w.lastClick > 5000) return;
         w.tabs.add(tab.id);
         w.events.push({ at: Date.now(), kind: "tab", url: tab.pendingUrl || tab.url || "" });
       },
-      removed: (tabId) => { if (tabId === w.tabId) endWatching("gone"); },
+      removed: (tabId) => { if (tabId === w.tabId) endWatching(w, "gone"); },
       download: (d) => {
-        // Downloads of other extensions are not the user's.
-        if (d.byExtensionId && d.byExtensionId !== api.runtime.id) return;
-        w.download = { mime: d.mime, filename: d.filename, url: d.url, finalUrl: d.finalUrl, referrer: d.referrer, id: d.id };
+        // The first download from the watched pages only: not another extension's, not one of another tab.
+        if (w.download || (d.byExtensionId && d.byExtensionId !== api.runtime.id)) return;
+        const ours = [d.referrer, d.url, d.finalUrl].some((u) => u && w.origins.has(originOf(u)));
+        const originless = !d.referrer && /^(data|blob):/i.test(d.url || "") && Date.now() - w.lastClick < 10000;
+        if (!ours && !originless) return;
+        const got = { mime: d.mime, filename: d.filename, url: d.url, finalUrl: d.finalUrl, referrer: d.referrer, id: d.id };
+        w.download = got;
         // The file name is decided a moment later.
         setTimeout(async () => {
-          try { const [x] = await api.downloads.search({ id: d.id }); if (x) Object.assign(w.download, { mime: x.mime || w.download.mime, filename: x.filename || w.download.filename }); } catch { /* as it came */ }
-          endWatching("download");
+          try { const [x] = await api.downloads.search({ id: got.id }); if (x) Object.assign(got, { mime: x.mime || got.mime, filename: x.filename || got.filename }); } catch { /* as it came */ }
+          endWatching(w, "download");
         }, 1500);
       },
     };
@@ -585,17 +607,16 @@ async function startWatching() {
     api.tabs.onCreated.addListener(w.listeners.created);
     api.tabs.onRemoved.addListener(w.listeners.removed);
     api.downloads.onCreated.addListener(w.listeners.download);
-    w.timer = setTimeout(() => endWatching("timeout"), WATCH_FOR);
-    await inject(w.tabId);
-    render();
-  } catch (e) { endWatching("stopped"); fail(e); }
+    w.timer = setTimeout(() => endWatching(w, "timeout"), WATCH_FOR);
+    w.blind = !(await inject(w.tabId));
+    if (state.view === "watch" && state.watch === w) render();
+  } catch (e) { if (w.phase === "starting") w.phase = "ask"; endWatching(w, "stopped"); fail(e); }
 }
 /** Ends a watch: listeners off, the page stops noting, the text is shown. */
-function endWatching(why) {
-  const w = state.watch;
+function endWatching(w, why) {
   if (!w || w.phase !== "watching") return;
   w.phase = "done"; w.ended = why;
-  clearTimeout(w.timer);
+  clearTimeout(w.timer); clearTimeout(w.again);
   const L = w.listeners || {};
   try {
     api.runtime.onMessage.removeListener(L.message);
@@ -605,7 +626,7 @@ function endWatching(why) {
     api.downloads?.onCreated.removeListener(L.download);
   } catch { /* already gone */ }
   for (const tabId of w.tabs) api.scripting.executeScript({ target: { tabId, allFrames: true }, func: unobserve }).catch(() => {});
-  if (state.view === "watch") render();
+  if (state.view === "watch" && state.watch === w) render();
 }
 /** The browser's name and main version, for the report. */
 function browserName() {
@@ -618,12 +639,12 @@ function viewWatch() {
   const w = state.watch;
   const box = h("div", {});
   const back = () => { const b = w.back || { view: "list" }; go(b.view, b.job ? { job: b.job } : {}); };
-  if (w.phase === "ask") {
+  if (w.phase === "ask" || w.phase === "starting") {
     box.append(h("div", { class: "card" }, h("h1", {}, t("watch_title")),
       h("p", { class: "small" }, t("watch_intro")),
       h("ul", { class: "small" }, h("li", {}, t("watch_what_tab")), h("li", {}, t("watch_what_click")), h("li", {}, t("watch_what_private"))),
       h("div", { class: "row" },
-        h("button", { class: "btn primary", type: "button", onclick: startWatching }, t("watch_start")),
+        h("button", { class: "btn primary", type: "button", disabled: w.phase === "starting", onclick: startWatching }, t("watch_start")),
         h("button", { class: "btn", type: "button", onclick: back }, t("cancel")))));
     return box;
   }
@@ -631,7 +652,8 @@ function viewWatch() {
     box.append(h("div", { class: "card" }, h("h1", {}, t("watch_title")),
       h("p", {}, t("watch_now")),
       h("p", { class: "small muted", "data-watch-count": "" }, t("watch_count", String(w.clicks.length))),
-      h("button", { class: "btn bad", type: "button", onclick: () => endWatching("stopped") }, t("watch_stop"))));
+      w.blind ? h("p", { class: "small err" }, t("watch_blind")) : null,
+      h("button", { class: "btn bad", type: "button", onclick: () => endWatching(w, "stopped") }, t("watch_stop"))));
     return box;
   }
   let host = "";
@@ -639,9 +661,11 @@ function viewWatch() {
   if (w.named === undefined) w.named = true;
   const make = () => buildReport(w, { version: api.runtime.getManifest().version, browser: browserName(), namePortal: w.named });
   const text = h("textarea", { rows: "16", style: "width:100%;font:12px ui-monospace,monospace", "aria-label": t("watch_title") });
-  text.value = make();
+  // What the user changed in the text stays when the panel draws anew.
+  text.value = w.text ?? make();
+  text.addEventListener("input", () => { w.text = text.value; });
   const name = h("input", { type: "checkbox", checked: w.named });
-  name.addEventListener("change", () => { w.named = name.checked; text.value = make(); });
+  name.addEventListener("change", () => { w.named = name.checked; text.value = make(); w.text = undefined; });
   const copyBtn = h("button", { class: "btn primary", type: "button", onclick: () => copy(text.value, copyBtn) }, t("watch_copy"));
   const ended = { download: t("watch_end_download"), timeout: t("watch_end_timeout"), stopped: t("watch_end_stopped"), gone: t("watch_end_gone") };
   box.append(h("div", { class: "card" }, h("h1", {}, t("watch_title")),
@@ -801,7 +825,7 @@ for (const [sel, label] of [["#project", t("project_page")], ["#feedback", t("fe
 }
 $("#version").textContent = `v${api.runtime.getManifest().version}`;
 // Closing the panel takes the highlighting off the page and ends a queue.
-addEventListener("pagehide", () => { const d = state.docs; if (d) { d.stop = true; unhighlight(d); } if (state.watch) endWatching("stopped"); });
+addEventListener("pagehide", () => { const d = state.docs; if (d) { d.stop = true; unhighlight(d); } if (state.watch) endWatching(state.watch, "stopped"); });
 // Another panel of this browser may unlock, lock or add a service.
 api.storage.onChanged.addListener(async (changes, area) => {
   if (area === "local" && changes.language && (changes.language.newValue ?? "auto") !== chosenLanguage && !typed()) return location.reload(); if (area === "local" || area === "session") { try { await loadBackends(); } catch { return; } if (state.view === "list" || state.view === "add" || state.vaultState === "locked") render(); else renderTop(); } });

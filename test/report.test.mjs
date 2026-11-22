@@ -19,6 +19,7 @@ test("words lose digits and e-mail addresses, and stay short", () => {
 test("scripts keep their function names, not what is quoted", () => {
   assert.equal(redactCode("__doPostBack('ctl00$Main$Grid','Select$12')"), "__doPostBack('…','…')");
   assert.equal(redactCode('openDoc("Max Muster", 4711)'), 'openDoc("…", #)');
+  assert.equal(redactCode("load(`/kunde/mustermann`)"), "load('…')");
 });
 
 test("addresses keep their form only", () => {
@@ -27,7 +28,13 @@ test("addresses keep their form only", () => {
   assert.equal(redactUrl(`${P}/u/max.muster@example.org/doc`, P), "/u/…/doc");
   assert.equal(redactUrl(`${P}/docs/rechnung-2026-01.pdf`, P), "/docs/rechnung-#-#.pdf");
   assert.equal(redactUrl(`${P}/f/a8Kd93LmQz71xPw2.pdf`, P), "/f/….pdf");
-  assert.equal(redactUrl(`${P}/f/550e8400-e29b-41d4-a716-446655440000`, P), "/f/#e#-e#b-#d#-a#-#");
+  assert.equal(redactUrl(`${P}/f/550e8400-e29b-41d4-a716-446655440000`, P), "/f/…");
+  assert.equal(redactUrl(`${P}/doc;jsessionid=0A1B2C3D4E5F6A7B8C9D`, P), "/doc;…");
+  assert.equal(redactUrl(`${P}/download/dGhpcyBpcyBh_c2VjcmV0LXRva2Vu`, P), "/download/…");
+  assert.equal(redactUrl(`${P}/t/AbCdEfGhIjKlMnOpQrStUvWx/`, P), "/t/…/");
+  assert.equal(redactUrl(`${P}/x/eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXgifQ.c2lnbmF0dXJl`, P), "/x/…");
+  assert.equal(redactUrl(`${P}/dl.php?eyJhbGciOiJIUzI1NiJ9abcdef`, P), "/dl.php?…=…");
+  assert.equal(redactUrl(`${P}/api/downloadInvoiceDocument/Jahresabrechnung`, P), "/api/downloadInvoiceDocument/Jahresabrechnung");
   assert.equal(redactUrl("https://files.cdn.example/a/b.pdf?t=1", P), "https://files.cdn.example/a/b.pdf?t=…");
   assert.equal(redactUrl("https://files.cdn.example/a/b.pdf", P, false), "[another site]/a/b.pdf");
   assert.equal(redactUrl("data:application/pdf;base64,JVBERi0xLjQK", P), "data:application/pdf");
@@ -41,7 +48,7 @@ test("the search's verdict in words", () => {
   assert.match(verdictText({ finder: "none", clickable: false }), /no link or button in the markup/);
 });
 
-const click = (over) => ({ at: 1000, tag: "a", type: "", role: "", id: "row-4711", cls: "btn btn-pdf", text: "Rechnung 03/2026", title: "", aria: "", alt: "", download: null, href: `${P}/api/doc?id=4711&token=s3cr3t`, target: "_blank", onclick: "track('Max Muster')", form: null, pointer: true, icons: ["fa fa-file-pdf"], chain: ["table.grid", "tr", "td"], shadow: false, frame: "", page: `${P}/rechnungen`, verdict: { finder: "found", kind: "link", reason: "address", sure: true }, ...over });
+const click = (over) => ({ at: 1000, tag: "a", type: "", role: "", id: "row-4711", cls: "btn btn-pdf", text: "Rechnung 03/2026", title: "", aria: "", alt: "", download: null, href: `${P}/api/doc?id=4711&token=s3cr3t`, target: "_blank", onclick: "track('Max Muster')", form: null, pointer: true, icons: [{ cls: "fa fa-file-pdf" }], chain: [{ tag: "table", cls: "grid" }, { tag: "tr", cls: "" }, { tag: "td", cls: "" }], shadow: false, frame: "", page: `${P}/rechnungen`, verdict: { finder: "found", kind: "link", reason: "address", sure: true }, ...over });
 
 test("the report names the portal only when asked, and leaks no number, token or e-mail", () => {
   const w = { url: `${P}/kunde/4711/rechnungen?sid=abc`, ended: "download",
@@ -61,6 +68,24 @@ test("the report names the portal only when asked, and leaks no number, token or
     assert.match(r, /then a new tab opened: `\/view\?doc=…`/);
     assert.match(r, /type `application\/pdf`, file ending `\.pdf`/);
   }
+});
+
+test("what a page wrote cannot become a link, an image or a mention in the issue", () => {
+  const r = buildReport({ url: `${P}/`, ended: "stopped", clicks: [click({ text: "[pay here](https://evil.example) @octocat ![x](https://evil.example/t.png)", title: "@someone" })], events: [] });
+  const line = r.split("\n").find((l) => l.startsWith("1."));
+  // Everything the page wrote stands inside code spans.
+  for (const part of line.split(" · ").slice(1)) assert.match(part, /^(title |label |alt )?`[^`]*`$/, part);
+});
+
+test("icons, ids and classes lose their keys; icon addresses their parameters", () => {
+  const r = buildReport({ url: `${P}/`, ended: "stopped", clicks: [click({ id: "dl-a8Kd93LmQz71xPw2Zq", cls: "btn sess-AbCdEfGhIjKlMnOpQr", icons: [{ cls: "fa fa-file-pdf", url: "https://cdn.portal.example/avatars/max.mustermann.png?token=abcdefgh" }] })], events: [] }, { namePortal: false });
+  assert.ok(!r.includes("a8Kd93") && !r.includes("AbCdEf") && !r.includes("abcdefgh") && !r.includes("cdn.portal"), r);
+  assert.match(r, /icons `fa fa-file-pdf \[another site\]\/avatars\/max\.mustermann\.png\?token=…`/);
+});
+
+test("fields of an odd type do not break the text", () => {
+  const r = buildReport({ url: `${P}/`, ended: "stopped", clicks: [click({ form: { action: {}, method: 5 }, id: {}, chain: "x", icons: null })], events: [] });
+  assert.match(r, /sends a form/);
 });
 
 test("only the last five clicks are told", () => {

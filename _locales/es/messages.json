@@ -619,5 +619,8 @@
   },
   "watch_form": {
     "message": "Abrir el formulario de comentarios"
+  },
+  "watch_blind": {
+    "message": "Esta página no se puede observar: el navegador no deja entrar a las extensiones. Los clics en las pestañas que abra se siguen anotando."
   }
 }

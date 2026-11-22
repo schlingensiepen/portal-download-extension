@@ -619,5 +619,8 @@
   },
   "watch_form": {
     "message": "Rückmeldeformular öffnen"
+  },
+  "watch_blind": {
+    "message": "Diese Seite lässt sich nicht beobachten: Der Browser lässt Erweiterungen dort nicht hinein. Klicks in Tabs, die sie öffnet, werden trotzdem notiert."
   }
 }
