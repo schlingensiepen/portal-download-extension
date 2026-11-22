@@ -41,6 +41,12 @@ Under **+**, *Keep jobs in this browser* creates a store of jobs in this browser
 
 Under ⚙ of a backend, *Export the jobs* writes a ZIP file with every job, its login, its history and the deleted jobs, encrypted with AES-256 when you give a password (8 to 200 characters, no umlauts, no space at either end); without one the logins are in plain text and the extension asks first. *Read a file in* takes such a file from any Portal-Download service or from this extension: it first shows what would be taken over as new, what is the same, and where you decide, field by field, which side to keep (the newer side is chosen; for a due date the nearer one). No run is lost. Reading in copies: to move jobs, read them in on the other backend and then delete them where they were; a deleted job then stays deleted on both sides when files travel again.
 
+## Safari
+
+Ich bitte um Verständnis, dass ich für ein kleines Hobbyprojekt nicht in das Apple Developer Program investiere. Ich habe aber gehört, dass Firefox und Chrome sehr gut auf Apple-Geräten laufen.
+
+*Please understand that I am not paying for the Apple Developer Program for a small hobby project. I have heard, though, that Firefox and Chrome run very well on Apple devices.*
+
 ## License
 
 Apache License 2.0, see [LICENSE](LICENSE).

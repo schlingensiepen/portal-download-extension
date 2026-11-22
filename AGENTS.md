@@ -25,3 +25,5 @@ Rules that hold:
 - **Host permissions only for the services added,** asked for in the click that adds one (`optional_host_permissions`).
 - **The extension sends a token only to the base address that issued it,** in the `Authorization` header.
 - Run `node test/contract.mjs <path to the service's contract-tests>`, `node test/zip.test.mjs`, `node test/messages.test.mjs` before each commit; `node build.mjs` packs `dist/`.
+
+Questions and ideas from users come in under GitHub Discussions of this repository; they are read regularly, and what holds up becomes an issue or a change.
