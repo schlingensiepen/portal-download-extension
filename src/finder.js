@@ -19,17 +19,18 @@ export function scan() {
   const W = (words) => new RegExp(`(?<![\\p{L}\\p{N}])(?:${words})(?![\\p{L}\\p{N}])`, "iu");
   const ACTION = W("löschen|entfernen|hochladen|absenden|senden|abmelden|kündigen|stornieren|bestellen|bezahlen|speichern|ändern|bearbeiten|papierkorb|archivieren|freigeben|genehmigen|unterschreiben|signieren|teilen|ablehnen|widerrufen|versenden|delete|remove|upload|send|submit|log ?out|sign ?out|cancel|order|pay|save|edit|trash|archive|approve|sign|share|reject|revoke|supprimer|retirer|téléverser|envoyer|soumettre|déconnexion|annuler|commander|payer|enregistrer|modifier|archiver|approuver|signer|partager|rejeter|révoquer|eliminar|borrar|quitar|subir|enviar|cancelar|pagar|guardar|editar|archivar|aprobar|firmar|compartir|rechazar|revocar|excluir|apagar|remover|salvar|encomendar|cargar|carregar|arquivar|aprovar|assinar|compartilhar|partilhar|rejeitar|revogar");
   // Actions that destroy or end something: never offered, whatever else the element says.
-  const DESTROY = W("löschen|entfernen|papierkorb|abmelden|ausloggen|kündigen|widerrufen|abbrechen|abbestellen|deaktivieren|delete|remove|trash|discard|erase|log ?out|sign ?out|revoke|unsubscribe|deactivate|supprimer|effacer|déconnexion|déconnecter|résilier|révoquer|eliminar|borrar|cerrar sesión|revocar|darse de baja|excluir|apagar|remover|sair|encerrar sessão|revogar");
+  const DESTROY = W("löschen|entfernen|papierkorb|abmelden|ausloggen|kündigen|widerrufen|abbrechen|abbestellen|deaktivieren|delete|remove|trash|discard|erase|cancel|log ?out|sign ?out|revoke|unsubscribe|deactivate|supprimer|effacer|annuler|déconnexion|déconnecter|résilier|révoquer|eliminar|borrar|cancelar|cerrar sesión|revocar|darse de baja|excluir|apagar|remover|sair|encerrar sessão|revogar");
   const DESTROY_ZH = /删除|刪除|移除|退出|登出|撤销|撤銷/;
   const ACTION_ZH = /删除|刪除|移除|上传|上傳|提交|发送|發送|退出|登出|取消|订购|訂購|支付|付款|保存|儲存|编辑|編輯|归档|歸檔|批准|签署|簽署|分享|拒绝|拒絕|撤销|撤銷/;
   // Icons and class names of such actions only make an element doubtful.
-  const ACTION_ICON = /(?:^|[\s_-])(trash|delete|remove|times|close|edit|pencil|upload|save|floppy|share)(?:$|[\s_-])/i;
+  const ACTION_ICON = /(?:^|[\s_\-\/.])(trash|delete|remove|times|close|edit|pencil|upload|save|floppy|share)(?:$|[\s_\-\/.])/i;
   // Words in the path of an address (not its parameters): those that clearly change something
   // are never fetched; those that may also name a place of documents (archive, share) only take
   // the tick away. Words that name documents (storno, order) are in neither.
   const PATH_DESTROY = /^(delete|remove|destroy|drop|cancel|logout|signout|upload|submit|revoke|reject|approve|unsubscribe|deactivate|markread)$/i;
   const PATH_DOUBT = /^(archive|share|send|pay|sign)$/i;
-  const tokens = (u) => new URL(u).pathname.toLowerCase().replace(/mark-read/g, "markread").split(/[\/_\-.]+/).filter(Boolean);
+  // camelCase is split too: "deleteFile" names "delete".
+  const tokens = (u) => new URL(u).pathname.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase().replace(/mark-read/g, "markread").split(/[\/_\-.]+/).filter(Boolean);
   const CLICKABLE = "a, button, input[type=button], input[type=submit], input[type=image], [role=button], [role=link], [role=menuitem], [onclick]";
 
   // Every element, also inside open shadow roots.
@@ -61,7 +62,11 @@ export function scan() {
   const found = [];
   let hidden = 0;
   for (const el of all) {
-    if (!el.matches(CLICKABLE) || !visible(el)) continue;
+    // One element that cannot be read (an address such as "http://") is skipped, not the whole frame.
+    try { consider(el); } catch { /* skipped */ }
+  }
+  function consider(el) {
+    if (!el.matches(CLICKABLE) || !visible(el)) return;
     // Only an address of its own counts as a link: "#…" and "javascript:" are buttons.
     const raw = el.tagName === "A" ? (el.getAttribute("href") || "").trim() : "";
     const href = raw && !raw.startsWith("#") && !/^javascript:/i.test(raw) ? el.href : "";
@@ -78,14 +83,15 @@ export function scan() {
     else if (real && FILE.test(new URL(href, location.href).pathname)) { kind = "file"; reason = "name"; }
     else if (real && el.getAttribute("type") && /pdf|msword|officedocument|octet-stream|zip/i.test(el.getAttribute("type"))) { kind = "file"; reason = "type"; }
     // A link to a downloads area itself (".../downloads") is a menu, not a document.
-    else if (real && MAYBE_URL.test(href) && !/\/downloads\/?$/i.test(new URL(href).pathname)) { kind = "link"; reason = "address"; }
+    // The path and query, not the host: on "download.example.com" not every link is a document.
+    else if (real && MAYBE_URL.test(new URL(href).pathname + new URL(href).search) && !/\/downloads\/?$/i.test(new URL(href).pathname)) { kind = "link"; reason = "address"; }
     else if (DOWNLOAD.test(words) || HINT.test(words)) { kind = real ? "link" : "button"; reason = "words"; sure = DOWNLOAD.test(words) && !submits; }
-    if (!kind) continue;
+    if (!kind) return;
     // A link that names a file only downloads it. Anything else that names an action is left
     // out, or offered unticked when it says "download" too; an action icon makes it doubtful.
     if (kind !== "file") {
-      if (real && tokens(href).some((w) => PATH_DESTROY.test(w))) { hidden++; continue; }
-      if (DESTROY.test(reads) || DESTROY_ZH.test(reads)) { hidden++; continue; }
+      if (real && tokens(href).some((w) => PATH_DESTROY.test(w))) { hidden++; return; }
+      if (DESTROY.test(reads) || DESTROY_ZH.test(reads)) { hidden++; return; }
       // Every candidate here shows a sign of a document (its address, or a download or document
       // word), so an action word only takes the tick away.
       if (ACTION.test(reads) || ACTION_ZH.test(reads)) sure = false;
