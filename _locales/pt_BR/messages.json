@@ -489,7 +489,7 @@
     "message": "Salvos em $1 na sua pasta de downloads."
   },
   "docs_download": {
-    "message": "Baixar os marcados ($1)"
+    "message": "Iniciar download ($1 marcados)"
   },
   "docs_stop": {
     "message": "Parar"
@@ -529,5 +529,35 @@
   },
   "docs_err_timeout": {
     "message": "ainda não terminou após cinco minutos"
+  },
+  "docs_http": {
+    "message": "Esta página não usa https. A extensão só pesquisa páginas https e páginas http deste computador."
+  },
+  "docs_folder_firefox": {
+    "message": "Links com um nome de arquivo no endereço são salvos em $1 na sua pasta de downloads; todo o resto, diretamente na sua pasta de downloads."
+  },
+  "docs_err_html": {
+    "message": "voltou uma página web em vez de um documento, talvez porque o login expirou; ela foi excluída"
+  },
+  "docs_err_gone": {
+    "message": "o elemento não está mais na página; pesquise novamente"
+  },
+  "docs_err_stopped": {
+    "message": "interrompido; o navegador ainda pode concluir este download"
+  },
+  "docs_twice": {
+    "message": "Encontrado duas vezes; marcado só uma vez."
+  },
+  "docs_unsure": {
+    "message": "Não marcado: talvez não seja um download. Marque se for."
+  },
+  "docs_one": {
+    "message": "Só este"
+  },
+  "docs_tick_all": {
+    "message": "Marcar todos"
+  },
+  "docs_tick_none": {
+    "message": "Nenhum"
   }
 }

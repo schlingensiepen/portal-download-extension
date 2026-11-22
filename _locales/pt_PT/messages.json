@@ -489,7 +489,7 @@
     "message": "Guardados em $1 na sua pasta de transferências."
   },
   "docs_download": {
-    "message": "Transferir os marcados ($1)"
+    "message": "Iniciar transferência ($1 marcados)"
   },
   "docs_stop": {
     "message": "Parar"
@@ -529,5 +529,35 @@
   },
   "docs_err_timeout": {
     "message": "ainda não terminou após cinco minutos"
+  },
+  "docs_http": {
+    "message": "Esta página não usa https. A extensão só pesquisa páginas https e páginas http deste computador."
+  },
+  "docs_folder_firefox": {
+    "message": "As ligações com um nome de ficheiro no endereço são guardadas em $1 na sua pasta de transferências; tudo o resto, diretamente na sua pasta de transferências."
+  },
+  "docs_err_html": {
+    "message": "voltou uma página web em vez de um documento, talvez porque a sessão expirou; foi eliminada"
+  },
+  "docs_err_gone": {
+    "message": "o elemento já não está na página; pesquise novamente"
+  },
+  "docs_err_stopped": {
+    "message": "interrompido; o navegador ainda pode concluir esta transferência"
+  },
+  "docs_twice": {
+    "message": "Encontrado duas vezes; marcado só uma vez."
+  },
+  "docs_unsure": {
+    "message": "Não marcado: talvez não seja uma transferência. Marque-o se for."
+  },
+  "docs_one": {
+    "message": "Só este"
+  },
+  "docs_tick_all": {
+    "message": "Marcar todos"
+  },
+  "docs_tick_none": {
+    "message": "Nenhum"
   }
 }

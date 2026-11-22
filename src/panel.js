@@ -387,12 +387,15 @@ async function addFromTab() {
 async function findDocuments() {
   const url = state.tabUrl, tabId = state.tabId;
   if (!/^https?:/i.test(url) || tabId == null) return toast(t("docs_no_page"), true);
+  // Plain http only for this computer; the browser would refuse to ask for any other.
+  const site = new URL(url);
+  if (site.protocol === "http:" && !["localhost", "127.0.0.1"].includes(site.hostname)) return toast(t("docs_http"), true);
   // The job it was started from; a new search keeps it.
   const job = state.view === "job" ? state.job : state.view === "docs" && state.docs ? state.docs.job : null;
   try {
     // The first thing the click awaits, as Firefox requires: access to this portal only.
     if (!(await api.permissions.request({ origins: [originPattern(url)] }))) return toast(t("docs_refused"), true);
-    if (state.docs) await unhighlight(state.docs);
+    if (state.docs) { state.docs.stop = true; await unhighlight(state.docs); }
     let results;
     // Every frame the extension may reach; frames of other addresses are left out.
     try { results = await api.scripting.executeScript({ target: { tabId, allFrames: true }, func: scan }); }
@@ -400,22 +403,26 @@ async function findDocuments() {
     const scope = job ? `job:${job.b.id}:${job.j.job_id}` : `site:${new URL(url).hostname}`;
     const known = await remembered.get(scope);
     let n = 0;
-    const frames = [];
+    const frames = [], keys = new Set();
     for (const r of results.filter((x) => x && x.result)) {
       const items = [];
-      for (const it of r.result.items) {
+      for (const found of r.result.items) {
+        const it = { ...found, page: r.result.url };
         const key = await remembered.keyOf(it);
-        items.push({ ...it, frameId: r.frameId, n: ++n, key, done: known[key] || null, on: !known[key], status: null });
+        // Ticked: what is new, sure to be a download, and not the same as one above it.
+        const twice = keys.has(key);
+        keys.add(key);
+        items.push({ ...it, frameId: r.frameId, n: ++n, key, twice, done: known[key] || null, on: !known[key] && it.sure !== false && !twice, status: null });
       }
       frames.push({ frameId: r.frameId, url: r.result.url, items });
     }
     state.docs = { tabId, url, job, scope, folder: folderFor(job && job.j, url), frames, running: false, stop: false };
-    await highlight();
+    await highlight(state.docs);
     go("docs");
   } catch (e) { fail(e); }
 }
-async function highlight() {
-  const d = state.docs;
+async function highlight(d = state.docs) {
+  if (!d || state.docs !== d) return;
   await Promise.all(d.frames.map((f) => api.scripting.executeScript({ target: { tabId: d.tabId, frameIds: [f.frameId] }, func: mark, args: [f.items.filter((i) => i.on).map((i) => [i.i, i.n])] }).catch(() => {})));
 }
 const unhighlight = (d) => Promise.all(d.frames.map((f) => api.scripting.executeScript({ target: { tabId: d.tabId, frameIds: [f.frameId] }, func: unmark }).catch(() => {})));
@@ -426,13 +433,14 @@ async function clearDocuments() {
   if (d) await unhighlight(d);
   go(d && d.job ? "job" : "list", d && d.job ? { job: d.job } : {});
 }
-async function downloadDocuments() {
+async function downloadDocuments(only) {
   const d = state.docs;
   if (!d || d.running) return;
   try {
     // The first thing the click awaits: the permission to download, asked once.
     if (!(await api.permissions.request({ permissions: ["downloads"] }))) return toast(t("docs_refused_downloads"), true);
-    const items = d.frames.flatMap((f) => f.items).filter((i) => i.on);
+    // One document from its own button, else every ticked one.
+    const items = only && only.n ? [only] : d.frames.flatMap((f) => f.items).filter((i) => i.on);
     if (!items.length) return;
     d.running = true; d.stop = false;
     for (const i of items) i.status = "waiting";
@@ -452,7 +460,7 @@ async function downloadDocuments() {
     });
     for (const i of items) if (i.status === "waiting") i.status = null;
     d.running = false;
-    await highlight();
+    await highlight(d);
     if (state.docs === d && state.view === "docs") render();
     const ok = items.filter((i) => i.status && i.status.ok).length;
     toast(t("docs_finished", String(ok), String(items.length)), ok < items.length);
@@ -460,11 +468,12 @@ async function downloadDocuments() {
 }
 /** The state of one found document: waiting, downloading, saved, failed, or downloaded before. */
 function docLine(it) {
-  const errors = { nothing: t("docs_err_nothing"), navigated: t("docs_err_navigated"), tab_open: t("docs_err_tab"), tab_closed: t("docs_err_tab"), timeout: t("docs_err_timeout") };
+  const errors = { nothing: t("docs_err_nothing"), navigated: t("docs_err_navigated"), tab_open: t("docs_err_tab"), timeout: t("docs_err_timeout"), html: t("docs_err_html"), gone: t("docs_err_gone"), stopped: t("docs_err_stopped") };
   const st = it.status;
   return st === "waiting" ? t("docs_waiting") : st === "running" ? t("docs_running")
     : st && st.ok ? t("docs_saved", (st.file || "").split(/[\\/]/).pop() || "?")
-    : st ? t("docs_failed", errors[st.error] || st.error) : it.done ? t("docs_done_before", fmtDate(it.done)) : "";
+    : st ? t("docs_failed", errors[st.error] || st.error) : it.done ? t("docs_done_before", fmtDate(it.done))
+    : it.twice ? t("docs_twice") : it.sure === false && !it.on ? t("docs_unsure") : "";
 }
 function viewDocs() {
   const d = state.docs;
@@ -474,27 +483,32 @@ function viewDocs() {
   if (d.job) box.append(h("button", { class: "btn", type: "button", disabled: d.running, onclick: () => go("job", { job: d.job }) }, t("back")));
   const card = h("div", { class: "card" }, h("h1", {}, d.job ? d.job.j.title : t("docs_title")),
     h("p", { class: "small" }, items.length ? t("docs_count", String(items.length)) : t("docs_none")),
-    h("p", { class: "small muted" }, t("docs_folder", d.folder)),
+    // Firefox lets an extension choose the folder only with the file name; see the README.
+    h("p", { class: "small muted" }, api.downloads && !api.downloads.onDeterminingFilename ? t("docs_folder_firefox", d.folder) : t("docs_folder", d.folder)),
     h("div", { class: "row" },
       d.running
         ? h("button", { class: "btn bad", type: "button", onclick: () => { d.stop = true; toast(t("docs_stopping")); } }, t("docs_stop"))
-        : h("button", { class: "btn primary", type: "button", disabled: !ticked, onclick: downloadDocuments }, t("docs_download", String(ticked))),
+        : h("button", { class: "btn primary", type: "button", disabled: !ticked, onclick: () => downloadDocuments() }, t("docs_download", String(ticked))),
       h("button", { class: "btn", type: "button", disabled: d.running, onclick: findDocuments }, t("docs_again")),
-      h("button", { class: "btn", type: "button", disabled: d.running, onclick: clearDocuments }, t("docs_clear"))));
+      h("button", { class: "btn", type: "button", disabled: d.running, onclick: clearDocuments }, t("docs_clear"))),
+    items.length ? h("div", { class: "row", style: "margin-top:6px" },
+      h("button", { class: "btn", type: "button", disabled: d.running, onclick: () => { for (const i of items) i.on = true; highlight(d); render(); } }, t("docs_tick_all")),
+      h("button", { class: "btn", type: "button", disabled: d.running, onclick: () => { for (const i of items) i.on = false; highlight(d); render(); } }, t("docs_tick_none"))) : null);
   box.append(card);
   const kinds = { file: t("docs_kind_file"), link: t("docs_kind_link"), button: t("docs_kind_button") };
   const why = { attr: t("docs_why_attr"), name: t("docs_why_name"), type: t("docs_why_type"), address: t("docs_why_address"), words: t("docs_why_words") };
   for (const it of items) {
     const check = h("input", { type: "checkbox", checked: it.on, disabled: d.running, "aria-label": String(it.n) });
-    check.addEventListener("change", () => { it.on = check.checked; highlight(); render(); });
-    const where = it.url ? (() => { try { const u = new URL(it.url); return u.host + u.pathname; } catch { return it.url; } })() : "";
+    check.addEventListener("change", () => { it.on = check.checked; highlight(d); render(); });
+    const where = it.url ? (() => { try { const u = new URL(it.url); let path = u.pathname; try { path = decodeURIComponent(path); } catch { /* as it is */ } return u.host + path; } catch { return it.url; } })() : "";
     const st = it.status;
     box.append(h("div", { class: `card doc${st && st.ok === false ? " failed" : ""}`, "data-doc": String(it.n) }, h("div", { class: "row" }, check, h("span", { class: "badge" }, String(it.n)),
-      h("a", { href: "#", onclick: (e) => { e.preventDefault(); api.scripting.executeScript({ target: { tabId: d.tabId, frameIds: [it.frameId] }, func: show, args: [it.i] }).catch(() => {}); } }, it.label || "—")),
+      h("a", { href: "#", onclick: (e) => { e.preventDefault(); api.scripting.executeScript({ target: { tabId: d.tabId, frameIds: [it.frameId] }, func: show, args: [it.i] }).catch(() => {}); } }, it.label || "—"),
+      h("button", { class: "btn small one", type: "button", disabled: d.running, title: t("docs_one"), onclick: () => downloadDocuments(it) }, `↓ ${t("docs_one")}`)),
       h("div", { class: "small muted" }, `${kinds[it.kind]} · ${why[it.reason]}${where ? ` · ${where}` : ""}`),
       h("div", { class: "small status" }, docLine(it))));
   }
-  if (items.some((i) => i.done) && !d.running) box.append(h("button", { class: "btn wide", type: "button", onclick: async () => { await remembered.forget(d.scope); for (const i of items) { i.done = null; i.on = true; } await highlight(); render(); } }, t("docs_forget")));
+  if (items.some((i) => i.done) && !d.running) box.append(h("button", { class: "btn wide", type: "button", onclick: async () => { await remembered.forget(d.scope); for (const i of items) { i.done = null; i.on = i.sure !== false && !i.twice; } await highlight(d); render(); } }, t("docs_forget")));
   return box;
 }
 
@@ -643,6 +657,8 @@ for (const [sel, label] of [["#project", t("project_page")], ["#feedback", t("fe
   a.addEventListener("click", (e) => { e.preventDefault(); api.tabs.create({ url: a.href }); });
 }
 $("#version").textContent = `v${api.runtime.getManifest().version}`;
+// Closing the panel takes the highlighting off the page and ends a queue.
+addEventListener("pagehide", () => { const d = state.docs; if (d) { d.stop = true; unhighlight(d); } });
 // Another panel of this browser may unlock, lock or add a service.
 api.storage.onChanged.addListener(async (changes, area) => {
   if (area === "local" && changes.language && (changes.language.newValue ?? "auto") !== chosenLanguage && !typed()) return location.reload(); if (area === "local" || area === "session") { try { await loadBackends(); } catch { return; } if (state.view === "list" || state.view === "add" || state.vaultState === "locked") render(); else renderTop(); } });

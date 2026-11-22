@@ -489,7 +489,7 @@
     "message": "Saved into $1 in your download folder."
   },
   "docs_download": {
-    "message": "Download the ticked ones ($1)"
+    "message": "Start downloading ($1 ticked)"
   },
   "docs_stop": {
     "message": "Stop"
@@ -529,5 +529,35 @@
   },
   "docs_err_timeout": {
     "message": "still not finished after five minutes"
+  },
+  "docs_http": {
+    "message": "This page is not on https. The extension searches only https pages, and http pages on this computer."
+  },
+  "docs_folder_firefox": {
+    "message": "Links with a file name in their address are saved into $1 in your download folder; everything else straight into your download folder."
+  },
+  "docs_err_html": {
+    "message": "a web page came back instead of a document, perhaps because the login expired; it was deleted"
+  },
+  "docs_err_gone": {
+    "message": "the element is no longer in the page; search again"
+  },
+  "docs_err_stopped": {
+    "message": "stopped; the browser may still finish this download"
+  },
+  "docs_twice": {
+    "message": "Found twice; ticked only once."
+  },
+  "docs_unsure": {
+    "message": "Not ticked: it may not be a download. Tick it if it is."
+  },
+  "docs_one": {
+    "message": "Only this one"
+  },
+  "docs_tick_all": {
+    "message": "Tick all"
+  },
+  "docs_tick_none": {
+    "message": "Tick none"
   }
 }

@@ -489,7 +489,7 @@
     "message": "儲存到下載資料夾中的 $1。"
   },
   "docs_download": {
-    "message": "下載已勾選的項目（$1）"
+    "message": "開始下載（已勾選 $1 個）"
   },
   "docs_stop": {
     "message": "停止"
@@ -529,5 +529,35 @@
   },
   "docs_err_timeout": {
     "message": "五分鐘後仍未完成"
+  },
+  "docs_http": {
+    "message": "此頁面未使用 https。擴充功能只搜尋 https 頁面以及本機上的 http 頁面。"
+  },
+  "docs_folder_firefox": {
+    "message": "網址中含有檔案名稱的連結會儲存到下載資料夾中的 $1；其他內容直接儲存到下載資料夾。"
+  },
+  "docs_err_html": {
+    "message": "傳回的是網頁而不是文件，可能是登入已過期；已將其刪除"
+  },
+  "docs_err_gone": {
+    "message": "該元素已不在頁面中；請重新尋找"
+  },
+  "docs_err_stopped": {
+    "message": "已停止；瀏覽器可能仍會完成此下載"
+  },
+  "docs_twice": {
+    "message": "找到兩次；只勾選一次。"
+  },
+  "docs_unsure": {
+    "message": "未勾選：可能不是下載。如果是，請勾選。"
+  },
+  "docs_one": {
+    "message": "僅下載此項"
+  },
+  "docs_tick_all": {
+    "message": "全部勾選"
+  },
+  "docs_tick_none": {
+    "message": "全不選"
   }
 }

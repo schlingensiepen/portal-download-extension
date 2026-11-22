@@ -489,7 +489,7 @@
     "message": "Enregistrés dans $1 de votre dossier de téléchargement."
   },
   "docs_download": {
-    "message": "Télécharger les éléments cochés ($1)"
+    "message": "Lancer le téléchargement ($1 cochés)"
   },
   "docs_stop": {
     "message": "Arrêter"
@@ -529,5 +529,35 @@
   },
   "docs_err_timeout": {
     "message": "toujours pas terminé après cinq minutes"
+  },
+  "docs_http": {
+    "message": "Cette page n'est pas en https. L'extension ne parcourt que les pages https, et les pages http de cet ordinateur."
+  },
+  "docs_folder_firefox": {
+    "message": "Les liens dont l'adresse contient un nom de fichier sont enregistrés dans $1 de votre dossier de téléchargement ; tout le reste directement dans votre dossier de téléchargement."
+  },
+  "docs_err_html": {
+    "message": "une page web est revenue au lieu d'un document, peut-être parce que la connexion a expiré ; elle a été supprimée"
+  },
+  "docs_err_gone": {
+    "message": "l'élément n'est plus dans la page ; cherchez à nouveau"
+  },
+  "docs_err_stopped": {
+    "message": "arrêté ; le navigateur peut encore terminer ce téléchargement"
+  },
+  "docs_twice": {
+    "message": "Trouvé deux fois ; coché une seule fois."
+  },
+  "docs_unsure": {
+    "message": "Non coché : ce n'est peut-être pas un téléchargement. Cochez-le si c'en est un."
+  },
+  "docs_one": {
+    "message": "Seulement celui-ci"
+  },
+  "docs_tick_all": {
+    "message": "Tout cocher"
+  },
+  "docs_tick_none": {
+    "message": "Aucun"
   }
 }

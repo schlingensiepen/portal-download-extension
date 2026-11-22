@@ -489,7 +489,7 @@
     "message": "Gespeichert in $1 in Deinem Download-Ordner."
   },
   "docs_download": {
-    "message": "Angehakte herunterladen ($1)"
+    "message": "Herunterladen starten ($1 angehakt)"
   },
   "docs_stop": {
     "message": "Anhalten"
@@ -529,5 +529,35 @@
   },
   "docs_err_timeout": {
     "message": "nach fünf Minuten noch nicht fertig"
+  },
+  "docs_http": {
+    "message": "Diese Seite ist nicht über https erreichbar. Die Erweiterung durchsucht nur https-Seiten und http-Seiten auf diesem Computer."
+  },
+  "docs_folder_firefox": {
+    "message": "Links mit einem Dateinamen in der Adresse landen in $1 in Deinem Download-Ordner, alles andere direkt in Deinem Download-Ordner."
+  },
+  "docs_err_html": {
+    "message": "statt eines Dokuments kam eine Webseite zurück, vielleicht weil die Anmeldung abgelaufen ist; sie wurde gelöscht"
+  },
+  "docs_err_gone": {
+    "message": "das Element ist nicht mehr in der Seite; neu suchen"
+  },
+  "docs_err_stopped": {
+    "message": "angehalten; der Browser lädt diesen Download vielleicht noch zu Ende"
+  },
+  "docs_twice": {
+    "message": "Zweimal gefunden; nur einmal angehakt."
+  },
+  "docs_unsure": {
+    "message": "Nicht angehakt: vielleicht kein Download. Hake es an, wenn doch."
+  },
+  "docs_one": {
+    "message": "Nur dieses laden"
+  },
+  "docs_tick_all": {
+    "message": "Alle anhaken"
+  },
+  "docs_tick_none": {
+    "message": "Keine"
   }
 }

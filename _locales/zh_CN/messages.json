@@ -489,7 +489,7 @@
     "message": "保存到下载文件夹中的 $1。"
   },
   "docs_download": {
-    "message": "下载已勾选的项目（$1）"
+    "message": "开始下载（已勾选 $1 个）"
   },
   "docs_stop": {
     "message": "停止"
@@ -529,5 +529,35 @@
   },
   "docs_err_timeout": {
     "message": "五分钟后仍未完成"
+  },
+  "docs_http": {
+    "message": "此页面未使用 https。扩展只搜索 https 页面以及本机上的 http 页面。"
+  },
+  "docs_folder_firefox": {
+    "message": "地址中带有文件名的链接保存到下载文件夹中的 $1；其他内容直接保存到下载文件夹。"
+  },
+  "docs_err_html": {
+    "message": "返回的是网页而不是文档，可能是登录已过期；已将其删除"
+  },
+  "docs_err_gone": {
+    "message": "该元素已不在页面中；请重新查找"
+  },
+  "docs_err_stopped": {
+    "message": "已停止；浏览器可能仍会完成此下载"
+  },
+  "docs_twice": {
+    "message": "找到两次；只勾选一次。"
+  },
+  "docs_unsure": {
+    "message": "未勾选：可能不是下载。如果是，请勾选。"
+  },
+  "docs_one": {
+    "message": "仅下载此项"
+  },
+  "docs_tick_all": {
+    "message": "全部勾选"
+  },
+  "docs_tick_none": {
+    "message": "全不选"
   }
 }
