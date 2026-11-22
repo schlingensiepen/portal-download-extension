@@ -419,7 +419,7 @@ function previewCard(b) {
   const P = state.preview, R = P.result;
   const box = h("div", { class: "card" }, h("h2", {}, t("preview_title")));
   const line = (x, extra) => h("div", { class: "small" }, h("strong", {}, x.title), " ", h("span", { class: "muted" }, extra || ""));
-  if (R.people_left_out || (R.people && b.id === "local")) box.append(h("p", { class: "small" }, t("people_left_out")));
+  if (R.people_left_out || R.people) box.append(h("p", { class: "small" }, t("people_left_out")));
   box.append(h("h2", {}, t("preview_new", R.new.length)), ...R.new.map((x) => line(x, x.new_runs === 1 ? t("runs_one") : x.new_runs ? t("runs_more", x.new_runs) : "")));
   box.append(h("h2", {}, t("preview_same", R.same.length)), ...R.same.map((x) => line(x, x.new_runs === 1 ? t("runs_one") : x.new_runs ? t("runs_more", x.new_runs) : "")));
   box.append(h("h2", {}, t("preview_decide", R.decide.length)));

@@ -82,7 +82,8 @@ export class Vault {
   }
 
   /** Creates the local backend: from now on everything lies under the passphrase. */
-  async createLocal(passphrase) {
+  async createLocal(passphrase) { return withVaultLock(() => this.#createLocal(passphrase)); }
+  async #createLocal(passphrase) {
     const { services, vault } = await api.storage.local.get(["services", "vault"]);
     // Another panel may have created it meanwhile; never write over a store.
     if (vault) throw Object.assign(new Error("exists"), { kind: "vault_exists" });
