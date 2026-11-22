@@ -21,9 +21,17 @@ The extension is for Chrome and Edge 121 or newer, and Firefox 140 or newer.
 
 ## Installing
 
-**Firefox:** install it from [addons.mozilla.org](https://addons.mozilla.org/); search for *Portal-Download* there. Mozilla reviewed and signed it.
+**Firefox:** install it from [addons.mozilla.org](https://addons.mozilla.org/); search for *Portal-Download* there. It appears there once Mozilla has reviewed it; until then the search finds nothing.
 
-A [release](https://github.com/schlingensiepen/portal-download-extension/releases) may also carry the same signed file as `portal-download-<version>.xpi`. To install that file:
+Until then, or to try a newer version, Firefox can load it for the current session only:
+
+1. Download `portal-download-<version>.zip` from a [release](https://github.com/schlingensiepen/portal-download-extension/releases) and unpack it.
+2. Open `about:debugging#/runtime/this-firefox`.
+3. Click *Load Temporary Add-on…* and choose the file `manifest.json` in the unpacked folder.
+
+Firefox removes it again when it restarts; your jobs stay. A version from addons.mozilla.org is replaced while the temporary one is loaded.
+
+After Mozilla's review, a release may also carry the same signed file as `portal-download-<version>.xpi`. To install that file:
 
 1. Download it.
 2. Open `about:addons`.
@@ -224,6 +232,8 @@ Once you are logged in to the portal, the extension can find the documents in th
 A document that failed stays ticked, so that *Start downloading* tries it again.
 
 **What it never does:** log in or fill in a form. Elements whose words name a destroying action (delete, remove, log out, cancel, revoke, unsubscribe and the like), and links whose address path names one (delete, cancel, logout, upload, submit and the like), are never offered; the panel says how many it left out. Words that may name an action or a document alike (save, send, order, pay, archive, sign, share) only take the tick away: such an element is offered unticked, for you to decide. A link straight to a file is downloaded whatever its address says. A button that sends a form, or says *download* and an action at once, is only offered unticked, for you to decide. It works only when you click. It remembers which documents were downloaded, per job, in this browser only, as checksums that name no address and no document; *Forget which documents were downloaded* at the end of the list clears that for the job. Closing the panel takes the highlighting off the page and ends the downloads.
+
+**A portal where it goes wrong:** if it misses a document, ticks something that is no document, or a download fails, please tell us with the form [Feedback on a portal](https://github.com/schlingensiepen/portal-download-extension/issues/new?template=portal-feedback.yml). The rules for what counts as a document can only get better with real portals. Do not include your name, customer numbers, addresses with session parameters, or screenshots with personal data.
 
 **Close the run** afterwards as before, with *Succeeded* or *Failed*; downloading does not close it.
 

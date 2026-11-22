@@ -1,0 +1,47 @@
+name: Feedback on a portal
+description: The document finder missed a document, ticked something wrong, or a download failed.
+title: "Portal: "
+labels: ["portal feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. Please write nothing that identifies you: no names, customer or invoice numbers, no addresses with session parameters, no screenshots with personal data.
+  - type: input
+    id: portal
+    attributes:
+      label: Portal
+      description: The site's address without the path, for example www.example-utility.com. Leave it empty if you prefer.
+  - type: dropdown
+    id: what
+    attributes:
+      label: What happened
+      multiple: true
+      options:
+        - A document was not found
+        - Something was offered that is no document
+        - A document was offered unticked or hidden, but is a document
+        - The download failed or brought a web page
+        - The file landed in the wrong folder
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: element
+    attributes:
+      label: The element
+      description: What does the link or button say, or what icon does it show? Is it a link, a button, or something in a menu? Did it open a new tab?
+    validations:
+      required: true
+  - type: textarea
+    id: panel
+    attributes:
+      label: What the panel said
+      description: The message beside the document, for example "the click started no download", or "left out" counts.
+  - type: input
+    id: version
+    attributes:
+      label: Extension version and browser
+      description: The version is at the bottom of the panel, for example "1.0.0, Firefox 147".
+    validations:
+      required: true
