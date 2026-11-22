@@ -9,21 +9,24 @@
 /** Runs in the page: the candidates of this frame, as plain data. */
 export function scan() {
   const FILE = /\.(pdf|docx?|xlsx?|odt|ods|rtf|csv|txt|xml|zip|tiff?|jpe?g|png|eml|msg|p7m|xps)(?:$|[?#;])/i;
-  const MAYBE_URL = /download|attachment|getdoc|getfile|showdoc|viewdoc|filename=|format=(pdf|docx?|xlsx?)|mime=|\/files?\/|\/documents?\/[^/]*\d/i;
+  const MAYBE_URL = /download(?!s\b)|attachment|getdoc|getfile|showdoc|viewdoc|filename=|format=(pdf|docx?|xlsx?)|mime=|\/files?\/|\/documents?\/[^/]*\d/i;
   // Words that say "download"; words that only hint at a document.
-  const DOWNLOAD = /download|herunterladen|runterladen|télécharger|descargar|baixar|下载|下載/i;
+  const DOWNLOAD = /download(?!s\b)|herunterladen|runterladen|télécharger|descargar|baixar|下载|下載/i;
   const HINT = /\bpdf\b|\bdocx?\b|\bxlsx?\b|\bzip\b|exportieren|\bexport\b|abrufen/i;
   // Verbs of actions that change something, as whole words in what a person reads (text, title,
-  // label), in the languages of the panel. Such an element is never offered; with a download
-  // word as well ("save and download") it is offered unticked.
+  // label), in the languages of the panel. Many are nouns of documents too (order, pay slip, save
+  // as PDF): with any sign of a document as well it is offered unticked; without, never.
   const W = (words) => new RegExp(`(?<![\\p{L}\\p{N}])(?:${words})(?![\\p{L}\\p{N}])`, "iu");
-  const ACTION = W("löschen|entfernen|hochladen|absenden|senden|abmelden|kündigen|stornieren|bestellen|bezahlen|zahlen|speichern|ändern|bearbeiten|papierkorb|delete|remove|upload|send|submit|log ?out|sign ?out|cancel|order|pay|save|edit|trash|supprimer|retirer|téléverser|envoyer|soumettre|déconnexion|annuler|commander|payer|enregistrer|modifier|eliminar|borrar|quitar|subir|enviar|cancelar|pagar|guardar|editar|excluir|apagar|remover|salvar|encomendar");
-  const ACTION_ZH = /删除|刪除|移除|上传|上傳|提交|发送|發送|退出|登出|取消|订购|訂購|支付|付款|保存|儲存|编辑|編輯/;
+  const ACTION = W("löschen|entfernen|hochladen|absenden|senden|abmelden|kündigen|stornieren|bestellen|bezahlen|speichern|ändern|bearbeiten|papierkorb|archivieren|freigeben|genehmigen|unterschreiben|signieren|teilen|ablehnen|widerrufen|versenden|delete|remove|upload|send|submit|log ?out|sign ?out|cancel|order|pay|save|edit|trash|archive|approve|sign|share|reject|revoke|supprimer|retirer|téléverser|envoyer|soumettre|déconnexion|annuler|commander|payer|enregistrer|modifier|archiver|approuver|signer|partager|rejeter|révoquer|eliminar|borrar|quitar|subir|enviar|cancelar|pagar|guardar|editar|archivar|aprobar|firmar|compartir|rechazar|revocar|excluir|apagar|remover|salvar|encomendar|arquivar|aprovar|assinar|compartilhar|partilhar|rejeitar|revogar");
+  // Actions that destroy or end something: never offered, whatever else the element says.
+  const DESTROY = W("löschen|entfernen|papierkorb|abmelden|kündigen|widerrufen|delete|remove|trash|log ?out|sign ?out|revoke|supprimer|déconnexion|révoquer|eliminar|borrar|cerrar sesión|revocar|excluir|apagar|remover|revogar");
+  const DESTROY_ZH = /删除|刪除|移除|退出|登出|撤销|撤銷/;
+  const ACTION_ZH = /删除|刪除|移除|上传|上傳|提交|发送|發送|退出|登出|取消|订购|訂購|支付|付款|保存|儲存|编辑|編輯|归档|歸檔|批准|签署|簽署|分享|拒绝|拒絕|撤销|撤銷/;
   // Icons and class names of such actions only make an element doubtful.
   const ACTION_ICON = /(?:^|[\s_-])(trash|delete|remove|times|close|edit|pencil|upload|save|floppy|share)(?:$|[\s_-])/i;
   // Addresses that clearly change something are never fetched, whatever the link says; words
   // that also name documents (storno, order) are not among them.
-  const ACTION_URL = /(?:^|[\/_\-.?=&])(delete|remove|destroy|drop|cancel|logout|signout|upload|send|submit|pay)(?:$|[\/_\-.?=&])/i;
+  const ACTION_URL = /(?:^|[\/_\-.?=&])(delete|remove|destroy|drop|cancel|logout|signout|upload|send|submit|pay|archive|approve|sign|share|reject|revoke|mark-?read|markread)(?:$|[\/_\-.?=&])/i;
   const CLICKABLE = "a, button, input[type=button], input[type=submit], input[type=image], [role=button], [role=link], [role=menuitem], [onclick]";
 
   // Every element, also inside open shadow roots.
@@ -53,6 +56,7 @@ export function scan() {
   const fileName = (url) => { try { const p = new URL(url).pathname; return decodeURIComponent(p.slice(p.lastIndexOf("/") + 1)); } catch { return ""; } };
 
   const found = [];
+  let hidden = 0;
   for (const el of all) {
     if (!el.matches(CLICKABLE) || !visible(el)) continue;
     // Only an address of its own counts as a link: "#…" and "javascript:" are buttons.
@@ -76,8 +80,12 @@ export function scan() {
     // A link that names a file only downloads it. Anything else that names an action is left
     // out, or offered unticked when it says "download" too; an action icon makes it doubtful.
     if (kind !== "file") {
-      if (real && ACTION_URL.test(new URL(href).pathname + new URL(href).search)) continue;
-      if (ACTION.test(reads) || ACTION_ZH.test(reads)) { if (!DOWNLOAD.test(reads)) continue; sure = false; }
+      if (real && ACTION_URL.test(new URL(href).pathname + new URL(href).search)) { hidden++; continue; }
+      if (DESTROY.test(reads) || DESTROY_ZH.test(reads)) { hidden++; continue; }
+      if (ACTION.test(reads) || ACTION_ZH.test(reads)) {
+        if (reason !== "address" && !DOWNLOAD.test(words) && !HINT.test(words)) { hidden++; continue; }
+        sure = false;
+      }
       if (ACTION_ICON.test(marks)) sure = false;
     }
     // The row it stands in (a table row, a list item) tells documents with the same button apart.
@@ -93,7 +101,7 @@ export function scan() {
   globalThis.__portalDownloadFound = kept.map((f) => f.el);
   // Buttons with the same words in the same row are told apart by their order.
   const seen = {};
-  return { url: location.href, items: kept.map(({ kind, reason, label, url, context, sure }, i) => {
+  return { url: location.href, hidden, items: kept.map(({ kind, reason, label, url, context, sure }, i) => {
     const k = `${context}|${label}`;
     return { i, kind, reason, label, url, context, sure, nth: url ? 0 : (seen[k] = (seen[k] ?? -1) + 1) };
   }) };

@@ -559,5 +559,8 @@
   },
   "docs_tick_none": {
     "message": "全不選"
+  },
+  "docs_hidden": {
+    "message": "另有 $1 個被略過，因為其文字或網址表示刪除、傳送或付款等操作。"
   }
 }

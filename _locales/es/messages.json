@@ -559,5 +559,8 @@
   },
   "docs_tick_none": {
     "message": "Ninguno"
+  },
+  "docs_hidden": {
+    "message": "$1 más omitidos, porque sus palabras o su dirección nombran una acción como eliminar, enviar o pagar."
   }
 }

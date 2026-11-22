@@ -559,5 +559,8 @@
   },
   "docs_tick_none": {
     "message": "Nenhum"
+  },
+  "docs_hidden": {
+    "message": "Mais $1 deixados de fora, porque as palavras ou o endereço indicam uma ação como excluir, enviar ou pagar."
   }
 }

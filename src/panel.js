@@ -133,7 +133,8 @@ async function render() {
   const view = $("#view");
   try {
     if (state.vaultState === "locked") {
-      // Nothing of the store stays on screen or in memory while it is locked.
+      // Nothing of the store stays on screen or in memory while it is locked; a download queue stops.
+      if (state.docs) { state.docs.stop = true; unhighlight(state.docs); state.docs = null; }
       Object.assign(state, { job: null, preview: null, done: null, view: "list" });
       return view.replaceChildren(viewUnlock());
     }
@@ -404,6 +405,7 @@ async function findDocuments() {
     const known = await remembered.get(scope);
     let n = 0;
     const frames = [], keys = new Set();
+    const hidden = results.reduce((sum, x) => sum + ((x && x.result && x.result.hidden) || 0), 0);
     for (const r of results.filter((x) => x && x.result)) {
       const items = [];
       for (const found of r.result.items) {
@@ -416,7 +418,7 @@ async function findDocuments() {
       }
       frames.push({ frameId: r.frameId, url: r.result.url, items });
     }
-    state.docs = { tabId, url, job, scope, folder: folderFor(job && job.j, url), frames, running: false, stop: false };
+    state.docs = { tabId, url, job, scope, folder: folderFor(job && job.j, url), frames, hidden, running: false, stop: false };
     await highlight(state.docs);
     go("docs");
   } catch (e) { fail(e); }
@@ -484,6 +486,7 @@ function viewDocs() {
   if (d.job) box.append(h("button", { class: "btn", type: "button", disabled: d.running, onclick: () => go("job", { job: d.job }) }, t("back")));
   const card = h("div", { class: "card" }, h("h1", {}, d.job ? d.job.j.title : t("docs_title")),
     h("p", { class: "small" }, items.length ? t("docs_count", String(items.length)) : t("docs_none")),
+    d.hidden ? h("p", { class: "small muted" }, t("docs_hidden", String(d.hidden))) : null,
     // Firefox lets an extension choose the folder only with the file name; see the README.
     h("p", { class: "small muted" }, api.runtime.getBrowserInfo ? t("docs_folder_firefox", d.folder) : t("docs_folder", d.folder)),
     h("div", { class: "row" },

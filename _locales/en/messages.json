@@ -559,5 +559,8 @@
   },
   "docs_tick_none": {
     "message": "Tick none"
+  },
+  "docs_hidden": {
+    "message": "$1 more left out, because their words or address name an action such as delete, send or pay."
   }
 }

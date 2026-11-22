@@ -559,5 +559,8 @@
   },
   "docs_tick_none": {
     "message": "Keine"
+  },
+  "docs_hidden": {
+    "message": "$1 weitere ausgelassen, weil ihre Beschriftung oder Adresse eine Handlung nennt, etwa löschen, senden oder bezahlen."
   }
 }
