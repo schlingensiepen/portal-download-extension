@@ -54,6 +54,8 @@ export function observe(token) {
   };
   const off = () => { removeEventListener("click", on, true); removeEventListener("auxclick", on, true); if (globalThis.__portalDownloadObserve === me) globalThis.__portalDownloadObserve = null; };
   function on(e) {
+    // Only the user's own clicks: a page that clicks a link of its own in a script is not the user.
+    if (!e.isTrusted) return;
     try {
       const click = describe(e.composedPath());
       // No panel listening (closed, or a newer watch): stop noting.

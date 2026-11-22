@@ -541,7 +541,7 @@ async function startWatching() {
     // The first thing the click awaits: access to this portal, and to the browser's downloads (to see one start).
     if (!(await api.permissions.request({ origins: [originPattern(w.url)], permissions: ["downloads"] }))) return toast(t("watch_refused"), true);
     if (state.docs) { const d = state.docs; d.stop = true; state.docs = null; await unhighlight(d); }
-    Object.assign(w, { phase: "watching", token: crypto.randomUUID(), origin: site.origin, clicks: [], events: [], tabs: new Set([w.tabId]), download: null, ended: "" });
+    Object.assign(w, { phase: "watching", token: crypto.randomUUID(), origin: site.origin, clicks: [], events: [], tabs: new Set([w.tabId]), seen: new Map([[w.tabId, w.url.split("#")[0]]]), download: null, ended: "" });
     const inject = (tabId) => api.scripting.executeScript({ target: { tabId, allFrames: true }, func: scan })
       .catch(() => api.scripting.executeScript({ target: { tabId }, func: scan }))
       .then(() => api.scripting.executeScript({ target: { tabId, allFrames: true }, func: observe, args: [w.token] }).catch(() => api.scripting.executeScript({ target: { tabId }, func: observe, args: [w.token] })))
@@ -557,7 +557,10 @@ async function startWatching() {
       },
       updated: (tabId, info, tab) => {
         if (!w.tabs.has(tabId) || info.status !== "complete") return;
-        w.events.push({ at: Date.now(), kind: "page", url: (tab && tab.url) || "" });
+        // A page loaded anew needs the observer again; only a new address is worth telling.
+        const url = (tab && tab.url) || "", bare = url.split("#")[0];
+        if (w.seen.get(tabId) !== bare) w.events.push({ at: Date.now(), kind: "page", url });
+        w.seen.set(tabId, bare);
         inject(tabId);
       },
       created: (tab) => {

@@ -23,8 +23,15 @@ export function redactCode(s, max = 120) {
   return redactText(r, max);
 }
 
-// A path segment that looks like a key, a token or an address: left out.
-const tokenish = (seg) => /^[A-Za-z0-9_\-=+%.~]{20,}$/.test(seg) || seg.includes("@");
+// A path segment that looks like a key or token (long, letters and digits mixed, no separators),
+// or an e-mail address: left out, its file ending kept.
+const tokenish = (seg) => (/^[A-Za-z0-9+=%~]{16,}$/.test(seg) && /\d/.test(seg) && /[A-Za-z]/.test(seg));
+const segment = (d) => {
+  if (d.includes("@")) return "…";
+  const m = /^(.*?)(\.[A-Za-z0-9]{1,8})$/.exec(d);
+  const [stem, ending] = m ? [m[1], m[2]] : [d, ""];
+  return tokenish(stem) ? `…${ending}` : redactText(d, 40);
+};
 
 /**
  * An address in its form only: the portal's own as its path, another site by its name (or not at
@@ -42,7 +49,7 @@ export function redactUrl(u, portalOrigin, namePortal = true) {
   const path = x.pathname.split("/").map((seg) => {
     let d = seg;
     try { d = decodeURIComponent(seg); } catch { /* as it is */ }
-    return tokenish(d) ? "…" : redactText(d, 40);
+    return segment(d);
   }).join("/");
   const names = [...new Set(x.searchParams.keys())].slice(0, 12).map((k) => `${redactText(k, 30)}=…`);
   return `${site}${path}${names.length ? `?${names.join("&")}` : ""}${x.hash ? "#…" : ""}`;

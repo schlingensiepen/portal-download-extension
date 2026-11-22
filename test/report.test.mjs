@@ -25,6 +25,9 @@ test("addresses keep their form only", () => {
   assert.equal(redactUrl(`${P}/kunde/4711/rechnung.pdf?id=8&sid=abc#p=2`, P), "/kunde/#/rechnung.pdf?id=…&sid=…#…");
   assert.equal(redactUrl(`${P}/dl/eyJhbGciOiJIUzI1NiJ9abcdefgh/file`, P), "/dl/…/file");
   assert.equal(redactUrl(`${P}/u/max.muster@example.org/doc`, P), "/u/…/doc");
+  assert.equal(redactUrl(`${P}/docs/rechnung-2026-01.pdf`, P), "/docs/rechnung-#-#.pdf");
+  assert.equal(redactUrl(`${P}/f/a8Kd93LmQz71xPw2.pdf`, P), "/f/….pdf");
+  assert.equal(redactUrl(`${P}/f/550e8400-e29b-41d4-a716-446655440000`, P), "/f/#e#-e#b-#d#-a#-#");
   assert.equal(redactUrl("https://files.cdn.example/a/b.pdf?t=1", P), "https://files.cdn.example/a/b.pdf?t=…");
   assert.equal(redactUrl("https://files.cdn.example/a/b.pdf", P, false), "[another site]/a/b.pdf");
   assert.equal(redactUrl("data:application/pdf;base64,JVBERi0xLjQK", P), "data:application/pdf");
