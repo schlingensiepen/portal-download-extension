@@ -227,7 +227,7 @@ function viewJob() {
   if (state.mismatch[b.id]) box.append(h("p", { class: "card alert small" }, t("contract_blocks")));
   else if (!state.done) {
     const note = h("textarea", { placeholder: t("note_placeholder") });
-    if (state.keptNote) { note.value = note.defaultValue = state.keptNote; state.keptNote = ""; }
+    if (state.keptNote) { note.value = state.keptNote; state.keptNote = ""; }
     const finish = async (outcome) => {
       try {
         const r = await b.call("job.complete", { job_id: j.job_id, outcome, note: note.value, expected_next_due: j.next_due });
@@ -317,7 +317,7 @@ async function addFromTab() {
   const inv = parseInvitation(state.tabUrl);
   if (!inv) return toast(t("no_invitation"), true);
   const pattern = originPattern(inv.base);
-  let granted = false;
+  let granted = false, redeemed = null;
   try {
     // The first thing the click awaits, as Firefox requires: access to this one service only.
     granted = await api.permissions.request({ origins: [pattern] });
@@ -331,19 +331,34 @@ async function addFromTab() {
     const browser = /Firefox\//.test(ua) ? "Firefox" : /Edg\//.test(ua) ? "Edge" : "Chrome";
     const os = /Windows/.test(ua) ? "Windows" : /Mac OS/.test(ua) ? "macOS" : /Linux/.test(ua) ? "Linux" : "";
     const label = t("device_label", browser, os).trim();
-    const r = await probe.call("invitation.redeem", { token: inv.token, label, kind: "extension" });
+    redeemed = await probe.call("invitation.redeem", { token: inv.token, label, kind: "extension" });
+    const r = redeemed;
     const id = `s${Date.now().toString(36)}`;
     // Read anew: another window may have changed the store while the service answered.
-    await vault.update((latest) => { if (latest.services.some((s) => s.base === inv.base)) return; latest.services.push({ id, name: `${new URL(inv.base).host} (${r.name})`, base: inv.base, token: r.device_token }); });
+    const kept = await vault.update((latest) => {
+      const there = latest.services.find((s) => s.base === inv.base);
+      if (there) return there.id;
+      latest.services.push({ id, name: `${new URL(inv.base).host} (${r.name})`, base: inv.base, token: r.device_token });
+      return id;
+    });
     await loadBackends();
-    state.choice = id;
-    toast(t("service_added", r.name));
+    state.choice = kept;
+    if (kept !== id) { dropDevice(inv.base, r.device_token); toast(t("already_added"), true); }
+    else toast(t("service_added", r.name));
     go("list");
   } catch (e) {
+    // An access redeemed but not kept is revoked on the service again.
+    if (redeemed) dropDevice(inv.base, redeemed.device_token);
     // A permission for a service that was not added is given back.
     if (granted && !(state.content && state.content.services.some((s) => originPattern(s.base) === pattern))) api.permissions.remove({ origins: [pattern] }).catch(() => {});
     fail(e);
   }
+}
+
+/** Revokes a device access just redeemed but not kept, best effort. */
+function dropDevice(base, token) {
+  const b = new ServiceBackend({ id: "drop", name: base, base, token });
+  b.call("device.list").then((d) => b.call("device.revoke", { device_id: d.current_device_id })).catch(() => {});
 }
 
 async function viewManage() {
@@ -368,12 +383,12 @@ async function viewManage() {
   } else {
     const p1 = h("input", { type: "password", autocomplete: "new-password" }), p2 = h("input", { type: "password", autocomplete: "new-password" });
     const change = h("form", { class: "card" }, h("p", { class: "small muted" }, t("export_reminder")), h("label", {}, t("passphrase_new")), p1, h("label", {}, t("passphrase_again")), p2, h("div", { class: "row", style: "margin-top:8px" }, h("button", { class: "btn", type: "submit" }, t("passphrase_change")),
-      h("button", { class: "btn", type: "button", onclick: async () => { await vault.lock(); await loadBackends(); go("list"); } }, t("lock"))));
+      h("button", { class: "btn", type: "button", onclick: async () => { try { await vault.lock(); await loadBackends(); go("list"); } catch (e) { fail(e); } } }, t("lock"))));
     change.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (p1.value.length < 10) return toast(t("passphrase_short"), true);
       if (p1.value !== p2.value) return toast(t("passphrase_differs"), true);
-      await vault.changePassphrase(p1.value); p1.value = ""; p2.value = ""; toast(t("passphrase_changed"));
+      try { await vault.changePassphrase(p1.value); p1.value = ""; p2.value = ""; toast(t("passphrase_changed")); } catch (err) { fail(err); }
     });
     box.append(change, h("div", { class: "card" }, h("p", { class: "small" }, t("local_remove_text")),
       confirmButton(t("local_remove"), t("really"), "bad", async () => { await vault.removeLocal(); await loadBackends(); state.choice = "all"; go("list"); })));
@@ -487,5 +502,5 @@ for (const [sel, label] of [["#project", t("project_page")], ["#feedback", t("fe
 $("#version").textContent = `v${api.runtime.getManifest().version}`;
 // Another panel of this browser may unlock, lock or add a service.
 api.storage.onChanged.addListener(async (changes, area) => {
-  if (area === "local" && changes.language && (changes.language.newValue ?? "auto") !== chosenLanguage && !typed()) return location.reload(); if (area === "local" || area === "session") { await loadBackends(); if (state.view === "list" || state.view === "add" || state.vaultState === "locked") render(); else renderTop(); } });
+  if (area === "local" && changes.language && (changes.language.newValue ?? "auto") !== chosenLanguage && !typed()) return location.reload(); if (area === "local" || area === "session") { try { await loadBackends(); } catch { return; } if (state.view === "list" || state.view === "add" || state.vaultState === "locked") render(); else renderTop(); } });
 loadBackends().then(render, fail);

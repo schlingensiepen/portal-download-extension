@@ -100,8 +100,10 @@ export class Vault {
     const content = await this.read();
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const key = await deriveKey(passphrase, salt);
-    await api.storage.local.set({ vault: { salt: b64(salt), iterations: ITERATIONS, sealed: await seal(key, content) } });
+    const sealed = await seal(key, content);
+    // The key first: another panel reading between the two writes then fails once instead of with the old key.
     await remember(key);
+    await api.storage.local.set({ vault: { salt: b64(salt), iterations: ITERATIONS, sealed } });
   }
 
   /** For a forgotten passphrase: deletes the local store and every service kept with it. */
