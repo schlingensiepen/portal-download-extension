@@ -185,6 +185,7 @@ async function viewList() {
   if (!state.backends.length) {
     box.append(h("div", { class: "card" }, h("h1", {}, t("welcome_title")), h("p", { class: "small" }, t("welcome_text")),
       h("button", { class: "btn primary", type: "button", onclick: () => go("add") }, t("add_title"))));
+    box.append(h("button", { class: "btn wide", type: "button", onclick: findDocuments }, t("docs_find")));
     return box;
   }
   // What concerns one backend is greyed out under "All".
