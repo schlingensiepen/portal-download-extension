@@ -432,6 +432,6 @@
     "message": "Pas encore de backend"
   },
   "err_damaged": {
-    "message": "La phrase secrète est correcte, mais le stockage est illisible ; il est endommagé. Restaurez-le depuis un export : supprimez-le sous « Phrase secrète oubliée ? » et importez le fichier."
+    "message": "La phrase secrète est correcte, mais le stockage est illisible ; il est endommagé. Supprimez-le sous « Phrase secrète oubliée ? », créez un nouveau stockage local, importez votre dernier export des tâches et ajoutez à nouveau vos services avec de nouveaux liens d'invitation."
   }
 }

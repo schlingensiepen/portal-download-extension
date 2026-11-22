@@ -18,12 +18,13 @@ function area() {
 const local = area(), session = area();
 globalThis.chrome = { storage: { local, session } };
 // One lock for every name, enough here; ifAvailable gets null while it is held.
-let tail = Promise.resolve(), held = false;
+let tail = Promise.resolve(), held = false, waiting = 0;
 Object.defineProperty(globalThis.navigator, "locks", { value: { request(_name, opts, fn) {
   if (typeof opts === "function") { fn = opts; opts = {}; }
   if (opts.ifAvailable && held) return Promise.resolve(fn(null));
   if (opts.ifAvailable) { held = true; return Promise.resolve().then(() => fn({})).finally(() => { held = false; }); }
-  const run = tail.then(async () => { held = true; try { return await fn({}); } finally { held = false; } });
+  waiting++;
+  const run = tail.then(async () => { waiting--; held = true; try { return await fn({}); } finally { held = false; } });
   tail = run.catch(() => {}); return run;
 } } });
 
@@ -157,6 +158,15 @@ test("content read from a store deleted and made anew is not written into the ne
   assert.deepEqual((await b.read()).services, []);
 });
 
+test("a leftover services list is removed on unlock too", async () => {
+  const v = new Vault();
+  await v.createLocal("correct horse battery");
+  await v.lock();
+  await local.set({ services: [{ id: "s1", token: "secret" }] });
+  assert.equal(await v.unlock("correct horse battery"), true);
+  assert.equal(local.m.has("services"), false);
+});
+
 test("a creation cut short leaves no services in plain", async () => {
   const v = new Vault();
   await v.update((c) => { c.services.push({ id: "s1", token: "secret" }); });
@@ -182,11 +192,13 @@ test("unlock while another window changes the passphrase uses the new salt", asy
   // The test holds the lock, so that the order is fixed: the change waits first, then the unlock
   // (which read the old salt before the change was written).
   let release; const held = navigator.locks.request("x", () => new Promise((r) => { release = r; }));
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  // Counts only after the test holds the lock itself, so that the change is surely queued first.
+  const queued = async (n) => { while (waiting < n) await new Promise((r) => setTimeout(r, 10)); };
+  while (!release) await new Promise((r) => setTimeout(r, 0));
   const change = a.changePassphrase("a new passphrase here");
-  await sleep(1000);
+  await queued(1);
   const pending = b.unlock("a new passphrase here");
-  await sleep(1000);
+  await queued(2);
   release(); await held; await change;
   assert.equal(await pending, true);
 });

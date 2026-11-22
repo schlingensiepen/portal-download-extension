@@ -432,6 +432,6 @@
     "message": "No backend yet"
   },
   "err_damaged": {
-    "message": "The passphrase fits, but the store cannot be read; it is damaged. Restore it from an export: delete it under “Forgot the passphrase?” and import the file."
+    "message": "The passphrase fits, but the store cannot be read; it is damaged. Delete it under “Forgot the passphrase?”, create a new local store, import your last export of the jobs, and add your services again with new invitation links."
   }
 }

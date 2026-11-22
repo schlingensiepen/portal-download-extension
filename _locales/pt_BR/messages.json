@@ -432,6 +432,6 @@
     "message": "Nenhum backend ainda"
   },
   "err_damaged": {
-    "message": "A frase secreta está correta, mas o armazenamento não pode ser lido; ele está danificado. Restaure-o a partir de uma exportação: exclua-o em “Esqueceu a frase secreta?” e importe o arquivo."
+    "message": "A frase secreta está correta, mas o armazenamento não pode ser lido; ele está danificado. Exclua-o em “Esqueceu a frase secreta?”, crie um novo armazenamento local, importe sua última exportação das tarefas e adicione seus serviços novamente com novos links de convite."
   }
 }

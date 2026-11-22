@@ -432,6 +432,6 @@
     "message": "Nenhum backend ainda"
   },
   "err_damaged": {
-    "message": "A frase-passe está correta, mas o armazenamento não pode ser lido; está danificado. Restaure-o a partir de uma exportação: elimine-o em “Esqueceu-se da frase-passe?” e importe o ficheiro."
+    "message": "A frase-passe está correta, mas o armazenamento não pode ser lido; está danificado. Elimine-o em “Esqueceu-se da frase-passe?”, crie um novo armazenamento local, importe a sua última exportação das tarefas e adicione novamente os seus serviços com novas ligações de convite."
   }
 }

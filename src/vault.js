@@ -111,14 +111,17 @@ export class Vault {
     this.#revs.set(content, `${vault.kid}:${vault.rev + 1}`);
   }
 
+  /** true when unlocked, false for a passphrase that does not fit, "damaged" for a store that does not open. */
   async unlock(passphrase, tries = 2) {
     const { vault } = await api.storage.local.get("vault");
     if (!vault) return true;
     // The slow derivation outside the lock; what it opens is checked under the lock.
     const kek = await deriveKey(passphrase, unb64(vault.salt), vault.iterations || ITERATIONS);
     const result = await withVaultLock(async () => {
-      const { vault: now } = await api.storage.local.get("vault");
+      const { vault: now, services } = await api.storage.local.get(["vault", "services"]);
       if (!now) return true;
+      // Under the lock no removeLocal is half done: a plain services list is a leftover.
+      if (services) await api.storage.local.remove("services");
       // The passphrase was changed in another window meanwhile: derive anew with the new salt.
       if (now.salt !== vault.salt) return "again";
       if (now.v === 2) {

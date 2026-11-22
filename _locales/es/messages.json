@@ -432,6 +432,6 @@
     "message": "Aún no hay backend"
   },
   "err_damaged": {
-    "message": "La frase de contraseña es correcta, pero el almacén no se puede leer; está dañado. Restáuralo desde una exportación: elimínalo en «¿Olvidaste la frase de contraseña?» e importa el archivo."
+    "message": "La frase de contraseña es correcta, pero el almacén no se puede leer; está dañado. Elimínalo en «¿Olvidaste la frase de contraseña?», crea un nuevo almacén local, importa tu última exportación de las tareas y vuelve a añadir tus servicios con nuevos enlaces de invitación."
   }
 }
