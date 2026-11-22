@@ -9,7 +9,8 @@ The texts and images for the store pages. Kept here so that every store says the
 - **Homepage / support site:** https://github.com/schlingensiepen/portal-download-extension (questions under *Discussions*)
 - **Privacy policy:** https://github.com/schlingensiepen/portal-download-extension/blob/main/PRIVACY.md
 - **Data collection (Mozilla):** none
-- **Logo:** `store/logo-300.png` (300×300)
+- **Logo:** `store/logo-300.png` (300×300), `store/logo-512.png`
+- **GitHub social preview:** `store/social-preview.png` (1280×640; repository *Settings → Social preview*)
 - **Screenshots:** `store/screenshot-1-en.png`, `store/screenshot-1-de.png` (1280×800; the portal shown is made up)
 
 ## English
