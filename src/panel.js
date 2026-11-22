@@ -535,6 +535,8 @@ const watchOffer = () => h("button", { class: "btn wide small", type: "button", 
 async function startWatching() {
   const w = state.watch;
   if (!w || w.phase !== "ask") return;
+  // The address at the click, not at the offer: the tab may have gone on since.
+  if (state.tabId === w.tabId && /^https?:/i.test(state.tabUrl)) w.url = state.tabUrl;
   const site = new URL(w.url);
   if (site.protocol === "http:" && !["localhost", "127.0.0.1"].includes(site.hostname)) return toast(t("docs_http"), true);
   // Set before the first await: a second click on Start does nothing.
@@ -551,8 +553,14 @@ async function startWatching() {
     // The observer in every frame of a tab; true when it runs in the tab's page itself.
     const inject = async (tabId) => {
       const run = (func, args = []) => api.scripting.executeScript({ target: { tabId, allFrames: true }, func, args }).catch(() => api.scripting.executeScript({ target: { tabId }, func, args }));
-      try { await run(scan); const r = await run(observe, [w.token]); return !!(r && r.some((x) => x.frameId === 0 && x.result === true)); }
-      catch { return false; }
+      try {
+        await run(scan);
+        if (w.phase !== "watching") return false;
+        const r = await run(observe, [w.token]);
+        // Ended meanwhile: the page stops noting again at once.
+        if (w.phase !== "watching") { run(unobserve).catch(() => {}); return false; }
+        return !!(r && r.some((x) => x.frameId === 0 && x.result === true));
+      } catch { return false; }
     };
     const originOf = (u) => { try { return new URL(u).origin; } catch { return ""; } };
     w.listeners = {
@@ -581,10 +589,16 @@ async function startWatching() {
         inject(tabId).then((ok) => { if (tabId === w.tabId && w.blind !== !ok) { w.blind = !ok; if (state.view === "watch" && w.phase === "watching") render(); } });
       },
       created: (tab) => {
-        // Only a tab the portal opened right after a click of the user, not one the user opened.
-        if (!w.tabs.has(tab.openerTabId) || Date.now() - w.lastClick > 5000) return;
-        w.tabs.add(tab.id);
-        w.events.push({ at: Date.now(), kind: "tab", url: tab.pendingUrl || tab.url || "" });
+        // Only a tab the portal opened right after a click of the user. The click's message may
+        // arrive after the new tab, so it is decided a moment later.
+        if (!w.tabs.has(tab.openerTabId)) return;
+        const at = Date.now();
+        setTimeout(() => {
+          if (w.phase !== "watching" || Math.abs(at - w.lastClick) > 5000) return;
+          w.tabs.add(tab.id);
+          w.events.push({ at: Math.max(at, w.lastClick), kind: "tab", url: tab.pendingUrl || tab.url || "" });
+          inject(tab.id);
+        }, 400);
       },
       removed: (tabId) => { if (tabId === w.tabId) endWatching(w, "gone"); },
       download: (d) => {
@@ -625,7 +639,7 @@ function endWatching(w, why) {
     api.tabs.onRemoved.removeListener(L.removed);
     api.downloads?.onCreated.removeListener(L.download);
   } catch { /* already gone */ }
-  for (const tabId of w.tabs) api.scripting.executeScript({ target: { tabId, allFrames: true }, func: unobserve }).catch(() => {});
+  for (const tabId of w.tabs) api.scripting.executeScript({ target: { tabId, allFrames: true }, func: unobserve }).catch(() => api.scripting.executeScript({ target: { tabId }, func: unobserve })).catch(() => {});
   if (state.view === "watch" && state.watch === w) render();
 }
 /** The browser's name and main version, for the report. */

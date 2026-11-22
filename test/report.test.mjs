@@ -57,7 +57,7 @@ test("the report names the portal only when asked, and leaks no number, token or
     download: { mime: "application/pdf", filename: "/home/u/Downloads/Rechnung_4711.PDF", url: "https://cdn.example/x/9?sig=abc", referrer: `${P}/kunde/4711/rechnungen` } };
   const named = buildReport(w, { version: "1.1.0", browser: "Firefox 147", namePortal: true });
   const anon = buildReport(w, { version: "1.1.0", browser: "Firefox 147", namePortal: false });
-  assert.match(named, /Portal: www\.portal\.example/);
+  assert.match(named, /Portal: `www\.portal\.example`/);
   assert.match(named, /Portal-Download 1\.1\.0, Firefox 147/);
   assert.match(anon, /Portal: \(not named\)/);
   assert.ok(!anon.includes("portal.example") && !anon.includes("cdn.example"));
@@ -86,6 +86,36 @@ test("icons, ids and classes lose their keys; icon addresses their parameters", 
 test("fields of an odd type do not break the text", () => {
   const r = buildReport({ url: `${P}/`, ended: "stopped", clicks: [click({ form: { action: {}, method: 5 }, id: {}, chain: "x", icons: null })], events: [] });
   assert.match(r, /sends a form/);
+});
+
+test("short share keys, base64 and runs of capitals go; words with a number and camelCase stay", () => {
+  assert.equal(redactUrl("https://cloud.example/s/aBcDe4GhIjK7mNo", P), "https://cloud.example/s/…");
+  assert.equal(redactUrl(`${P}/share/Xk9fQ2LmPz7Rt`, P), "/share/…");
+  assert.equal(redactUrl(`${P}/doc/SGVsbG8gV29ybGQ.pdf`, P), "/doc/….pdf");
+  assert.equal(redactUrl(`${P}/d/QWERTZUIOPASDFGHJKLYXCVB`, P), "/d/…");
+  assert.equal(redactUrl(`${P}/files/rechnung2024.pdf`, P), "/files/rechnung#.pdf");
+  assert.equal(redactUrl(`${P}/api/getDocumentById`, P), "/api/getDocumentById");
+  assert.equal(redactUrl("moz-extension://1b2c3d4e-aaaa-bbbb/icon.png", P), "[extension]");
+});
+
+test("a file name shows only its ending, and only a short one of letters", () => {
+  const r = buildReport({ url: `${P}/`, ended: "download", clicks: [click({ download: "Rechnung_Max_Mustermann_2024.pdf" })], events: [],
+    download: { mime: "application/octet-stream", filename: "/home/u/Downloads/invoice.20240115", url: `${P}/x` } });
+  assert.ok(!r.includes("Mustermann"), r);
+  assert.match(r, /download attribute `set, \.pdf`/);
+  assert.match(r, /file ending `other`/);
+});
+
+test("scripts lose an unpaired quote to the end; invisible format characters go", () => {
+  assert.equal(redactCode("x='unterminated secret"), "x='…");
+  assert.equal(redactText("abc\u202Edef\u200B"), "abcdef");
+});
+
+test("a new tab without an address yet is still told; the verdict takes only known words", () => {
+  const r = buildReport({ url: `${P}/`, ended: "stopped", clicks: [click({ at: 1, verdict: { finder: "found", kind: "[x](http://e)", reason: "@me", sure: true } })], events: [{ at: 2, kind: "tab", url: "about:blank" }] });
+  assert.match(r, /then a new tab opened: `\(no address yet\)`/);
+  assert.match(r, /found as a candidate \(other reason\)/);
+  assert.ok(!r.includes("@me") && !r.includes("http://e"));
 });
 
 test("only the last five clicks are told", () => {

@@ -11,7 +11,8 @@ const cut = (s, max) => { const c = [...s]; return c.length > max ? `${c.slice(0
 
 /** Words a person reads: no e-mail addresses, no digits, short. */
 export function redactText(s, max = 80) {
-  let r = String(s ?? "").replace(/\s+/g, " ").trim();
+  // Invisible format characters (bidi overrides, zero widths) could reorder what the user reads.
+  let r = String(s ?? "").replace(/\p{Cf}/gu, "").replace(/\s+/g, " ").trim();
   r = r.replace(/[\p{L}\p{N}._%+-]+@[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)+/gu, "[e-mail]");
   r = r.replace(/\p{N}+/gu, "#");
   // A code span in the report must not end early.
@@ -21,14 +22,28 @@ export function redactText(s, max = 80) {
 
 /** Script in an attribute: function names stay, what is quoted (also in backticks) goes. */
 export function redactCode(s, max = 120) {
-  const r = String(s ?? "").replace(/(["'`])(?:\\.|(?!\1)[^\\])*\1/g, "$1…$1");
+  // Pairs of quotes first, then an unpaired one to the end.
+  const pairs = [];
+  let r = String(s ?? "").replace(/(["'`])(?:\\.|(?!\1)[^\\])*\1/g, (_, q) => { pairs.push(q); return `\u0000${pairs.length - 1}\u0000`; });
+  r = r.replace(/["'`].*$/s, (m) => `${m[0]}…`).replace(/\u0000(\d+)\u0000/g, (_, i) => `${pairs[i]}…${pairs[i]}`);
   return redactText(r, max);
 }
 
-// A key or token: 16 characters or more that are not plain words. A plain word is all digits, or
-// all letters with few changes from small to capital (camelCase has some, random keys many).
-const plain = (p) => /^\p{N}+$/u.test(p) || (/^\p{L}+$/u.test(p) && [...p].length <= 30 && (p.match(/\p{Ll}\p{Lu}/gu) || []).length <= Math.floor([...p].length / 6));
-export const opaque = (s) => [...String(s)].length >= 16 && !String(s).split(/[-_.~+=%\s]+/).filter(Boolean).every(plain);
+// A key or token. A part (between separators) of 8 characters or more is one when letters and
+// digits change more than once ("aBcDe4GhIjK7mNo"), small and capital letters change often
+// ("dGhpcyBpcyBh"; camelCase changes seldom), or it is a long run of capitals. A whole of 16
+// characters or more is one when a part is neither digits, nor letters, nor letters then digits.
+const tokenPart = (p) => {
+  const n = [...p].length;
+  if (n < 8) return false;
+  const turns = (p.match(/\p{L}\p{N}|\p{N}\p{L}/gu) || []).length, caps = (p.match(/\p{Ll}\p{Lu}/gu) || []).length;
+  return turns >= 2 || caps > n / 4 || (/^\p{Lu}+$/u.test(p) && n > 12);
+};
+const plain = (p) => /^\p{N}+$/u.test(p) || /^\p{L}+\p{N}*$/u.test(p);
+export const opaque = (s) => {
+  const parts = String(s).split(/[-_.~+=%\s]+/).filter(Boolean);
+  return parts.some(tokenPart) || ([...String(s)].length >= 16 && !parts.every(plain));
+};
 /** A name such as an id or class list: each key or token in it left out, the rest as words. */
 export function redactName(s, max = 60) {
   return redactText(String(s ?? "").split(/\s+/).filter(Boolean).map((w) => (opaque(w) ? "…" : w)).join(" "), max);
@@ -56,6 +71,7 @@ export function redactUrl(u, portalOrigin, namePortal = true) {
   try { x = new URL(u); } catch { return redactCode(u, 60); }
   if (x.protocol === "data:") return `data:${redactText(x.pathname.split(/[;,]/)[0], 40)}`;
   if (x.protocol === "blob:") return "blob: (made in the page)";
+  if (/-extension:$/.test(x.protocol)) return "[extension]";
   const site = x.origin === portalOrigin ? "" : namePortal ? `${x.protocol}//${redactText(x.host, 60)}` : "[another site]";
   const path = x.pathname.split("/").map((seg) => {
     let d = seg;
@@ -73,7 +89,8 @@ const WHY = { attr: "download attribute", name: "file name in its address", type
 export function verdictText(v, tag = "") {
   if (!v) return "unknown";
   if (v.finder === "none" && /^(input|textarea|select)$/.test(String(tag))) return "not found: a form field";
-  if (v.finder === "found") return `found as a ${v.kind} (${WHY[v.reason] || v.reason}), ${v.sure === false ? "offered unticked" : "ticked"}`;
+  const KINDS = { file: "file", link: "link", button: "button" };
+  if (v.finder === "found") return `found as a ${KINDS[v.kind] || "candidate"} (${WHY[v.reason] || "other reason"}), ${v.sure === false ? "offered unticked" : "ticked"}`;
   if (v.finder === "hidden") return v.why === "path" ? "left out: a word in its address path names an action" : "left out: its words name a destroying action";
   return v.clickable ? "not found: no file, download or document word in it" : "not found: no link or button in the markup (a script listens to it)";
 }
@@ -90,7 +107,8 @@ function clickLines(n, c, origin, namePortal) {
   const more = [];
   if (S(c.id)) more.push(`id ${code(redactName(c.id, 40))}`);
   if (c.href) more.push(`href ${code(redactUrl(c.href, origin, namePortal))}`);
-  if (c.download !== null && c.download !== undefined) more.push(`download ${code(redactText(c.download, 40))}`);
+  // Of a file name only its ending: the name may be the customer's.
+  if (c.download !== null && c.download !== undefined) more.push(`download attribute ${code(`set${endingOf(c.download) === "none" ? "" : `, ${endingOf(c.download)}`}`)}`);
   if (c.target) more.push(`target ${code(redactText(c.target, 20))}`);
   if (c.onclick) more.push(`onclick ${code(redactCode(c.onclick))}`);
   if (c.form) more.push(`sends a form: ${code(redactText(c.form.method, 8))} ${code(redactUrl(c.form.action, origin, namePortal))}`);
@@ -104,6 +122,14 @@ function clickLines(n, c, origin, namePortal) {
   }
   lines.push(`   search: ${verdictText(c.verdict, c.tag)}`);
   return lines;
+}
+
+/** The ending of a file name: letters only, at most five, else "other" (a name may hide in a longer one). */
+function endingOf(name) {
+  const last = String(name ?? "").split(/[\\/]/).pop();
+  const m = /\.([^.]+)$/.exec(last);
+  if (!m) return "none";
+  return /^[A-Za-z]{1,5}$/.test(m[1]) ? `.${m[1].toLowerCase()}` : "other";
 }
 
 const ENDED = { download: "a download started", timeout: "no download within two minutes", stopped: "stopped by the user", gone: "the tab was closed" };
@@ -122,7 +148,7 @@ export function buildReport(w, { version = "", browser = "", namePortal = true }
     // Version and browser name nobody; they stay as they are.
     `**Observed with Portal-Download ${String(version).replace(/[^\w.]/g, "")}${browser ? `, ${String(browser).replace(/[^\w .]/g, "").slice(0, 40)}` : ""}**`,
     "",
-    `- Portal: ${namePortal && host ? host : "(not named)"}`,
+    `- Portal: ${namePortal && host ? code(host.replace(/[`\p{Cf}]/gu, "")) : "(not named)"}`,
     `- Page: ${code(redactUrl(w.url, origin, namePortal))}`,
     `- Ended: ${ENDED[w.ended] || w.ended || "?"}`,
     "",
@@ -135,15 +161,16 @@ export function buildReport(w, { version = "", browser = "", namePortal = true }
     clicks.forEach((c, k) => {
       out.push(...clickLines(k + 1, c, origin, namePortal));
       const next = clicks[k + 1] ? clicks[k + 1].at : Infinity;
-      for (const e of events.filter((x) => x.at >= c.at && x.at < next && !/^about:/i.test(x.url || "") && (x.url || x.kind === "tab"))) {
-        out.push(e.kind === "tab" ? `   then a new tab opened: ${code(redactUrl(e.url, origin, namePortal) || "(no address yet)")}` : `   then the page loaded: ${code(redactUrl(e.url, origin, namePortal))}`);
+      for (const e of events.filter((x) => x.at >= c.at && x.at < next && (x.kind === "tab" || (x.url && !/^about:/i.test(x.url))))) {
+        const where = /^about:/i.test(e.url || "") ? "" : redactUrl(e.url, origin, namePortal);
+        out.push(e.kind === "tab" ? `   then a new tab opened: ${code(where || "(no address yet)")}` : `   then the page loaded: ${code(where)}`);
       }
     });
   }
   const d = w.download;
   if (d) {
     out.push("", "**Download**", "");
-    const ending = (() => { const m = /\.([A-Za-z0-9]{1,8})$/.exec(String(d.filename || "").split(/[\\/]/).pop() || ""); return m ? `.${m[1].toLowerCase()}` : "none"; })();
+    const ending = endingOf(d.filename);
     out.push(`- type ${code(redactText(d.mime || "unknown", 60))}, file ending ${code(ending)}`);
     out.push(`- address ${code(redactUrl(d.finalUrl || d.url, origin, namePortal))}${d.referrer ? `, started from ${code(redactUrl(d.referrer, origin, namePortal))}` : ", no referrer"}`);
   }

@@ -242,24 +242,24 @@ The extension can write the details for you. It watches you download one documen
 2. **Read the card *Feedback on this portal*, then click *Start watching*.** The browser asks for access to the site and for the downloads permission, unless it has them already. Both are needed. The downloads permission stays afterwards; you can remove it in the browser's extension settings.
 3. **Download one document in the page, the way you normally do.** If the button you use is the one the extension missed, click it anyway: that click is what we need to see. The panel counts along: *Clicks noted: 3*. Watching ends at the first download, after two minutes, when you click *Stop and show the text*, or when the tab is closed. If you leave the view or close the panel, it ends too and the notes are gone.
 4. **Read the text.** It is in English, whatever the panel's language, and holds only the last five clicks. Untick *Name the portal* if you want the site's name left out; the page's path is still shown. Do that first, because it makes the text anew. Then edit the text in its box and delete anything personal: look at the words in quotes of each click (also after *title*, *label* and *alt*), at the addresses, and at the first lines (*Portal*, *Page*).
-5. **Click *Copy the text*, then *Open the feedback form*.** The form opens on GitHub; paste the text into the field *The text from the panel*. Nothing is sent before you post it there.
+5. **Click *Copy the text*, then *Open the feedback form*.** The form opens on GitHub. Paste the text into the field *The text from the panel (optional)*, not into *What the panel said*. Choose *What happened* (here: *A document was not found*), write "see below" under *The element*, and give the version from the bottom of the panel and your browser. The form's own *Portal* field is separate from the tick in the panel; leave it empty if you do not want to name the portal. Nothing is sent before you post it.
 
 **What is watched:** the tab that was active when you started, every frame in it, and the pages it loads. Also a tab opened from it within five seconds after a click; in Chrome that includes a tab you open yourself in that moment. Only your own clicks are noted, nothing you type. If the browser does not let the extension into the page, the panel says so.
 
 **What is noted for each click:**
 
 - The element: tag, type, role, id and class, and whether the cursor is a pointer over it.
-- Its words: the text of a link or button, or the label of an input button. For any other element, its text only if it is at most 40 characters and has nothing nested in it. Also *title*, *aria-label* and *alt*. Never the content of a text field, password field, text area or selection list.
+- Its words: the text of a link or button, or the label of an input button. For any other element, its text only if it is at most 40 characters and has nothing nested in it. Also *title*, *aria-label* and *alt*. Never the content of a text field, password field or text area, nor an entry chosen from a list, nor the words of an element that holds such a field.
 - Where it leads: the address, *target*, the *download* attribute, the `onclick` attribute, and for a submit button the form's address and method.
 - Its surroundings: up to six icons inside it (class, title, label, alt, address), up to three elements around it (tag and class), and whether it is in a frame (with the frame's address) or in shadow DOM.
 - What the search made of it: found, left out (and why), or not found.
-- What followed: pages loaded, tabs opened, and the first download from the portal's own sites, with its type, file ending, address and referrer. The file's name is not noted, only its ending.
+- What followed: pages loaded (also of other sites, such as a login page), tabs opened, and the first download from the portal's own sites, with its type, file ending, address and referrer. The file's name is not noted, only its ending; of a *download* attribute, too, only the ending. A name may still stand in the address or in the link's words.
 
 **What is changed before you see the text:**
 
-- Every run of digits becomes `#`, every e-mail address `[e-mail]`.
+- Every run of digits becomes `#`, every e-mail address `[e-mail]`; only the portal's name after *Portal:* stays as it is, if you leave it named.
 - In addresses, the values of parameters, the `#…` part and `;…` parameters are removed. The names of parameters stay.
-- Tokens are removed: 16 or more characters that are not plain words, in a part of an address path, a parameter name, an id or a class.
+- Keys and tokens are removed from address paths, parameter names, ids and classes: parts of 8 or more characters in which letters and digits, or small and capital letters, change often, and longer strings that are not plain words.
 - In scripts, everything in quotes is removed. Function names and other unquoted names stay.
 - Long texts are cut, the words of a click to 80 characters.
 - With *Name the portal* unticked, the portal's host is left out and other sites become `[another site]`.

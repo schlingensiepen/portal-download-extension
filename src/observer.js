@@ -33,10 +33,13 @@ export function observe(token) {
   };
   // The words a person reads on it, never what was typed: buttons and links only; a plain element
   // only when it holds nothing but a short text of its own (not a whole row or panel).
-  const words = (el, clickable) => {
-    if (el.matches("input, textarea, select, [contenteditable], [contenteditable] *")) {
-      return el.matches("input[type=button], input[type=submit], input[type=reset]") ? attr(el, "value") : "";
-    }
+  // Anything one types into or chooses from: its words are never read.
+  const FIELD = "input:not([type=button]):not([type=submit]):not([type=reset]):not([type=image]), textarea, select, option, optgroup, datalist, [contenteditable]:not([contenteditable=false]), [role=textbox], [role=listbox], [role=option], [role=combobox], [role=searchbox]";
+  const words = (el, clickable, target) => {
+    if (el.matches("input[type=button], input[type=submit], input[type=reset]")) return attr(el, "value");
+    // The click landed in a field, the element is one, or it holds one (a wrapper around a form):
+    // no words. Neither for the page itself.
+    if ((target && target.closest(FIELD)) || el.closest(FIELD) || el.querySelector(FIELD) || el === document.body || el === document.documentElement) return "";
     const t = (el.innerText || "").replace(/\s+/g, " ").trim();
     if (clickable) return t.slice(0, 200);
     return el.children.length === 0 && t.length <= 40 ? t : "";
@@ -62,7 +65,7 @@ export function observe(token) {
     if (submits && form) { try { action = new URL(attr(form, "action") || "", document.baseURI).href; } catch { action = attr(form, "action"); } }
     return {
       at: Date.now(), tag: tagOf(el), type: attr(el, "type"), role: attr(el, "role"), id: attr(el, "id"), cls: cls(el),
-      text: words(el, !!hit), title: attr(el, "title"), aria: attr(el, "aria-label"), alt: attr(el, "alt"),
+      text: words(el, !!hit, els[0]), title: attr(el, "title"), aria: attr(el, "aria-label"), alt: attr(el, "alt"),
       download: el.hasAttribute("download") ? attr(el, "download") || "(empty)" : null,
       href, target: attr(el, "target"), onclick: attr(el, "onclick"),
       form: submits && form ? { action, method: (attr(form, "method") || "get").toLowerCase() } : null,
@@ -79,7 +82,7 @@ export function observe(token) {
       const click = describe(e.composedPath());
       // Only the watching panel answers true; anything else (closed, ended, a newer watch) stops the noting.
       Promise.resolve(api.runtime.sendMessage({ portalDownloadClick: token, click })).then((r) => { if (r !== true) off(); }, off);
-    } catch { /* never in the way of the page */ }
+    } catch { off(); /* never in the way of the page; an extension reloaded meanwhile cannot be reached */ }
   }
   const me = { off };
   globalThis.__portalDownloadObserve = me;
