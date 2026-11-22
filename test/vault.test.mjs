@@ -17,8 +17,15 @@ function area() {
 }
 const local = area(), session = area();
 globalThis.chrome = { storage: { local, session } };
-let tail = Promise.resolve();
-Object.defineProperty(globalThis.navigator, "locks", { value: { request(_name, fn) { const run = tail.then(() => fn({})); tail = run.catch(() => {}); return run; } } });
+// One lock for every name, enough here; ifAvailable gets null while it is held.
+let tail = Promise.resolve(), held = false;
+Object.defineProperty(globalThis.navigator, "locks", { value: { request(_name, opts, fn) {
+  if (typeof opts === "function") { fn = opts; opts = {}; }
+  if (opts.ifAvailable && held) return Promise.resolve(fn(null));
+  if (opts.ifAvailable) { held = true; return Promise.resolve().then(() => fn({})).finally(() => { held = false; }); }
+  const run = tail.then(async () => { held = true; try { return await fn({}); } finally { held = false; } });
+  tail = run.catch(() => {}); return run;
+} } });
 
 const here = dirname(fileURLToPath(import.meta.url));
 const src = process.env.VAULT_SRC ? resolve(process.env.VAULT_SRC) : join(here, "..", "src", "vault.js");
@@ -184,12 +191,28 @@ test("unlock while another window changes the passphrase uses the new salt", asy
   assert.equal(await pending, true);
 });
 
-test("a damaged store counts as locked", async () => {
+test("a damaged store counts as locked, and unlock names it", async () => {
   const v = new Vault();
   await v.createLocal("correct horse battery");
   const rec = local.m.get("vault");
   rec.sealed.data = Buffer.from("broken content here").toString("base64");
   assert.equal(await kind(v.read()), "locked");
+  await v.lock();
+  assert.equal(await v.unlock("correct horse battery"), "damaged");
+  assert.equal(await v.state(), "locked");
+});
+
+test("a read while the store is being removed leaves the services written for it", async () => {
+  const a = new Vault(), b = new Vault();
+  await a.createLocal("correct horse battery");
+  await a.update((c) => { c.services.push({ id: "s1", token: "t" }); });
+  // As removeLocal stands between its two writes, under the lock.
+  let release; const removing = navigator.locks.request("x", () => new Promise((r) => { release = r; }));
+  await new Promise((r) => setTimeout(r, 0));
+  await local.set({ services: [{ id: "s1", token: "t" }] });
+  await b.read();
+  assert.equal(local.m.has("services"), true);
+  release(); await removing;
 });
 
 let failed = 0;

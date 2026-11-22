@@ -62,6 +62,20 @@ export class Vault {
   #revs = new WeakMap();
   #at = (vault) => (vault ? `${vault.kid}:${vault.rev}` : "plain");
 
+  /**
+   * Removes a services list left by a creation cut short between its writes: with a store, no
+   * service lies in plain. Only when no change holds the lock, since removeLocal writes that
+   * list on purpose while the store still exists; under the lock it is not touched.
+   */
+  async #tidy() {
+    if (!globalThis.navigator?.locks) return;
+    await navigator.locks.request(VAULT_LOCK, { ifAvailable: true }, async (held) => {
+      if (!held) return;
+      const { vault, services } = await api.storage.local.get(["vault", "services"]);
+      if (vault && services) await api.storage.local.remove("services");
+    });
+  }
+
   /** "plain" (no local backend), "locked" or "open". */
   async state() {
     const { vault } = await api.storage.local.get("vault");
@@ -73,8 +87,7 @@ export class Vault {
   async read() {
     const { vault, services } = await api.storage.local.get(["vault", "services"]);
     if (!vault) { const c = { services: services || [], local: null }; this.#revs.set(c, this.#at(null)); return c; }
-    // Left by a creation cut short between its writes: with a store, no service lies in plain.
-    if (services) await api.storage.local.remove("services");
+    if (services) await this.#tidy();
     // A store of an older version, or a key of another store (one deleted and made anew in
     // another window), counts as locked: the passphrase opens it.
     const key = vault.v === 2 ? await sessionKey(vault) : null;
@@ -111,6 +124,8 @@ export class Vault {
       if (now.v === 2) {
         const raw = await unwrap(kek, now);
         if (!raw) return false;
+        // The passphrase fits, but the content does not open: a damaged store stays locked.
+        try { await open(await importDataKey(raw), now.sealed); } catch { return "damaged"; }
         await remember(now.kid, raw);
         return true;
       }
@@ -165,7 +180,7 @@ export class Vault {
       const { vault } = await api.storage.local.get("vault");
       if (!vault || vault.v !== 2) throw failure("locked");
       const { vaultKey } = await api.storage.session.get("vaultKey");
-      if (!(await sessionKey(vault))) throw failure("locked");
+      if (!vaultKey || typeof vaultKey !== "object" || vaultKey.kid !== vault.kid) throw failure("locked");
       const wrapped = await encrypt(kek, unb64(vaultKey.key));
       await api.storage.local.set({ vault: { ...vault, rev: vault.rev + 1, salt: b64(salt), iterations: ITERATIONS, wrapped } });
     });

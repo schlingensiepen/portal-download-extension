@@ -93,12 +93,14 @@ const current = () => state.backends.find((b) => b.id === state.choice) || null;
 let loads = 0;
 async function loadBackends() {
   const mine = ++loads;
-  const vaultState = await vault.state();
+  let vaultState = await vault.state();
   const backends = [];
   let content = null;
   if (vaultState !== "locked") {
     try { content = await vault.read(); }
     catch (e) { if (e.kind !== "locked") throw e; return finish(mine, "locked", [], null); }
+    // From what was read: another window may have created or removed the store since state().
+    vaultState = content.local ? "open" : "plain";
     for (const s of content.services) backends.push(new ServiceBackend(s));
     if (content.local) { const b = localBackend(vault); b.name = t("local_name"); backends.push(b); }
   }
@@ -163,10 +165,11 @@ function viewUnlock() {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     try {
-      if (!(await vault.unlock(pw.value))) return toast(t("passphrase_wrong"), true);
-      await loadBackends();
+      const ok = await vault.unlock(pw.value);
+      if (!ok) return toast(t("passphrase_wrong"), true);
       // The passphrase fit, but the content does not open: a damaged store.
-      if (state.vaultState === "locked") return toast(t("err_damaged"), true);
+      if (ok === "damaged") return toast(t("err_damaged"), true);
+      await loadBackends();
       go("list");
     } catch (err) { fail(err); }
   });
