@@ -161,6 +161,9 @@
   "failed": {
     "message": "failed"
   },
+  "feedback": {
+    "message": "Feedback"
+  },
   "file_password": {
     "message": "Password for the file (8 to 200 characters without umlauts)"
   },
@@ -334,6 +337,9 @@
   },
   "preview_title": {
     "message": "What reading the file in does"
+  },
+  "project_page": {
+    "message": "Project page"
   },
   "really": {
     "message": "Really?"

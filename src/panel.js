@@ -442,6 +442,12 @@ $("#add").addEventListener("click", () => go("add"));
 $("#manage").addEventListener("click", () => go("manage"));
 document.documentElement.lang = api.i18n.getUILanguage();
 $("#choose").setAttribute("aria-label", t("backend"));
+// The links at the foot open in a tab of their own.
+for (const [sel, label] of [["#project", t("project_page")], ["#feedback", t("feedback")]]) {
+  const a = $(sel); a.textContent = label;
+  a.addEventListener("click", (e) => { e.preventDefault(); api.tabs.create({ url: a.href }); });
+}
+$("#version").textContent = `v${api.runtime.getManifest().version}`;
 // Another panel of this browser may unlock, lock or add a service.
 api.storage.onChanged.addListener(async (_, area) => { if (area === "local" || area === "session") { await loadBackends(); if (state.view === "list" || state.view === "add" || state.vaultState === "locked") render(); else renderTop(); } });
 loadBackends().then(render, fail);

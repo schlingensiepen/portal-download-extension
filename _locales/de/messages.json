@@ -161,6 +161,9 @@
   "failed": {
     "message": "hat nicht geklappt"
   },
+  "feedback": {
+    "message": "Feedback"
+  },
   "file_password": {
     "message": "Passwort für die Datei (8 bis 200 Zeichen ohne Umlaute)"
   },
@@ -334,6 +337,9 @@
   },
   "preview_title": {
     "message": "Was das Einlesen bewirkt"
+  },
+  "project_page": {
+    "message": "Projektseite"
   },
   "really": {
     "message": "Wirklich?"
