@@ -38,7 +38,8 @@ async function remember(key) {
 }
 
 /** One change of the stored content at a time, across every panel of this browser. */
-export const withVaultLock = (fn) => (globalThis.navigator?.locks ? navigator.locks.request("portal-download-vault", fn) : fn());
+const VAULT_LOCK = "portal-download-vault";
+export const withVaultLock = (fn) => (globalThis.navigator?.locks ? navigator.locks.request(VAULT_LOCK, fn) : fn());
 
 export class Vault {
   /** "plain" (no local backend), "locked" or "open". */
@@ -57,7 +58,14 @@ export class Vault {
     // A key that does not open the store (a change of passphrase cut short) counts as locked:
     // the passphrase then opens it again.
     try { return await open(key, vault.sealed); }
-    catch { await api.storage.session.remove("vaultKey"); throw Object.assign(new Error("locked"), { kind: "locked" }); }
+    catch {
+      // While a change holds the lock (a passphrase change between its two writes), this is a
+      // passing state: report it, keep the key.
+      const held = globalThis.navigator?.locks ? (await navigator.locks.query()).held.some((l) => l.name === VAULT_LOCK) : false;
+      if (held) throw Object.assign(new Error("busy"), { kind: "busy" });
+      await api.storage.session.remove("vaultKey");
+      throw Object.assign(new Error("locked"), { kind: "locked" });
+    }
   }
 
   async write(content) {
