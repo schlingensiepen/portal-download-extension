@@ -570,16 +570,16 @@
     "message": "Comentarios sobre este portal"
   },
   "watch_intro": {
-    "message": "Descarga un documento de la página como siempre. La extensión anota lo que pulsas, para que puedas enviárnoslo como comentario. Así vemos cómo ofrece este portal sus documentos."
+    "message": "Descarga un documento de la página como siempre; si el botón que usas es el que la extensión no encontró, púlsalo igualmente. La extensión anota tus clics y hace con ellos un texto, en inglés, que puedes publicar como comentario."
   },
   "watch_what_tab": {
-    "message": "Solo esta pestaña y las que abra; termina con la primera descarga, tras dos minutos o cuando lo detengas."
+    "message": "Se observan esta pestaña, sus marcos, las páginas que carga y una pestaña abierta desde ella justo después de un clic. Termina con la primera descarga, tras dos minutos o cuando lo detienes, cierras la pestaña o sales de esta vista."
   },
   "watch_what_click": {
-    "message": "Por cada clic: el tipo de elemento, sus palabras, la forma de su dirección y lo que la búsqueda hizo con él."
+    "message": "Por cada clic se anota: el elemento con su id y su clase, sus palabras, título y etiqueta, su dirección y un posible script onclick, los iconos que contiene, los elementos de alrededor y lo que la búsqueda hizo con él. Nunca lo que escribiste o elegiste en un campo."
   },
   "watch_what_private": {
-    "message": "Los números, las direcciones de correo y los valores de las direcciones se tachan. Nada sale de tu ordenador: ves el texto y decides si lo copias."
+    "message": "Las cifras pasan a #, las direcciones de correo a [e-mail]; los valores de las direcciones, los tokens largos y el texto entre comillas de los scripts se quitan, pero las palabras normales se quedan, también los nombres. No se envía nada: ves el texto, puedes cambiarlo y decides si lo copias."
   },
   "watch_start": {
     "message": "Empezar a observar"
@@ -609,7 +609,7 @@
     "message": "La pestaña se ha cerrado; la observación ha terminado."
   },
   "watch_check": {
-    "message": "Lee el texto antes de enviarlo. Los nombres en las palabras de un enlace o botón no se pueden reconocer: borra todo lo personal."
+    "message": "Lee el texto; contiene los cinco últimos clics y puedes cambiarlo en el cuadro. Los nombres no se pueden reconocer: ajusta primero la casilla de abajo, porque rehace el texto, y luego borra todo lo personal de las palabras, títulos, etiquetas, direcciones y primeras líneas."
   },
   "watch_name_portal": {
     "message": "Nombrar el portal ($1)"

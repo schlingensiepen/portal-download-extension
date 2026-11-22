@@ -234,17 +234,40 @@ A document that failed stays ticked, so that *Start downloading* tries it again.
 
 **What it never does:** log in or fill in a form. Elements whose words name a destroying action (delete, remove, log out, cancel, revoke, unsubscribe and the like), and links whose address path names one (delete, cancel, logout, upload, submit and the like), are never offered; the panel says how many it left out. Words that may name an action or a document alike (save, send, order, pay, archive, sign, share) only take the tick away: such an element is offered unticked, for you to decide. A link straight to a file is downloaded whatever its address says. A button that sends a form, or says *download* and an action at once, is only offered unticked, for you to decide. It works only when you click. It remembers which documents were downloaded, per job, in this browser only, as checksums that name no address and no document; *Forget which documents were downloaded* at the end of the list clears that for the job. Closing the panel takes the highlighting off the page and ends the downloads.
 
-**A portal where it goes wrong:** if it misses a document, ticks something that is no document, or a download fails, please tell us with the form [Feedback on a portal](https://github.com/schlingensiepen/portal-download-extension/issues/new?template=portal-feedback.yml). The rules for what counts as a document can only get better with real portals. Everything else goes to the [discussions](https://github.com/schlingensiepen/portal-download-extension/discussions). Do not include your name, customer numbers, addresses with session parameters, or screenshots with personal data.
+**A portal where it goes wrong:** if it misses a document, ticks something that is no document, or a download fails, please tell us with the form [Feedback on a portal](https://github.com/schlingensiepen/portal-download-extension/issues/new?template=portal-feedback.yml). Posting needs a GitHub account, and what you post is public. The rules for what counts as a document can only get better with real portals. Everything else goes to the [discussions](https://github.com/schlingensiepen/portal-download-extension/discussions). Do not include your name, customer numbers, addresses with session parameters, or screenshots with personal data.
 
-The extension can write the details for you:
+The extension can write the details for you. It watches you download one document and makes a text of what it saw.
 
-1. In the page, click *Something missing or wrong? Show me how you download* in the panel (below *Find documents on this page*, and below a list of found documents). The panel says what will be noted.
-2. Click *Start watching*. The first time, the browser asks for access to the site and to the downloads.
-3. Download one document in the page, as you always do. Watching ends at the first download, after two minutes, or when you click *Stop and show the text*.
-4. **Read the text.** For each click it names the kind of element, its words, the form of its address, any script in its markup, and what the search made of it; then what followed, such as a new tab and the download. Numbers, e-mail addresses, the values in addresses and long keys are blacked out. A name in the words of a link cannot be recognised: delete anything personal. Untick *Name the portal* to leave its address out.
-5. Click *Copy the text*, then *Open the feedback form*, and paste it there. Nothing is sent before you do; the issue is public.
+1. **Open the portal page with the document.** In the panel, click *Something missing or wrong? Show me how you download*. The button is below *Find documents on this page* (in an open job, in the list of jobs and on the welcome card) and at the end of a list of found documents, also when the search found nothing.
+2. **Read the card *Feedback on this portal*, then click *Start watching*.** The browser asks for access to the site and for the downloads permission, unless it has them already. Both are needed. The downloads permission stays afterwards; you can remove it in the browser's extension settings.
+3. **Download one document in the page, the way you normally do.** If the button you use is the one the extension missed, click it anyway: that click is what we need to see. The panel counts along: *Clicks noted: 3*. Watching ends at the first download, after two minutes, when you click *Stop and show the text*, or when the tab is closed. If you leave the view or close the panel, it ends too and the notes are gone.
+4. **Read the text.** It is in English, whatever the panel's language, and holds only the last five clicks. Untick *Name the portal* if you want the site's name left out; the page's path is still shown. Do that first, because it makes the text anew. Then edit the text in its box and delete anything personal: look at the words in quotes of each click (also after *title*, *label* and *alt*), at the addresses, and at the first lines (*Portal*, *Page*).
+5. **Click *Copy the text*, then *Open the feedback form*.** The form opens on GitHub; paste the text into the field *The text from the panel*. Nothing is sent before you post it there.
 
-Scripts a portal attaches to an element are invisible to an extension; the text shows only what the markup says and what happened after the click.
+**What is watched:** the tab that was active when you started, every frame in it, and the pages it loads. Also a tab opened from it within five seconds after a click; in Chrome that includes a tab you open yourself in that moment. Only your own clicks are noted, nothing you type. If the browser does not let the extension into the page, the panel says so.
+
+**What is noted for each click:**
+
+- The element: tag, type, role, id and class, and whether the cursor is a pointer over it.
+- Its words: the text of a link or button, or the label of an input button. For any other element, its text only if it is at most 40 characters and has nothing nested in it. Also *title*, *aria-label* and *alt*. Never the content of a text field, password field, text area or selection list.
+- Where it leads: the address, *target*, the *download* attribute, the `onclick` attribute, and for a submit button the form's address and method.
+- Its surroundings: up to six icons inside it (class, title, label, alt, address), up to three elements around it (tag and class), and whether it is in a frame (with the frame's address) or in shadow DOM.
+- What the search made of it: found, left out (and why), or not found.
+- What followed: pages loaded, tabs opened, and the first download from the portal's own sites, with its type, file ending, address and referrer. The file's name is not noted, only its ending.
+
+**What is changed before you see the text:**
+
+- Every run of digits becomes `#`, every e-mail address `[e-mail]`.
+- In addresses, the values of parameters, the `#…` part and `;…` parameters are removed. The names of parameters stay.
+- Tokens are removed: 16 or more characters that are not plain words, in a part of an address path, a parameter name, an id or a class.
+- In scripts, everything in quotes is removed. Function names and other unquoted names stay.
+- Long texts are cut, the words of a click to 80 characters.
+- With *Name the portal* unticked, the portal's host is left out and other sites become `[another site]`.
+- Everything the page wrote stands in code marks, so that it cannot become a link, an image or a mention in the issue.
+
+**What stays:** plain words, also in an address path such as `/customer/max-muster/`, and names in the words of a link or button. The extension cannot recognise a name; that is why you read the text. The notes are passed from the page to the panel inside the extension and kept in the panel's memory only. Nothing is sent anywhere.
+
+Scripts a page attaches with `addEventListener` are invisible to an extension. The text shows only an `onclick` in the markup, and what happened after the click.
 
 **Close the run** afterwards as before, with *Succeeded* or *Failed*; downloading does not close it.
 

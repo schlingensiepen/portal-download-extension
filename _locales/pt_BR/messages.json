@@ -570,16 +570,16 @@
     "message": "Feedback sobre este portal"
   },
   "watch_intro": {
-    "message": "Baixe um documento da página como sempre faz. A extensão anota o que você clica, para que você possa nos enviar como feedback. Assim vemos como este portal oferece seus documentos."
+    "message": "Baixe um documento da página como você sempre faz; se o botão que você usa for o que a extensão não encontrou, clique nele mesmo assim. A extensão anota seus cliques e faz deles um texto, em inglês, que você pode publicar como feedback."
   },
   "watch_what_tab": {
-    "message": "Só esta aba e as abas que ela abrir; termina no primeiro download, após dois minutos ou quando você parar."
+    "message": "São observados esta aba, seus quadros, as páginas que ela carrega e uma aba aberta a partir dela logo após um clique. Termina no primeiro download, após dois minutos ou quando você para, fecha a aba ou sai desta tela."
   },
   "watch_what_click": {
-    "message": "Para cada clique: o tipo de elemento, suas palavras, a forma do endereço e o que a busca fez com ele."
+    "message": "Anotado para cada clique: o elemento com seu id e sua classe, suas palavras, título e rótulo, seu endereço e um eventual script onclick, os ícones dentro dele, os elementos ao redor e o que a busca fez com ele. Nunca o que você digitou ou escolheu num campo."
   },
   "watch_what_private": {
-    "message": "Números, endereços de e-mail e os valores nos endereços são ocultados. Nada sai do seu computador: você vê o texto e decide se o copia."
+    "message": "Os dígitos viram #, os endereços de e-mail [e-mail]; os valores nos endereços, tokens longos e texto entre aspas nos scripts são removidos, mas as palavras comuns ficam, inclusive nomes. Nada é enviado: você vê o texto, pode alterá-lo e decide se o copia."
   },
   "watch_start": {
     "message": "Começar a observar"
@@ -609,7 +609,7 @@
     "message": "A aba foi fechada; a observação terminou."
   },
   "watch_check": {
-    "message": "Leia o texto antes de enviar. Nomes nas palavras de um link ou botão não podem ser reconhecidos: apague tudo o que for pessoal."
+    "message": "Leia o texto; ele contém os cinco últimos cliques, e você pode alterá-lo na caixa. Nomes não podem ser reconhecidos: ajuste primeiro a caixa de seleção abaixo, pois ela refaz o texto, e depois apague tudo o que for pessoal das palavras, títulos, rótulos, endereços e primeiras linhas."
   },
   "watch_name_portal": {
     "message": "Nomear o portal ($1)"

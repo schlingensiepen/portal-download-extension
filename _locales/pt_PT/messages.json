@@ -570,16 +570,16 @@
     "message": "Comentários sobre este portal"
   },
   "watch_intro": {
-    "message": "Transfira um documento da página como faz sempre. A extensão regista aquilo em que clica, para que o possa enviar como comentário. Assim vemos como este portal disponibiliza os seus documentos."
+    "message": "Transfira um documento da página como faz sempre; se o botão que usa for o que a extensão não encontrou, clique nele na mesma. A extensão regista os seus cliques e faz deles um texto, em inglês, que pode publicar como comentário."
   },
   "watch_what_tab": {
-    "message": "Apenas este separador e os que ele abrir; termina na primeira transferência, após dois minutos ou quando parar."
+    "message": "São observados este separador, os seus quadros, as páginas que carrega e um separador aberto a partir dele logo após um clique. Termina na primeira transferência, após dois minutos ou quando parar, fechar o separador ou sair desta vista."
   },
   "watch_what_click": {
-    "message": "Para cada clique: o tipo de elemento, as suas palavras, a forma do endereço e o que a pesquisa fez com ele."
+    "message": "Registado para cada clique: o elemento com o seu id e a sua classe, as suas palavras, título e etiqueta, o seu endereço e um eventual script onclick, os ícones nele contidos, os elementos à volta e o que a pesquisa fez com ele. Nunca o que escreveu ou escolheu num campo."
   },
   "watch_what_private": {
-    "message": "Números, endereços de e-mail e os valores nos endereços são ocultados. Nada sai do seu computador: vê o texto e decide se o copia."
+    "message": "Os algarismos passam a #, os endereços de e-mail a [e-mail]; os valores nos endereços, os tokens longos e o texto entre aspas nos scripts são removidos, mas as palavras comuns ficam, incluindo nomes. Nada é enviado: vê o texto, pode alterá-lo e decide se o copia."
   },
   "watch_start": {
     "message": "Começar a observar"
@@ -609,7 +609,7 @@
     "message": "O separador foi fechado; a observação terminou."
   },
   "watch_check": {
-    "message": "Leia o texto antes de o enviar. Nomes nas palavras de uma ligação ou botão não podem ser reconhecidos: apague tudo o que for pessoal."
+    "message": "Leia o texto; contém os cinco últimos cliques, e pode alterá-lo na caixa. Os nomes não podem ser reconhecidos: defina primeiro a caixa abaixo, pois ela refaz o texto, e depois apague tudo o que for pessoal das palavras, títulos, etiquetas, endereços e primeiras linhas."
   },
   "watch_name_portal": {
     "message": "Indicar o portal ($1)"

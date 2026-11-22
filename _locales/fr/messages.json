@@ -570,16 +570,16 @@
     "message": "Retour sur ce portail"
   },
   "watch_intro": {
-    "message": "Téléchargez un document de la page comme d'habitude. L'extension note ce sur quoi vous cliquez, pour que vous puissiez nous l'envoyer comme retour. Cela nous montre comment ce portail propose ses documents."
+    "message": "Téléchargez un document de la page comme d'habitude ; si le bouton que vous utilisez est celui que l'extension n'a pas trouvé, cliquez-le quand même. L'extension note vos clics et en fait un texte, en anglais, que vous pouvez publier comme retour."
   },
   "watch_what_tab": {
-    "message": "Seulement cet onglet et les onglets qu'il ouvre ; cela s'arrête au premier téléchargement, après deux minutes ou quand vous l'arrêtez."
+    "message": "Sont observés cet onglet, ses cadres, les pages qu'il charge et un onglet ouvert depuis lui juste après un clic. Cela s'arrête au premier téléchargement, après deux minutes, ou quand vous l'arrêtez, fermez l'onglet ou quittez cette vue."
   },
   "watch_what_click": {
-    "message": "Pour chaque clic : le type d'élément, ses mots, la forme de son adresse et ce que la recherche en a fait."
+    "message": "Noté pour chaque clic : l'élément avec son id et sa classe, ses mots, son titre et son libellé, son adresse et un éventuel script onclick, les icônes qu'il contient, les éléments autour et ce que la recherche en a fait. Jamais ce que vous avez saisi ou choisi dans un champ."
   },
   "watch_what_private": {
-    "message": "Les nombres, les adresses e-mail et les valeurs dans les adresses sont masqués. Rien ne quitte votre ordinateur : vous voyez le texte et décidez de le copier ou non."
+    "message": "Les chiffres deviennent #, les adresses e-mail [e-mail] ; les valeurs dans les adresses, les longs jetons et le texte entre guillemets dans les scripts sont supprimés, mais les mots ordinaires restent, noms compris. Rien n'est envoyé : vous voyez le texte, pouvez le modifier et décidez de le copier ou non."
   },
   "watch_start": {
     "message": "Commencer l'observation"
@@ -609,7 +609,7 @@
     "message": "L'onglet a été fermé ; l'observation est terminée."
   },
   "watch_check": {
-    "message": "Lisez le texte avant de l'envoyer. Les noms dans les mots d'un lien ou d'un bouton ne peuvent pas être reconnus : supprimez tout ce qui est personnel."
+    "message": "Lisez le texte ; il contient les cinq derniers clics, et vous pouvez le modifier dans la zone. Les noms ne peuvent pas être reconnus : réglez d'abord la case ci-dessous, car elle refait le texte, puis supprimez tout ce qui est personnel dans les mots, titres, libellés, adresses et premières lignes."
   },
   "watch_name_portal": {
     "message": "Nommer le portail ($1)"

@@ -570,16 +570,16 @@
     "message": "Rückmeldung zu diesem Portal"
   },
   "watch_intro": {
-    "message": "Lade ein Dokument in der Seite so herunter, wie du es immer tust. Die Erweiterung schreibt auf, was du anklickst, damit du es uns als Rückmeldung schicken kannst. Daran sehen wir, wie dieses Portal seine Dokumente anbietet."
+    "message": "Lade ein Dokument in der Seite so herunter, wie du es sonst auch tust; ist dein Knopf der, den die Erweiterung übersehen hat, klick ihn trotzdem. Die Erweiterung notiert deine Klicks und macht daraus einen Text auf Englisch, den du als Rückmeldung veröffentlichen kannst."
   },
   "watch_what_tab": {
-    "message": "Nur dieser Tab und die Tabs, die er öffnet; es endet beim ersten Download, nach zwei Minuten oder wenn du es beendest."
+    "message": "Beobachtet werden dieser Tab, seine Frames, die Seiten, die er lädt, und ein Tab, der gleich nach einem Klick aus ihm geöffnet wird. Es endet beim ersten Download, nach zwei Minuten oder wenn du es beendest, den Tab schließt oder diese Ansicht verlässt."
   },
   "watch_what_click": {
-    "message": "Zu jedem Klick: die Art des Elements, seine Worte, die Form seiner Adresse und was die Suche daraus gemacht hat."
+    "message": "Zu jedem Klick notiert: das Element mit id und Klasse, seine Worte, Titel und Label, seine Adresse und ein onclick-Skript, Icons darin, Elemente darum und was die Suche daraus gemacht hat. Nie, was du in ein Feld getippt oder dort gewählt hast."
   },
   "watch_what_private": {
-    "message": "Zahlen, E-Mail-Adressen und die Werte in Adressen werden geschwärzt. Nichts verlässt deinen Computer: Du siehst den Text und entscheidest, ob du ihn kopierst."
+    "message": "Ziffern werden zu #, E-Mail-Adressen zu [e-mail]; Werte in Adressen, lange Tokens und Text in Anführungszeichen in Skripten werden entfernt, einfache Wörter aber bleiben, auch Namen. Nichts wird gesendet: Du siehst den Text, kannst ihn ändern und entscheidest, ob du ihn kopierst."
   },
   "watch_start": {
     "message": "Zuschauen beginnen"
@@ -609,7 +609,7 @@
     "message": "Der Tab wurde geschlossen; das Zuschauen ist beendet."
   },
   "watch_check": {
-    "message": "Lies den Text, bevor du ihn schickst. Namen in den Worten eines Links oder Knopfs lassen sich nicht erkennen: Lösche alles Persönliche."
+    "message": "Lies den Text; er enthält die letzten fünf Klicks, und du kannst ihn im Feld ändern. Namen lassen sich nicht erkennen: Setz zuerst das Häkchen unten, denn es erzeugt den Text neu, und lösche dann alles Persönliche aus Worten, Titeln, Labels, Adressen und den ersten Zeilen."
   },
   "watch_name_portal": {
     "message": "Das Portal nennen ($1)"
