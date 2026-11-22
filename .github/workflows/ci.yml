@@ -26,7 +26,7 @@ jobs:
       - name: Lint as Firefox's add-on checker does
         run: |
           mkdir -p dist/unpacked && cd dist/unpacked && unzip -q ../portal-download-*.zip
-          npx --yes web-ext@10.7.0 lint --self-hosted --source-dir .
+          npx --yes web-ext@10.7.0 lint --source-dir .
       - uses: actions/upload-artifact@v4
         with: { name: extension, path: "dist/portal-download-*.zip" }
   release:

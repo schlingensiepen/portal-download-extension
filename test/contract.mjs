@@ -1,10 +1,17 @@
 // Runs the contract scenarios of the service against the local backend.
 //   node test/contract.mjs <directory with the scenario files>
 import { readFileSync, readdirSync } from "node:fs";
-import { LocalBackend, emptyData, todayIso } from "../src/local.js";
+import { join } from "node:path";
+import { LocalBackend, emptyData, todayIso, CONTRACT } from "../src/local.js";
 
 const dir = process.argv[2];
 if (!dir) { console.error("usage: node test/contract.mjs <contract-tests directory>"); process.exit(2); }
+// The service and this extension must speak the same interface version.
+{
+  const rpc = readFileSync(join(dir, "..", "src", "rpc.rs"), "utf8");
+  const theirs = (/pub const CONTRACT: &str = "([^"]+)"/.exec(rpc) || [])[1];
+  if (theirs !== CONTRACT) { console.log(`FAIL the service speaks interface ${theirs}, this extension ${CONTRACT}`); process.exit(1); }
+}
 const addDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return todayIso(d); };
 function substitute(v, saved) {
   if (typeof v === "string") {

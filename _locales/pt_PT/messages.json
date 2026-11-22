@@ -93,7 +93,7 @@
     "message": "Eliminado."
   },
   "device_label": {
-    "message": "Extensão $2 do $1"
+    "message": "Extensão do $1 $2"
   },
   "done": {
     "message": "Encerrada – vence novamente em $1."
@@ -138,7 +138,7 @@
     "message": "A cada quantas semanas?"
   },
   "exchange_text": {
-    "message": "O ficheiro contém todas as tarefas com o início de sessão, o histórico e as tarefas eliminadas. Qualquer serviço Portal-Download e esta extensão conseguem importá-lo."
+    "message": "O ficheiro contém todas as tarefas com as credenciais, o histórico e as tarefas eliminadas. Qualquer serviço Portal-Download e esta extensão conseguem importá-lo."
   },
   "exchange_title": {
     "message": "Exportar as tarefas"
@@ -252,10 +252,10 @@
     "message": "Este backend não mostra credenciais a este dispositivo."
   },
   "login_local": {
-    "message": "O início de sessão fica guardado neste navegador, cifrado com a frase-passe."
+    "message": "As credenciais ficam guardadas neste navegador, cifradas com a frase-passe."
   },
   "login_plain": {
-    "message": "O início de sessão fica guardado em texto simples, visível para todos os que utilizam este backend."
+    "message": "As credenciais ficam guardadas em texto simples, visíveis para todos os que utilizam este backend."
   },
   "manage_title": {
     "message": "Gerir o backend escolhido"

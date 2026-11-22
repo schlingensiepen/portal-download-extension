@@ -57,7 +57,8 @@ function checkLogin(field, s) {
 }
 function checkUrl(u) {
   const t = String(u).trim();
-  if (!(t.startsWith("https://") || t.startsWith("http://")) || t.length > 2000 || /\s/.test(t)) {
+  // Bytes of UTF-8, as the service counts them.
+  if (!(t.startsWith("https://") || t.startsWith("http://")) || new TextEncoder().encode(t).length > 2000 || /\s/.test(t)) {
     throw bad("entry_url_invalid", "`entry_url` must be a web address starting with https:// (or http://), without spaces. Copy it from the browser's address bar.");
   }
   return t;
@@ -139,7 +140,9 @@ const METHODS = {
     return changed(view(data, data.jobs[id], todayIso()));
   },
   "job.update"(data, p) {
-    const { job_id, ...input } = p;
+    const { job_id, ...given } = p;
+    // A field sent as null is left as it is, as by the service.
+    const input = Object.fromEntries(Object.entries(given).filter(([, v]) => v !== null));
     validateJob(input, false);
     const j = stored(data, job_id);
     const ts = nowIso();
@@ -254,7 +257,7 @@ export function parseFile(content) {
   try { head = JSON.parse(lines[0][1]); } catch { throw lineError(1, "the head is no JSON"); }
   if (!head || typeof head !== "object") throw lineError(1, "the head is no JSON object");
   if (head.format !== FORMAT) throw lineError(1, "the head does not name the format portal-download");
-  if (head.version !== VERSION) throw bad("file_version", `The file has format version ${JSON.stringify(head.version ?? null)}; this reads version ${VERSION}, which portal-download 0.8 writes. Files of older versions are not read.`);
+  if (head.version !== VERSION) throw bad("file_version", `The file has format version ${JSON.stringify(head.version ?? null)}; this reads version ${VERSION}, which portal-download writes since 0.8. Files of older versions are not read.`);
   if (head.kind !== "jobs" && head.kind !== "full") throw lineError(1, "the head names neither jobs nor full");
   const f = { kind: head.kind, jobs: [], runs: [], deleted: [] };
   const jobGuids = new Set(), runGuids = new Set(), replaced = new Set();

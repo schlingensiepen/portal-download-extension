@@ -93,7 +93,7 @@
     "message": "Excluído."
   },
   "device_label": {
-    "message": "Extensão $2 do $1"
+    "message": "Extensão do $1 $2"
   },
   "done": {
     "message": "Encerrada – vence novamente em $1."
