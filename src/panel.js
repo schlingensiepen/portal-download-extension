@@ -6,6 +6,7 @@ import { Vault } from "./vault.js";
 import { ServiceBackend, localBackend, parseInvitation, CONTRACT } from "./backends.js";
 import { checkPassword, fromBase64 } from "./local.js";
 import { LANGUAGES, load, tag } from "./i18n.js";
+import { scan, mark, unmark, show } from "./finder.js";
 
 const api = globalThis.browser ?? globalThis.chrome;
 const vault = new Vault();
@@ -83,7 +84,7 @@ async function activeTab() { const [tab] = await api.tabs.query({ active: true, 
 const state = { choice: "all", view: "list", job: null, done: null, backends: [], content: null, vaultState: "plain", problems: {}, mismatch: {}, preview: null, tabUrl: "", tabTitle: "" };
 // The address of the active tab, kept up to date, so that a click can ask for a permission
 // before anything else waits: Firefox grants permissions only directly in the click.
-async function followTab() { try { const tab = await activeTab(); state.tabUrl = (tab && tab.url) || ""; state.tabTitle = (tab && tab.title) || ""; } catch { /* no tab */ } }
+async function followTab() { try { const tab = await activeTab(); state.tabUrl = (tab && tab.url) || ""; state.tabId = tab ? tab.id : null; state.tabTitle = (tab && tab.title) || ""; } catch { /* no tab */ } }
 api.tabs.onActivated.addListener(followTab);
 api.tabs.onUpdated.addListener((_, info) => { if (info.url || info.title || info.status === "complete") followTab(); });
 followTab();
@@ -137,8 +138,9 @@ async function render() {
     }
     // A job and its editing carry their own backend, also under "All"; management and a new job need one chosen.
     if ((["manage", "new"].includes(state.view) && !current()) || (["job", "edit"].includes(state.view) && !(state.job && state.backends.some((x) => x.id === state.job.b.id)))) state.view = "list";
+    if (state.view === "docs" && !state.docs) state.view = "list";
     const v = state.view;
-    const content = v === "job" ? viewJob() : v === "add" ? viewAdd() : v === "manage" ? await viewManage() : v === "new" || v === "edit" ? await viewNew() : await viewList();
+    const content = v === "docs" ? viewDocs() : v === "job" ? viewJob() : v === "add" ? viewAdd() : v === "manage" ? await viewManage() : v === "new" || v === "edit" ? await viewNew() : await viewList();
     // A slower render that started earlier does not cover a later one.
     if (mine === renders) view.replaceChildren(content);
   } catch (e) { fail(e); }
@@ -186,7 +188,8 @@ async function viewList() {
     return box;
   }
   // What concerns one backend is greyed out under "All".
-  box.append(h("div", { class: "row", style: "margin-bottom:8px" }, h("button", { class: "btn", type: "button", disabled: state.choice === "all" || !!state.mismatch[state.choice], title: state.choice === "all" ? t("choose_backend") : null, onclick: () => go("new", { fromTab: true }) }, t("add_page"))));
+  box.append(h("div", { class: "row", style: "margin-bottom:8px" }, h("button", { class: "btn", type: "button", disabled: state.choice === "all" || !!state.mismatch[state.choice], title: state.choice === "all" ? t("choose_backend") : null, onclick: () => go("new", { fromTab: true }) }, t("add_page")),
+    h("button", { class: "btn", type: "button", onclick: findDocuments }, t("docs_find"))));
   const all = [];
   await Promise.all(chosen.map(async (b) => {
     delete state.problems[b.id];
@@ -223,6 +226,7 @@ function viewJob() {
   }
   if (j.last_run) box.append(h("p", { class: "small muted" }, t("last_run", t(j.last_run.outcome), fmtDateTime(j.last_run.finished_at), j.last_run.by), j.last_run.note ? h("div", { class: "pre" }, j.last_run.note) : null));
   box.append(h("button", { class: "btn primary wide", type: "button", onclick: () => { if (/^https?:\/\//i.test(j.entry_url)) api.tabs.create({ url: j.entry_url }); } }, t("open_portal")));
+  box.append(h("button", { class: "btn wide", type: "button", style: "margin-top:6px", onclick: findDocuments }, t("docs_find")));
   const login = h("div", { class: "card" });
   for (const [k, v] of [["username", j.username], ["password", j.password]]) {
     if (!v) continue;
@@ -373,6 +377,56 @@ async function addFromTab() {
     if (granted && !hadPattern) vault.read().then((c) => { if (!c.services.some((s) => originPattern(s.base) === pattern)) api.permissions.remove({ origins: [pattern] }).catch(() => {}); }, () => {});
     fail(e);
   }
+}
+
+// Documents in the active tab, a trial for 1.0: found, numbered and highlighted in yellow.
+async function findDocuments() {
+  const url = state.tabUrl, tabId = state.tabId;
+  if (!/^https?:/i.test(url) || tabId == null) return toast(t("docs_no_page"), true);
+  try {
+    // The first thing the click awaits, as Firefox requires: access to this portal only.
+    if (!(await api.permissions.request({ origins: [originPattern(url)] }))) return toast(t("docs_refused"), true);
+    let results;
+    // Every frame the extension may reach; frames of other addresses are left out.
+    try { results = await api.scripting.executeScript({ target: { tabId, allFrames: true }, func: scan }); }
+    catch { results = await api.scripting.executeScript({ target: { tabId }, func: scan }); }
+    let n = 0;
+    const frames = results.filter((r) => r && r.result).map((r) => ({ frameId: r.frameId, url: r.result.url, items: r.result.items.map((it) => ({ ...it, n: ++n, on: true })) }));
+    state.docs = { tabId, url, frames };
+    await highlight();
+    go("docs");
+  } catch (e) { fail(e); }
+}
+async function highlight() {
+  const d = state.docs;
+  await Promise.all(d.frames.map((f) => api.scripting.executeScript({ target: { tabId: d.tabId, frameIds: [f.frameId] }, func: mark, args: [f.items.filter((i) => i.on).map((i) => [i.i, i.n])] }).catch(() => {})));
+}
+async function clearDocuments() {
+  const d = state.docs;
+  state.docs = null;
+  if (d) await Promise.all(d.frames.map((f) => api.scripting.executeScript({ target: { tabId: d.tabId, frameIds: [f.frameId] }, func: unmark }).catch(() => {})));
+  go("list");
+}
+function viewDocs() {
+  const d = state.docs;
+  const items = d.frames.flatMap((f) => f.items.map((it) => ({ ...it, f })));
+  const box = h("div", {});
+  const card = h("div", { class: "card" }, h("h1", {}, t("docs_title")), h("p", { class: "small muted" }, t("docs_trial")),
+    h("p", { class: "small" }, items.length ? t("docs_count", String(items.length)) : t("docs_none")),
+    h("div", { class: "row" }, h("button", { class: "btn", type: "button", onclick: findDocuments }, t("docs_again")), h("button", { class: "btn", type: "button", onclick: clearDocuments }, t("docs_clear"))));
+  box.append(card);
+  const kinds = { file: t("docs_kind_file"), link: t("docs_kind_link"), button: t("docs_kind_button") };
+  const why = { attr: t("docs_why_attr"), name: t("docs_why_name"), type: t("docs_why_type"), address: t("docs_why_address"), words: t("docs_why_words") };
+  for (const it of items) {
+    const item = it.f.items.find((x) => x.n === it.n);
+    const check = h("input", { type: "checkbox", checked: item.on, "aria-label": String(it.n) });
+    check.addEventListener("change", () => { item.on = check.checked; highlight(); });
+    const where = it.url ? (() => { try { const u = new URL(it.url); return u.host + u.pathname; } catch { return it.url; } })() : "";
+    box.append(h("div", { class: "card doc" }, h("div", { class: "row" }, check, h("span", { class: "badge" }, String(it.n)),
+      h("a", { href: "#", onclick: (e) => { e.preventDefault(); api.scripting.executeScript({ target: { tabId: d.tabId, frameIds: [it.f.frameId] }, func: show, args: [it.i] }).catch(() => {}); } }, it.label || "—")),
+      h("div", { class: "small muted" }, `${kinds[it.kind]} · ${why[it.reason]}${where ? ` · ${where}` : ""}`)));
+  }
+  return box;
 }
 
 /** Revokes a device access just redeemed but not kept, best effort. */

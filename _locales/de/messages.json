@@ -433,5 +433,56 @@
   },
   "err_damaged": {
     "message": "Die Passphrase passt, aber der Speicher lässt sich nicht lesen; er ist beschädigt. Lösche ihn unter „Passphrase vergessen?“, lege einen neuen lokalen Speicher an, importiere Deinen letzten Export der Vorgänge und füge Deine Dienste mit neuen Einladungslinks wieder hinzu."
+  },
+  "docs_find": {
+    "message": "Dokumente auf dieser Seite finden"
+  },
+  "docs_title": {
+    "message": "Dokumente auf dieser Seite"
+  },
+  "docs_trial": {
+    "message": "Ein Versuch für Version 1.0: Er findet und markiert nur. Schreib in den Discussions, was er übersehen oder falsch markiert hat."
+  },
+  "docs_count": {
+    "message": "$1 gefunden, in der Seite gelb markiert und nummeriert. Nimm den Haken weg, wo es kein Dokument ist; ein Klick auf den Namen scrollt dorthin."
+  },
+  "docs_none": {
+    "message": "Nichts gefunden, das nach einem Dokument aussieht."
+  },
+  "docs_no_page": {
+    "message": "Öffne zuerst die Portalseite im aktiven Tab."
+  },
+  "docs_refused": {
+    "message": "Ohne Zugriff auf diese Seite kann die Erweiterung sie nicht durchsuchen."
+  },
+  "docs_again": {
+    "message": "Neu suchen"
+  },
+  "docs_clear": {
+    "message": "Markierung entfernen"
+  },
+  "docs_kind_file": {
+    "message": "Datei"
+  },
+  "docs_kind_link": {
+    "message": "Link, vermutlich eine Datei"
+  },
+  "docs_kind_button": {
+    "message": "Knopf"
+  },
+  "docs_why_attr": {
+    "message": "zum Herunterladen markiert"
+  },
+  "docs_why_name": {
+    "message": "Dateiname"
+  },
+  "docs_why_type": {
+    "message": "Dateityp"
+  },
+  "docs_why_address": {
+    "message": "Adresse"
+  },
+  "docs_why_words": {
+    "message": "Wörter oder Symbol"
   }
 }

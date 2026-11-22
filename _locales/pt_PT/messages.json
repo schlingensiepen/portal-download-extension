@@ -433,5 +433,56 @@
   },
   "err_damaged": {
     "message": "A frase-passe está correta, mas o armazenamento não pode ser lido; está danificado. Elimine-o em “Esqueceu-se da frase-passe?”, crie um novo armazenamento local, importe a sua última exportação das tarefas e adicione novamente os seus serviços com novas ligações de convite."
+  },
+  "docs_find": {
+    "message": "Find documents on this page"
+  },
+  "docs_title": {
+    "message": "Documents on this page"
+  },
+  "docs_trial": {
+    "message": "A trial for version 1.0: it only finds and highlights. Tell us in the discussions what it missed or marked wrongly."
+  },
+  "docs_count": {
+    "message": "$1 found, highlighted in yellow and numbered in the page. Untick what is no document; click a name to scroll to it."
+  },
+  "docs_none": {
+    "message": "Nothing found that looks like a document."
+  },
+  "docs_no_page": {
+    "message": "Open the portal page in the active tab first."
+  },
+  "docs_refused": {
+    "message": "Without access to this page the extension cannot search it."
+  },
+  "docs_again": {
+    "message": "Search again"
+  },
+  "docs_clear": {
+    "message": "Remove the highlighting"
+  },
+  "docs_kind_file": {
+    "message": "File"
+  },
+  "docs_kind_link": {
+    "message": "Link, probably a file"
+  },
+  "docs_kind_button": {
+    "message": "Button"
+  },
+  "docs_why_attr": {
+    "message": "marked for download"
+  },
+  "docs_why_name": {
+    "message": "file name"
+  },
+  "docs_why_type": {
+    "message": "file type"
+  },
+  "docs_why_address": {
+    "message": "address"
+  },
+  "docs_why_words": {
+    "message": "words or icon"
   }
 }
