@@ -59,7 +59,7 @@ export function scan() {
   };
   const fileName = (url) => { try { const p = new URL(url).pathname; return decodeURIComponent(p.slice(p.lastIndexOf("/") + 1)); } catch { return ""; } };
 
-  const found = [];
+  const found = [], skipped = [];
   let hidden = 0;
   for (const el of all) {
     // One element that cannot be read (an address such as "http://") is skipped, not the whole frame.
@@ -90,8 +90,8 @@ export function scan() {
     // A link that names a file only downloads it. Anything else that names an action is left
     // out, or offered unticked when it says "download" too; an action icon makes it doubtful.
     if (kind !== "file") {
-      if (real && tokens(href).some((w) => PATH_DESTROY.test(w))) { hidden++; return; }
-      if (DESTROY.test(reads) || DESTROY_ZH.test(reads)) { hidden++; return; }
+      if (real && tokens(href).some((w) => PATH_DESTROY.test(w))) { hidden++; skipped.push({ el, why: "path" }); return; }
+      if (DESTROY.test(reads) || DESTROY_ZH.test(reads)) { hidden++; skipped.push({ el, why: "words" }); return; }
       // Every candidate here shows a sign of a document (its address, or a download or document
       // word), so an action word only takes the tick away.
       if (ACTION.test(reads) || ACTION_ZH.test(reads)) sure = false;
@@ -109,6 +109,10 @@ export function scan() {
   // Kept in this frame's isolated world for mark(), unmark() and show().
   globalThis.__portalDownloadUnmark?.();
   globalThis.__portalDownloadFound = kept.map((f) => f.el);
+  // For the observer (observer.js): what was made of each element, and a way to search again.
+  globalThis.__portalDownloadInfo = kept.map(({ kind, reason, sure }) => ({ kind, reason, sure }));
+  globalThis.__portalDownloadSkipped = skipped;
+  globalThis.__portalDownloadRescan = scan;
   // Buttons with the same words in the same row are told apart by their order.
   const seen = {};
   return { url: location.href, hidden, items: kept.map(({ kind, reason, label, url, context, sure }, i) => {
