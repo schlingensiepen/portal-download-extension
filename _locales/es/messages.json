@@ -561,6 +561,6 @@
     "message": "Ninguno"
   },
   "docs_hidden": {
-    "message": "$1 más omitidos, porque sus palabras o su dirección nombran una acción como eliminar, enviar o pagar."
+    "message": "$1 más omitidos, porque sus palabras o su dirección nombran una acción como eliminar, cerrar sesión o subir."
   }
 }

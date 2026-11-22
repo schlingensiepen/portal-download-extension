@@ -107,6 +107,29 @@ test("a change of the \"#…\" part only does not stop the rest", async () => {
   assert.equal(s[2].ok, true);
 });
 
+test("a frame gone affects only its own items", async () => {
+  const s = await run([{ n: 1, label: "Download", frameId: 3 }, { n: 2, url: "https://portal.example/b.pdf" }], async () => {}, { alive: async (it) => !it.frameId });
+  assert.equal(s[1].error, "gone");
+  assert.equal(s[2].ok, true);
+});
+
+test("a single-page portal that changed its address but kept its elements goes on", async () => {
+  world.tabs.get(1).url = "https://portal.example/invoices/page/2";
+  const s = await run([{ n: 1, label: "Download" }], async () => { start({ url: "https://portal.example/d/1", referrer: PORTAL, mime: "application/pdf" }); }, { alive: async () => true });
+  assert.equal(s[1].ok, true);
+});
+
+test("a tab without an address and one download without origin: that download", async () => {
+  const s = await run([{ n: 1, label: "Open" }], async () => {
+    world.tabs.set(2, { id: 2, url: "about:blank", openerTabId: 1 });
+    tabs.onCreated.fire({ id: 2, openerTabId: 1 });
+    await sleep(20);
+    start({ url: "data:application/pdf;base64,JVBERi0=", referrer: "", mime: "application/pdf" });
+  });
+  assert.equal(s[1].ok, true);
+  assert.deepEqual(world.closed, [2]);
+});
+
 test("an element gone from the page is said so", async () => {
   const s = await run([{ n: 1, label: "Download" }], async () => ({ gone: true }));
   assert.equal(s[1].error, "gone");

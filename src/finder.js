@@ -9,24 +9,27 @@
 /** Runs in the page: the candidates of this frame, as plain data. */
 export function scan() {
   const FILE = /\.(pdf|docx?|xlsx?|odt|ods|rtf|csv|txt|xml|zip|tiff?|jpe?g|png|eml|msg|p7m|xps)(?:$|[?#;])/i;
-  const MAYBE_URL = /download(?!s\b)|attachment|getdoc|getfile|showdoc|viewdoc|filename=|format=(pdf|docx?|xlsx?)|mime=|\/files?\/|\/documents?\/[^/]*\d/i;
+  const MAYBE_URL = /download|attachment|getdoc|getfile|showdoc|viewdoc|filename=|format=(pdf|docx?|xlsx?)|mime=|\/files?\/|\/documents?\/[^/]*\d/i;
   // Words that say "download"; words that only hint at a document.
-  const DOWNLOAD = /download(?!s\b)|herunterladen|runterladen|télécharger|descargar|baixar|下载|下載/i;
+  const DOWNLOAD = /download(?!s(?![a-z]))|herunterladen|runterladen|télécharger|descargar|baixar|下载|下載/i;
   const HINT = /\bpdf\b|\bdocx?\b|\bxlsx?\b|\bzip\b|exportieren|\bexport\b|abrufen/i;
   // Verbs of actions that change something, as whole words in what a person reads (text, title,
   // label), in the languages of the panel. Many are nouns of documents too (order, pay slip, save
-  // as PDF): with any sign of a document as well it is offered unticked; without, never.
+  // as PDF), so they only take the tick away; destroying ones (DESTROY) hide the element.
   const W = (words) => new RegExp(`(?<![\\p{L}\\p{N}])(?:${words})(?![\\p{L}\\p{N}])`, "iu");
-  const ACTION = W("löschen|entfernen|hochladen|absenden|senden|abmelden|kündigen|stornieren|bestellen|bezahlen|speichern|ändern|bearbeiten|papierkorb|archivieren|freigeben|genehmigen|unterschreiben|signieren|teilen|ablehnen|widerrufen|versenden|delete|remove|upload|send|submit|log ?out|sign ?out|cancel|order|pay|save|edit|trash|archive|approve|sign|share|reject|revoke|supprimer|retirer|téléverser|envoyer|soumettre|déconnexion|annuler|commander|payer|enregistrer|modifier|archiver|approuver|signer|partager|rejeter|révoquer|eliminar|borrar|quitar|subir|enviar|cancelar|pagar|guardar|editar|archivar|aprobar|firmar|compartir|rechazar|revocar|excluir|apagar|remover|salvar|encomendar|arquivar|aprovar|assinar|compartilhar|partilhar|rejeitar|revogar");
+  const ACTION = W("löschen|entfernen|hochladen|absenden|senden|abmelden|kündigen|stornieren|bestellen|bezahlen|speichern|ändern|bearbeiten|papierkorb|archivieren|freigeben|genehmigen|unterschreiben|signieren|teilen|ablehnen|widerrufen|versenden|delete|remove|upload|send|submit|log ?out|sign ?out|cancel|order|pay|save|edit|trash|archive|approve|sign|share|reject|revoke|supprimer|retirer|téléverser|envoyer|soumettre|déconnexion|annuler|commander|payer|enregistrer|modifier|archiver|approuver|signer|partager|rejeter|révoquer|eliminar|borrar|quitar|subir|enviar|cancelar|pagar|guardar|editar|archivar|aprobar|firmar|compartir|rechazar|revocar|excluir|apagar|remover|salvar|encomendar|cargar|carregar|arquivar|aprovar|assinar|compartilhar|partilhar|rejeitar|revogar");
   // Actions that destroy or end something: never offered, whatever else the element says.
-  const DESTROY = W("löschen|entfernen|papierkorb|abmelden|kündigen|widerrufen|delete|remove|trash|log ?out|sign ?out|revoke|supprimer|déconnexion|révoquer|eliminar|borrar|cerrar sesión|revocar|excluir|apagar|remover|revogar");
+  const DESTROY = W("löschen|entfernen|papierkorb|abmelden|ausloggen|kündigen|widerrufen|abbrechen|abbestellen|deaktivieren|delete|remove|trash|discard|erase|log ?out|sign ?out|revoke|unsubscribe|deactivate|supprimer|effacer|déconnexion|déconnecter|résilier|révoquer|eliminar|borrar|cerrar sesión|revocar|darse de baja|excluir|apagar|remover|sair|encerrar sessão|revogar");
   const DESTROY_ZH = /删除|刪除|移除|退出|登出|撤销|撤銷/;
   const ACTION_ZH = /删除|刪除|移除|上传|上傳|提交|发送|發送|退出|登出|取消|订购|訂購|支付|付款|保存|儲存|编辑|編輯|归档|歸檔|批准|签署|簽署|分享|拒绝|拒絕|撤销|撤銷/;
   // Icons and class names of such actions only make an element doubtful.
   const ACTION_ICON = /(?:^|[\s_-])(trash|delete|remove|times|close|edit|pencil|upload|save|floppy|share)(?:$|[\s_-])/i;
-  // Addresses that clearly change something are never fetched, whatever the link says; words
-  // that also name documents (storno, order) are not among them.
-  const ACTION_URL = /(?:^|[\/_\-.?=&])(delete|remove|destroy|drop|cancel|logout|signout|upload|send|submit|pay|archive|approve|sign|share|reject|revoke|mark-?read|markread)(?:$|[\/_\-.?=&])/i;
+  // Words in the path of an address (not its parameters): those that clearly change something
+  // are never fetched; those that may also name a place of documents (archive, share) only take
+  // the tick away. Words that name documents (storno, order) are in neither.
+  const PATH_DESTROY = /^(delete|remove|destroy|drop|cancel|logout|signout|upload|submit|revoke|reject|approve|unsubscribe|deactivate|markread)$/i;
+  const PATH_DOUBT = /^(archive|share|send|pay|sign)$/i;
+  const tokens = (u) => new URL(u).pathname.toLowerCase().replace(/mark-read/g, "markread").split(/[\/_\-.]+/).filter(Boolean);
   const CLICKABLE = "a, button, input[type=button], input[type=submit], input[type=image], [role=button], [role=link], [role=menuitem], [onclick]";
 
   // Every element, also inside open shadow roots.
@@ -74,18 +77,19 @@ export function scan() {
     if (real && el.hasAttribute("download")) { kind = "file"; reason = "attr"; }
     else if (real && FILE.test(new URL(href, location.href).pathname)) { kind = "file"; reason = "name"; }
     else if (real && el.getAttribute("type") && /pdf|msword|officedocument|octet-stream|zip/i.test(el.getAttribute("type"))) { kind = "file"; reason = "type"; }
-    else if (real && MAYBE_URL.test(href)) { kind = "link"; reason = "address"; }
+    // A link to a downloads area itself (".../downloads") is a menu, not a document.
+    else if (real && MAYBE_URL.test(href) && !/\/downloads\/?$/i.test(new URL(href).pathname)) { kind = "link"; reason = "address"; }
     else if (DOWNLOAD.test(words) || HINT.test(words)) { kind = real ? "link" : "button"; reason = "words"; sure = DOWNLOAD.test(words) && !submits; }
     if (!kind) continue;
     // A link that names a file only downloads it. Anything else that names an action is left
     // out, or offered unticked when it says "download" too; an action icon makes it doubtful.
     if (kind !== "file") {
-      if (real && ACTION_URL.test(new URL(href).pathname + new URL(href).search)) { hidden++; continue; }
+      if (real && tokens(href).some((w) => PATH_DESTROY.test(w))) { hidden++; continue; }
       if (DESTROY.test(reads) || DESTROY_ZH.test(reads)) { hidden++; continue; }
-      if (ACTION.test(reads) || ACTION_ZH.test(reads)) {
-        if (reason !== "address" && !DOWNLOAD.test(words) && !HINT.test(words)) { hidden++; continue; }
-        sure = false;
-      }
+      // Every candidate here shows a sign of a document (its address, or a download or document
+      // word), so an action word only takes the tick away.
+      if (ACTION.test(reads) || ACTION_ZH.test(reads)) sure = false;
+      if (real && tokens(href).some((w) => PATH_DOUBT.test(w))) sure = false;
       if (ACTION_ICON.test(marks)) sure = false;
     }
     // The row it stands in (a table row, a list item) tells documents with the same button apart.

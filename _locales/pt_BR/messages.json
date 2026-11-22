@@ -561,6 +561,6 @@
     "message": "Nenhum"
   },
   "docs_hidden": {
-    "message": "Mais $1 deixados de fora, porque as palavras ou o endereço indicam uma ação como excluir, enviar ou pagar."
+    "message": "Mais $1 deixados de fora, porque as palavras ou o endereço indicam uma ação como excluir, sair ou enviar arquivo."
   }
 }

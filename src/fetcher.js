@@ -189,9 +189,13 @@ export async function runQueue({ items, tabId, pageUrl, folder, click, alive = n
     api.tabs.onUpdated.addListener(onNav);
     const moved = async () => { try { return bare((await api.tabs.get(tabId)).url) !== bare(pageUrl); } catch { return true; } };
     try {
-      // Still the page that was searched? A page gone elsewhere or loaded anew has other elements.
-      if (await moved()) return { ok: false, error: "navigated", stop: true };
-      if (alive) { let same = true; try { same = await alive(item); } catch { same = false; } if (!same) return { ok: false, error: "navigated", stop: true }; }
+      // Still the page that was searched? Asked in the page itself where possible: a single-page
+      // portal may change its address and keep its elements. A frame gone affects only its items.
+      if (alive) {
+        let same = true;
+        try { same = await alive(item); } catch { same = false; }
+        if (!same) return item.frameId ? { ok: false, error: "gone" } : { ok: false, error: "navigated", stop: true };
+      } else if (await moved()) return { ok: false, error: "navigated", stop: true };
       let pressed;
       try { pressed = await click(item); } catch { pressed = { gone: true }; }
       if (pressed && pressed.gone) return (seen.loading || (await moved())) ? { ok: false, error: "navigated", stop: true } : { ok: false, error: "gone" };
@@ -252,7 +256,11 @@ export async function runQueue({ items, tabId, pageUrl, folder, click, alive = n
     else if (!gone) {
       // The address it ended at, after redirects.
       try { url = (await api.tabs.get(id)).url || url; } catch { gone = true; }
-      if (gone || !/^https?:/i.test(url)) return { ok: false, error: gone ? "nothing" : "tab_open" };
+      if (gone || !/^https?:/i.test(url)) {
+        // A tab without an address of its own, but one download without origin: that is it.
+        if (seen.others.length === 1) { claimed.add(seen.others[0].id); r = await settle(seen.others[0].id); if (r.ok && !gone) api.tabs.remove(id).catch(() => {}); return r; }
+        return { ok: false, error: gone ? "nothing" : "tab_open" };
+      }
       r = await settle(await download(url));
     }
     else if (seen.others.length === 1) { claimed.add(seen.others[0].id); return await settle(seen.others[0].id); }

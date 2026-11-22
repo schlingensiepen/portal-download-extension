@@ -561,6 +561,6 @@
     "message": "Aucun"
   },
   "docs_hidden": {
-    "message": "$1 autres laissés de côté, car leurs mots ou leur adresse désignent une action comme supprimer, envoyer ou payer."
+    "message": "$1 autres laissés de côté, car leurs mots ou leur adresse désignent une action comme supprimer, se déconnecter ou téléverser."
   }
 }
