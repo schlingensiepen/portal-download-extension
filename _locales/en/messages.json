@@ -119,6 +119,9 @@
   "err_access_gone": {
     "message": "This extension's access to the service was revoked or the person deactivated. Remove the service and add it again with a new link."
   },
+  "err_busy": {
+    "message": "The store is being changed in another window. Try again in a moment."
+  },
   "err_deactivated": {
     "message": "The person this invitation is for is deactivated on the service."
   },

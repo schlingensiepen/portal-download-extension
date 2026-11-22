@@ -119,6 +119,9 @@
   "err_access_gone": {
     "message": "El acceso de esta extensión al servicio fue revocado o la persona desactivada. Quita el servicio y añádelo de nuevo con un enlace nuevo."
   },
+  "err_busy": {
+    "message": "El almacén se está modificando en otra ventana. Vuelve a intentarlo en un momento."
+  },
   "err_deactivated": {
     "message": "La persona a la que va dirigida esta invitación está desactivada en el servicio."
   },

@@ -59,12 +59,20 @@ export class Vault {
     // the passphrase then opens it again.
     try { return await open(key, vault.sealed); }
     catch {
-      // While a change holds the lock (a passphrase change between its two writes), this is a
-      // passing state: report it, keep the key.
-      const held = globalThis.navigator?.locks ? (await navigator.locks.query()).held.some((l) => l.name === VAULT_LOCK) : false;
-      if (held) throw Object.assign(new Error("busy"), { kind: "busy" });
-      await api.storage.session.remove("vaultKey");
-      throw Object.assign(new Error("locked"), { kind: "locked" });
+      // Either a change is under way (a passphrase change between its two writes), or the key no
+      // longer fits (such a change was cut short). Only under the lock, where no change runs, is
+      // that decided: read both anew; if they still do not fit, the store counts as locked.
+      const busy = () => Object.assign(new Error("busy"), { kind: "busy" });
+      if (!globalThis.navigator?.locks) throw busy();
+      return navigator.locks.request(VAULT_LOCK, { ifAvailable: true }, async (held) => {
+        if (!held) throw busy();
+        const { vault: now } = await api.storage.local.get("vault");
+        const k = await sessionKey();
+        if (!now || !k) throw Object.assign(new Error("locked"), { kind: "locked" });
+        try { return await open(k, now.sealed); } catch { /* still does not fit */ }
+        await api.storage.session.remove("vaultKey");
+        throw Object.assign(new Error("locked"), { kind: "locked" });
+      });
     }
   }
 
@@ -80,9 +88,14 @@ export class Vault {
     const { vault } = await api.storage.local.get("vault");
     if (!vault) return true;
     const key = await deriveKey(passphrase, unb64(vault.salt), vault.iterations || ITERATIONS);
-    try { await open(key, vault.sealed); } catch { return false; }
-    await remember(key);
-    return true;
+    // Kept only if it still opens the store under the lock: a passphrase change may have come between.
+    return withVaultLock(async () => {
+      const { vault: now } = await api.storage.local.get("vault");
+      if (!now || now.salt !== vault.salt) return false;
+      try { await open(key, now.sealed); } catch { return false; }
+      await remember(key);
+      return true;
+    });
   }
 
   /** Locks; waits for a change under way, so that it cannot reopen the store afterwards. */
@@ -123,8 +136,8 @@ export class Vault {
 
   /** For a forgotten passphrase: deletes the local store and every service kept with it. */
   async forget() {
-    await withVaultLock(() => api.storage.local.remove(["vault", "services"]));
-    await this.lock();
+    // Store, services and key in one step, so that nothing can come between.
+    await withVaultLock(async () => { await api.storage.local.remove(["vault", "services"]); await api.storage.session.remove("vaultKey"); });
   }
 
   /** Removes the local backend and its jobs; the services stay, without the passphrase. */

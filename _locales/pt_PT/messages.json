@@ -119,6 +119,9 @@
   "err_access_gone": {
     "message": "O acesso desta extensão ao serviço foi revogado ou a pessoa foi desativada. Remova o serviço e adicione-o novamente com uma nova ligação."
   },
+  "err_busy": {
+    "message": "O armazenamento está a ser alterado noutra janela. Tente novamente dentro de momentos."
+  },
   "err_deactivated": {
     "message": "A pessoa a quem este convite se destina está desativada no serviço."
   },

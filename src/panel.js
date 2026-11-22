@@ -41,6 +41,7 @@ function explain(e) {
   if (["device_revoked", "credential_unknown", "user_deactivated"].includes(e.kind)) return t("err_access_gone");
   if (e.kind === "unreadable") return t("err_unreadable");
   if (e.kind === "locked") return t("err_locked");
+  if (e.kind === "busy") return t("err_busy");
   if (e.kind === "vault_exists") return t("err_vault_exists");
   return e.message || String(e);
 }
@@ -318,6 +319,8 @@ async function addFromTab() {
   if (!inv) return toast(t("no_invitation"), true);
   const pattern = originPattern(inv.base);
   let granted = false, redeemed = null;
+  // Known without waiting, so that the permission request stays the first awaited step.
+  const hadPattern = !!(state.content && state.content.services.some((s) => originPattern(s.base) === pattern));
   try {
     // The first thing the click awaits, as Firefox requires: access to this one service only.
     granted = await api.permissions.request({ origins: [pattern] });
@@ -353,7 +356,8 @@ async function addFromTab() {
     // An access redeemed but not kept is revoked on the service again.
     if (redeemed) dropDevice(inv.base, redeemed.device_token);
     // A permission for a service that was not added is given back.
-    if (granted) vault.read().then((c) => c.services, () => []).then((list) => { if (!list.some((s) => originPattern(s.base) === pattern)) api.permissions.remove({ origins: [pattern] }).catch(() => {}); });
+    // Given back only if it was granted for this attempt and no kept service uses it; when in doubt it stays.
+    if (granted && !hadPattern) vault.read().then((c) => { if (!c.services.some((s) => originPattern(s.base) === pattern)) api.permissions.remove({ origins: [pattern] }).catch(() => {}); }, () => {});
     fail(e);
   }
 }

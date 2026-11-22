@@ -119,6 +119,9 @@
   "err_access_gone": {
     "message": "L’accès de cette extension au service a été révoqué ou la personne désactivée. Supprimez le service et ajoutez-le de nouveau avec un nouveau lien."
   },
+  "err_busy": {
+    "message": "Le stockage est en cours de modification dans une autre fenêtre. Réessayez dans un instant."
+  },
   "err_deactivated": {
     "message": "La personne à qui cette invitation est destinée est désactivée sur le service."
   },

@@ -119,6 +119,9 @@
   "err_access_gone": {
     "message": "Der Zugang dieser Erweiterung zum Dienst wurde widerrufen oder die Person deaktiviert. Entferne den Dienst und füge ihn mit einem neuen Link wieder hinzu."
   },
+  "err_busy": {
+    "message": "Der Speicher wird gerade in einem anderen Fenster geändert. Versuche es gleich noch einmal."
+  },
   "err_deactivated": {
     "message": "Die Person, für die diese Einladung ist, ist auf dem Dienst deaktiviert."
   },
