@@ -14,7 +14,9 @@ const click = (over) => ({ at: 1, tag: "a", role: "", type: "", words: "Rechnung
 test("words lose digits, e-mail addresses and format characters, and stay short", () => {
   assert.equal(redactText("Rechnung 2026-0471 für max.muster@example.org"), "Rechnung #-# für [e-mail]");
   assert.equal(redactText("Kundennr. ４７１１"), "Kundennr. #");
-  assert.equal(redactText("abc‮def​"), "abcdef");
+  assert.equal(redactText("abc\u202Edef\u200B"), "abcdef");
+  assert.equal(redactText("Code aB3xY9kLmN0pQ7rS2tUv holen"), "Code [long] holen");
+  assert.equal(redactText("Jahresverbrauchsabrechnung"), "Jahresverbrauchsabrechnung");
   assert.equal([...redactText("x".repeat(200))].length, 81);
   assert.ok(!redactText("a `b` c").includes("`"));
 });
@@ -38,7 +40,7 @@ test("a click is its kind, its words and yes/no marks; no address, id, class or 
   assert.match(r, /Portal: `www\.portal\.example`/);
   assert.match(r, /1\. a link with an address `"Rechnung #\/#"` · opens a new tab · script in its markup/);
   assert.match(r, /then a new tab opened/);
-  assert.match(r, /2\. an element <span> without words · has an icon · pointer cursor/);
+  assert.match(r, /2\. an element `<span>` without words · has an icon · pointer cursor/);
   assert.match(r, /then a new page loaded/);
   assert.match(r, /3\. a submit button `"Speichern"`/);
   assert.match(r, /\*\*Download:\*\* a PDF of 240 KB was downloaded\./);
@@ -54,7 +56,9 @@ test("the portal is named only when asked", () => {
 test("what a page wrote cannot become a link, an image or a mention, nor a strange tag or role", () => {
   const r = buildReport({ url: `${P}/`, ended: "stopped", clicks: [click({ words: "[pay here](https://evil.example) @octocat ![x](https://e/t.png)", tag: "x](http://e)", role: "@me" })], events: [] });
   const line = r.split("\n").find((l) => l.startsWith("1."));
-  assert.match(line, /^1\. an element <element> `"[^`]*"`$/);
+  assert.match(line, /^1\. an element `<element>` `"[^`]*"`$/);
+  const odd = buildReport({ url: `${P}/`, ended: "stopped", clicks: [click({ tag: "user-4711", role: "row-12", link: "", words: "" })], events: [] });
+  assert.match(odd, /an element `<user-#>` with role `row-#`/);
   assert.ok(!line.includes("@me"));
 });
 
@@ -67,6 +71,7 @@ test("the kind of a download from its type, else a short ending of letters; size
   assert.equal(kind({ mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", bytes: 3 * 1024 * 1024 }), "an Excel file of 3.0 MB was downloaded.");
   assert.equal(kind({ mime: "application/octet-stream", filename: "/d/Max_Muster.xml" }), "a XML file (size unknown) was downloaded.");
   assert.equal(kind({ mime: "application/octet-stream", filename: "/d/invoice.20240115" }), "a file (size unknown) was downloaded.");
+  assert.equal(kind({ mime: "", filename: "/d/J.Smith" }), "a file (size unknown) was downloaded.");
 });
 
 test("only the last five clicks are told", () => {

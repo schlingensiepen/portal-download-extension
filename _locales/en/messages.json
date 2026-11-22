@@ -621,6 +621,6 @@
     "message": "Open the feedback form"
   },
   "watch_blind": {
-    "message": "This page cannot be watched: the browser does not let extensions into it. Clicks in tabs it opens are still noted."
+    "message": "This page cannot be watched: the browser does not let extensions into it."
   }
 }

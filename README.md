@@ -248,9 +248,9 @@ The extension can write the details for you. It watches you download one documen
 
 **What the text says about each click:**
 
-- What kind of element it was: a link with an address, a link that runs a script, a button, a submit button, or another element by its tag (such as `<span>`).
-- Its words: the text of a link or button, or the label of an input button; of another clickable element (a row or card that reacts to clicks) only a text of at most 60 characters; of any other element only a text of at most 40 characters with nothing nested in it. Without text, its *aria-label*, *title* or *alt*. Never the content of a text field, password field or text area, nor an entry chosen from a list, nor the words of an element that holds such a field.
-- Yes or no: whether it has a *download* attribute, opens a new tab, has a script in its markup (`onclick`), holds an icon, is in a frame or in shadow DOM.
+- What kind of element it was: a link with an address, a link that runs a script, a link without an address, a button, a submit button, or another element by its tag and role (such as `<span>`).
+- Its words: the text of a link or button, or the label of an input button; of another clickable element (a row or card that reacts to clicks) only a text of at most 60 characters; of any other element only a text of at most 40 characters with nothing nested in it. Without text, its *aria-label*, *title* or *alt*. Never the content of a text field, password field or text area, nor an entry chosen from a list the browser knows as one (a selection list, or one marked as a list for screen readers), nor the words of an element that holds such a field.
+- Yes or no: whether it has a *download* attribute, opens a new tab, has a script in its markup (`onclick`), holds an icon, is in a frame or in shadow DOM; for an element the search did not find, whether the cursor turns into a hand over it.
 - What the search made of it: found, left out (and why), or not found.
 - What followed: that a new page loaded or a new tab opened, and that a download from the portal's own sites started, as its kind and size only, such as *a PDF of 240 KB*.
 

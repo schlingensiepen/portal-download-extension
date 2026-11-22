@@ -621,6 +621,6 @@
     "message": "Abrir o formulário de feedback"
   },
   "watch_blind": {
-    "message": "Esta página não pode ser observada: o navegador não deixa extensões entrarem nela. Cliques em abas que ela abrir ainda são anotados."
+    "message": "Esta página não pode ser observada: o navegador não deixa extensões entrarem nela."
   }
 }

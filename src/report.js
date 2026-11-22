@@ -13,6 +13,8 @@ const cut = (s, max) => { const c = [...s]; return c.length > max ? `${c.slice(0
 export function redactText(s, max = 80) {
   let r = String(s ?? "").replace(/\p{Cf}/gu, "").replace(/\s+/g, " ").trim();
   r = r.replace(/[\p{L}\p{N}._%+-]+@[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)+/gu, "[e-mail]");
+  // A long run of letters and digits mixed (a key or code in a link's text) goes whole.
+  r = r.replace(/\S{20,}/gu, (w) => (/\p{L}/u.test(w) && /\p{N}/u.test(w) ? "[long]" : w));
   r = r.replace(/\p{N}+/gu, "#");
   // A code span in the report must not end early.
   r = r.replace(/`/g, "'");
@@ -35,11 +37,12 @@ export function verdictText(v, tag = "") {
 const SAFE = /^[a-z][a-z0-9-]{0,19}$/;
 /** The kind of element, in words, from its tag, role and type (only plain names pass). */
 function kindText(c) {
-  const tag = SAFE.test(String(c.tag)) ? String(c.tag) : "element";
-  const role = SAFE.test(String(c.role)) ? String(c.role) : "";
+  // Plain names only, without digits, in code marks (GitHub would take a bare <details> as HTML).
+  const tag = SAFE.test(String(c.tag)) ? String(c.tag).replace(/\d+/g, "#") : "element";
+  const role = SAFE.test(String(c.role)) ? String(c.role).replace(/\d+/g, "#") : "";
   if (tag === "a") return c.link === "address" ? "a link with an address" : c.link === "script" ? "a link that runs a script" : "a link without an address";
   if (tag === "button" || (tag === "input" && /^(button|submit|reset|image)$/.test(String(c.type)))) return c.submits ? "a submit button" : "a button";
-  return `an element <${tag}>${role ? ` with role ${role}` : ""}`;
+  return `an element ${code(`<${tag}>`)}${role ? ` with role ${code(role)}` : ""}`;
 }
 
 /** One clicked element, as lines of the report. */
@@ -63,8 +66,10 @@ function kindOf(d) {
   if (KIND[mime]) return KIND[mime];
   if (/officedocument\.wordprocessingml|msword/.test(mime)) return "a Word document";
   if (/officedocument\.spreadsheetml|ms-excel/.test(mime)) return "an Excel file";
+  // Else only a known ending: another one may be part of a name ("J.Smith").
   const m = /\.([A-Za-z]{1,5})$/.exec(String(d.filename || "").split(/[\\/]/).pop());
-  return m ? `a ${m[1].toUpperCase()} file` : "a file";
+  const known = ["pdf", "zip", "csv", "xml", "xls", "xlsx", "doc", "docx", "odt", "ods", "rtf", "txt", "tif", "tiff", "jpg", "jpeg", "png", "eml", "msg", "p7m"];
+  return m && known.includes(m[1].toLowerCase()) ? `a ${m[1].toUpperCase()} file` : "a file";
 }
 /** The size, rounded, from the browser (not from the page). */
 function sizeOf(bytes) {

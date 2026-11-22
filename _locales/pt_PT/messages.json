@@ -621,6 +621,6 @@
     "message": "Abrir o formulário de comentários"
   },
   "watch_blind": {
-    "message": "Esta página não pode ser observada: o navegador não deixa as extensões entrar nela. Os cliques nos separadores que ela abrir continuam a ser registados."
+    "message": "Esta página não pode ser observada: o navegador não deixa as extensões entrar nela."
   }
 }

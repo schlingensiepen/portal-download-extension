@@ -28,9 +28,9 @@ Working on it:
 Rules that hold:
 - **The local backend behaves as the service does** for every scenario in the service's `contract-tests/`, of the same major and minor version (`PRODUCT_REF` in the CI). A change of the merge or the file format goes into the service first, with a scenario, then here.
 - **One backend cannot reach another:** nothing a backend sends is put into the page as HTML; instructions are shown as text.
-- **Host permissions only for the services added and the portals searched,** asked for in the click that adds a service or searches a portal (`optional_host_permissions`); `downloads` likewise, in the first click that downloads (`optional_permissions`).
+- **Host permissions only for the services added and the portals searched,** asked for in the click that adds a service or searches a portal (`optional_host_permissions`); `downloads` likewise, in the first click that downloads or starts watching (`optional_permissions`).
 - **In a portal page only on a click:** search, highlight, download. Never log in, never fill in a form; stop when the page goes to another address.
-- **Watching only after consent, and nothing sent:** the observer runs only after *Start watching*, only in the active tab (all its frames) and the tabs it opens within five seconds after a click, until the first download from the portal tab's own sites or two minutes; its notes stay in the panel's memory, blacked out before they are shown, and leave only by the user's copy.
+- **Watching only after consent, and nothing sent:** the observer runs only after *Start watching*, only in the active tab (all its frames) and the tabs it opens within five seconds after a click, until the first download from the portal tab's own sites or two minutes; its notes stay in the panel's memory, hold no address, id, class or script, and leave only by the user's copy.
 - **The extension sends a token only to the base address that issued it,** in the `Authorization` header.
 - Run `node test/contract.mjs <path to the service's contract-tests>`, `node test/zip.test.mjs`, `node test/messages.test.mjs`, `node test/i18n.test.mjs`, `node test/vault.test.mjs`, `node test/fetcher.test.mjs`, `node test/queue.test.mjs`, `node test/report.test.mjs` before each commit; `node build.mjs` packs `dist/`.
 

@@ -535,8 +535,8 @@ const watchOffer = () => h("button", { class: "btn wide small", type: "button", 
 async function startWatching() {
   const w = state.watch;
   if (!w || w.phase !== "ask") return;
-  // The address at the click, not at the offer: the tab may have gone on since.
-  if (state.tabId === w.tabId && /^https?:/i.test(state.tabUrl)) w.url = state.tabUrl;
+  // The tab and address at the click, not at the offer: the user may have switched tabs or gone on since.
+  if (state.tabId != null && /^https?:/i.test(state.tabUrl)) { w.tabId = state.tabId; w.url = state.tabUrl; }
   const site = new URL(w.url);
   if (site.protocol === "http:" && !["localhost", "127.0.0.1"].includes(site.hostname)) return toast(t("docs_http"), true);
   // Set before the first await: a second click on Start does nothing.
@@ -583,7 +583,8 @@ async function startWatching() {
         if (!w.tabs.has(tabId) || !(info.status === "complete" || (info.status === "loading" && info.url))) return;
         // A page loaded anew needs the observer again; only a new address is worth telling.
         const url = info.url || (tab && tab.url) || "", bare = url.split("#")[0];
-        if (url && w.seen.get(tabId) !== bare) w.events.push({ at: Date.now(), kind: "page" });
+        // The first page of a new tab is part of "a new tab opened"; afterwards a new address is a new page.
+        if (url && w.seen.has(tabId) && w.seen.get(tabId) !== bare) w.events.push({ at: Date.now(), kind: "page" });
         w.seen.set(tabId, bare);
         // Downloads count from the sites of the portal's own tab only: Chrome names the active tab as
         // the opener of a tab the user opens themselves, so a new tab's site is no proof.
@@ -606,8 +607,8 @@ async function startWatching() {
       },
       removed: (tabId) => { if (tabId === w.tabId) endWatching(w, "gone"); },
       download: (d) => {
-        // The first download from the watched pages only: not another extension's, not one of another tab.
-        // Neither this extension's own nor another's.
+        // The first download whose address or referrer is on a site of the portal's tab; none started
+        // by an extension (this one or another).
         if (w.download || d.byExtensionId) return;
         const ours = [d.referrer, d.url, d.finalUrl].some((u) => u && w.origins.has(originOf(u)));
         // A data: address names no site; one right after a click counts.
@@ -616,6 +617,8 @@ async function startWatching() {
         // Only kind and size go into the text; the name serves for the kind when the type says nothing.
         const got = { mime: d.mime, filename: d.filename, bytes: d.totalBytes, id: d.id };
         w.download = got;
+        // Watching ends here: no later click goes into the text.
+        endWatching(w, "download");
         // Type, name and size are known a moment later; the size only once the file is complete (up to 10 seconds).
         setTimeout(async () => {
           for (let k = 0; k < 20; k++) {
@@ -626,9 +629,8 @@ async function startWatching() {
             } catch { break; }
             await new Promise((r) => setTimeout(r, 500));
           }
-          // Ended meanwhile (stop, two minutes): the text is made anew with the file's type and ending.
-          if (w.phase === "done" && w.text === undefined && state.watch === w && state.view === "watch") render();
-          endWatching(w, "download");
+          // The text is made anew with the file's kind and size, unless the user already changed it.
+          if (w.text === undefined && state.watch === w && state.view === "watch") render();
         }, 1500);
       },
     };
