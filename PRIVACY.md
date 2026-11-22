@@ -34,7 +34,7 @@ If you do not want that, keep your jobs in the local store. It needs no service.
 ### How to check this
 
 - **The source** is public: <https://github.com/schlingensiepen/portal-download-extension>. The extension loads no code from elsewhere.
-- **The Firefox file** is signed by Mozilla and offered on addons.mozilla.org.
+- **The Firefox file** is submitted to addons.mozilla.org; Mozilla signs it and offers it there after its review.
 - **The ZIP file** for Chrome and Edge is built by the repository's public CI from the tagged source. The [releases](https://github.com/schlingensiepen/portal-download-extension/releases) link each file to its tag, and the [workflow](https://github.com/schlingensiepen/portal-download-extension/blob/main/.github/workflows/ci.yml) shows the steps.
 - **Checksums:** a release carries the file `SHA256SUMS` with the SHA-256 checksums of its files. Compare them with the checksum of the file you downloaded.
 - **In the browser,** the developer tools of the panel show every request it sends.
@@ -71,7 +71,7 @@ Wenn Du das nicht möchtest, behalte Deine Vorgänge im lokalen Speicher. Er bra
 ### Wie Du das prüfen kannst
 
 - **Der Quelltext** ist öffentlich: <https://github.com/schlingensiepen/portal-download-extension>. Die Erweiterung lädt keinen Code von anderswo.
-- **Die Firefox-Datei** ist von Mozilla signiert und wird auf addons.mozilla.org angeboten.
+- **Die Firefox-Datei** wird bei addons.mozilla.org eingereicht; Mozilla signiert sie nach seiner Prüfung und bietet sie dort an.
 - **Die ZIP-Datei** für Chrome und Edge baut die öffentliche CI des Repositorys aus dem getaggten Quelltext. Die [Releases](https://github.com/schlingensiepen/portal-download-extension/releases) verknüpfen jede Datei mit ihrem Tag, und der [Workflow](https://github.com/schlingensiepen/portal-download-extension/blob/main/.github/workflows/ci.yml) zeigt die Schritte.
 - **Prüfsummen:** Ein Release enthält die Datei `SHA256SUMS` mit den SHA-256-Prüfsummen seiner Dateien. Vergleiche sie mit der Prüfsumme der Datei, die Du heruntergeladen hast.
 - **Im Browser** zeigen die Entwicklerwerkzeuge des Panels jede Anfrage, die es sendet.

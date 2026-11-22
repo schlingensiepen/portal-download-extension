@@ -1,5 +1,5 @@
 // Packs the extension into dist/portal-download-<version>.zip: the one file for Chrome and Edge
-// (unpack and load) and for Firefox (signed by Mozilla before it is offered).
+// (unpack and load) and for Firefox (submitted to addons.mozilla.org; Mozilla signs it after its review).
 import { readFileSync, readdirSync, statSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";

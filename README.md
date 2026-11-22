@@ -21,15 +21,13 @@ The extension is for Chrome and Edge 121 or newer, and Firefox 140 or newer.
 
 ## Installing
 
-**Firefox:** install it from [addons.mozilla.org](https://addons.mozilla.org/); search for *Portal-Download* there. It appears there once Mozilla has reviewed it; until then the search finds nothing.
-
-Until then, or to try a newer version, Firefox can load it for the current session only:
+**Firefox:** install it from [addons.mozilla.org](https://addons.mozilla.org/); search for *Portal-Download* there. It appears there once Mozilla has reviewed it. If the search finds nothing, or to try a newer version, Firefox can load it for the current session only:
 
 1. Download `portal-download-<version>.zip` from a [release](https://github.com/schlingensiepen/portal-download-extension/releases) and unpack it.
 2. Open `about:debugging#/runtime/this-firefox`.
 3. Click *Load Temporary Add-on…* and choose the file `manifest.json` in the unpacked folder.
 
-Firefox removes it again when it restarts; your jobs stay. A version from addons.mozilla.org is replaced while the temporary one is loaded.
+Firefox removes it again when it restarts. If a version from addons.mozilla.org is installed, that one is switched off meanwhile, comes back after the restart and keeps its stored data. If not, the temporary one's local store may be gone after the restart: keep your jobs on a service, or export them first (see *Exchanging jobs*).
 
 After Mozilla's review, a release may also carry the same signed file as `portal-download-<version>.xpi`. To install that file:
 
@@ -179,6 +177,7 @@ No run is lost. Reading in copies. To move jobs, read them in on the other backe
 
 - **Firefox, installed from addons.mozilla.org:** Firefox updates the extension by itself.
 - **Firefox, installed from the `.xpi` file:** if Firefox does not update it, install the newer file the same way.
+- **Firefox, loaded temporarily:** load the newer ZIP the same way, again after every restart.
 - **Chrome and Edge:** download the new ZIP file. Replace the content of the folder with it. Then click the reload arrow on the extension's card under `chrome://extensions`.
 
 Your backends and jobs stay.
@@ -192,6 +191,8 @@ A later version may change the interface. Suppose a service then speaks a versio
 1. For each service: choose it in the backend menu, click **⚙**, then *Remove the service*. This also revokes the extension's access on that service.
 2. Export the jobs of the local store, if you want to keep them.
 3. Remove the extension on the browser's extension page.
+
+A temporary add-on in Firefox goes when Firefox restarts, or click *Remove* in `about:debugging`.
 
 Removing the extension deletes everything it kept in this browser. If you skipped step 1, revoke the device in the service's web application under **My devices**.
 
@@ -233,7 +234,7 @@ A document that failed stays ticked, so that *Start downloading* tries it again.
 
 **What it never does:** log in or fill in a form. Elements whose words name a destroying action (delete, remove, log out, cancel, revoke, unsubscribe and the like), and links whose address path names one (delete, cancel, logout, upload, submit and the like), are never offered; the panel says how many it left out. Words that may name an action or a document alike (save, send, order, pay, archive, sign, share) only take the tick away: such an element is offered unticked, for you to decide. A link straight to a file is downloaded whatever its address says. A button that sends a form, or says *download* and an action at once, is only offered unticked, for you to decide. It works only when you click. It remembers which documents were downloaded, per job, in this browser only, as checksums that name no address and no document; *Forget which documents were downloaded* at the end of the list clears that for the job. Closing the panel takes the highlighting off the page and ends the downloads.
 
-**A portal where it goes wrong:** if it misses a document, ticks something that is no document, or a download fails, please tell us with the form [Feedback on a portal](https://github.com/schlingensiepen/portal-download-extension/issues/new?template=portal-feedback.yml). The rules for what counts as a document can only get better with real portals. Do not include your name, customer numbers, addresses with session parameters, or screenshots with personal data.
+**A portal where it goes wrong:** if it misses a document, ticks something that is no document, or a download fails, please tell us with the form [Feedback on a portal](https://github.com/schlingensiepen/portal-download-extension/issues/new?template=portal-feedback.yml). The rules for what counts as a document can only get better with real portals. Everything else goes to the [discussions](https://github.com/schlingensiepen/portal-download-extension/discussions). Do not include your name, customer numbers, addresses with session parameters, or screenshots with personal data.
 
 **Close the run** afterwards as before, with *Succeeded* or *Failed*; downloading does not close it.
 
