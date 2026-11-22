@@ -41,8 +41,13 @@ export function docKey(item) {
     } catch { return `u:${item.url}`; }
   }
   // A button: the page it is on, the row it stands in, its words, and its order among equal ones.
+  // The page with its query (without volatile parameters) and its "#…" part, which single-page portals use as their address.
   let page = "";
-  try { const u = new URL(item.page || ""); page = u.origin + u.pathname; } catch { /* no page */ }
+  try {
+    const u = new URL(item.page || "");
+    const kept = [...u.searchParams].filter(([k]) => !VOLATILE.test(k)).sort(([a], [b]) => a.localeCompare(b));
+    page = `${u.origin}${u.pathname}?${new URLSearchParams(kept)}${u.hash}`;
+  } catch { /* no page */ }
   return `b:${page}|${(item.context || "").toLowerCase()}|${(item.label || "").toLowerCase()}#${item.nth || 0}`;
 }
 
@@ -99,7 +104,7 @@ function nameFromUrl(url) {
  * then { ok, file } or { ok: false, error }. stop() returning true ends the queue, also while
  * one document waits.
  */
-export async function runQueue({ items, tabId, pageUrl, folder, click, onStep, stop, pause = 1500, wait = 20000, grace = 3000, poll = 250, longest = 5 * 60000 }) {
+export async function runQueue({ items, tabId, pageUrl, folder, click, alive = null, onStep, stop, pause = 1500, wait = 20000, grace = 3000, poll = 250, longest = 5 * 60000 }) {
   const origin = (() => { try { return new URL(pageUrl).origin; } catch { return ""; } })();
   const bare = (u) => String(u || "").split("#")[0];
   const sameSite = (u, o = origin) => { try { return !!o && new URL(u).origin === o; } catch { return false; } };
@@ -113,9 +118,11 @@ export async function runQueue({ items, tabId, pageUrl, folder, click, onStep, s
   // In Chrome our own downloads, and the one download a click is waiting for, go into the job's
   // folder; every other download of the browser is left alone. Firefox has no such hook.
   let catching = null;
+  // Downloads taken as a document, by id: their name may be decided only after the click's wait ended.
+  const claimed = new Set();
   const place = (d, suggest) => {
     const name = (d.filename || "").split(/[\\/]/).pop();
-    if (name && ((self && d.byExtensionId === self) || (catching && catching(d)))) { suggest({ filename: `${folder}/${withEnding(name, d.mime)}`, conflictAction: "uniquify" }); return; }
+    if (name && ((self && d.byExtensionId === self) || claimed.has(d.id) || (catching && catching(d)))) { suggest({ filename: `${folder}/${withEnding(name, d.mime)}`, conflictAction: "uniquify" }); return; }
     suggest();
   };
   const canPlace = !!api.downloads.onDeterminingFilename;
@@ -132,11 +139,11 @@ export async function runQueue({ items, tabId, pageUrl, folder, click, onStep, s
   try {
     for (const item of items) {
       if (stop()) break;
-      onStep(item.n, "running");
+      await onStep(item.n, "running");
       let result;
       try { result = item.url ? await settle(await download(item.url)) : await clickAndCatch(item); }
       catch (e) { result = { ok: false, error: String((e && e.message) || e) }; }
-      onStep(item.n, result);
+      await onStep(item.n, result);
       // The page went elsewhere: the remaining items are no longer there.
       if (result.stop) break;
       if (!stop()) await sleep(pause);
@@ -151,7 +158,7 @@ export async function runQueue({ items, tabId, pageUrl, folder, click, onStep, s
     for (;;) {
       const [d] = await api.downloads.search({ id });
       if (d && d.state === "complete") {
-        if (/^text\/html\b/i.test(d.mime || "")) { try { await api.downloads.removeFile(id); await api.downloads.erase({ id }); } catch { /* left as it is */ } return { ok: false, error: "html" }; }
+        if (/^(text\/html|application\/xhtml\+xml)\b/i.test(d.mime || "")) { try { await api.downloads.removeFile(id); await api.downloads.erase({ id }); } catch { /* left as it is */ } return { ok: false, error: "html" }; }
         return { ok: true, file: d.filename };
       }
       if (!d || d.state === "interrupted") return { ok: false, error: (d && d.error) || "interrupted" };
@@ -163,31 +170,51 @@ export async function runQueue({ items, tabId, pageUrl, folder, click, onStep, s
 
   /** A button: clicked in the page; what follows from the portal is its document. */
   async function clickAndCatch(item) {
-    const seen = { downloads: [], tab: null, loading: false };
-    const onCreated = (d) => { if (fromSite(d) || (seen.tab && seen.tab.origin && fromSite(d, seen.tab.origin))) seen.downloads.push(d.id); };
+    const seen = { downloads: [], others: [], tab: null, loading: false };
+    // From the portal, or from the tab the click opened: its document. A download without any
+    // origin (a file server under no-referrer, a file the page made itself) is kept aside as a
+    // last resort; one with another site's referrer is someone else's and left alone.
+    const take = (d) => { seen.downloads.push(d.id); claimed.add(d.id); };
+    const onCreated = (d) => {
+      if (fromSite(d) || (seen.tab && seen.tab.origin && fromSite(d, seen.tab.origin))) take(d);
+      else if (originless(d)) seen.others.push(d);
+    };
     const onTab = (t) => { if (t.openerTabId === tabId && !seen.tab) seen.tab = { id: t.id, origin: "" }; };
     const onNav = (id, info) => { if (id === tabId && info.status === "loading") seen.loading = true; };
-    catching = (d) => fromSite(d) || !!(seen.tab && seen.tab.origin && fromSite(d, seen.tab.origin));
+    // Moved into the job's folder while the click waits: what it would take, the last resort included.
+    const originless = (d) => !d.byExtensionId && (!d.referrer || /^(data|blob):/i.test(d.url || ""));
+    catching = (d) => fromSite(d) || !!(seen.tab && seen.tab.origin && fromSite(d, seen.tab.origin)) || originless(d);
     api.downloads.onCreated.addListener(onCreated);
     api.tabs.onCreated.addListener(onTab);
     api.tabs.onUpdated.addListener(onNav);
     const moved = async () => { try { return bare((await api.tabs.get(tabId)).url) !== bare(pageUrl); } catch { return true; } };
     try {
-      try { await click(item); }
-      catch { return (await moved()) ? { ok: false, error: "navigated", stop: true } : { ok: false, error: "gone" }; }
+      let pressed;
+      try { pressed = await click(item); } catch { pressed = { gone: true }; }
+      if (pressed && pressed.gone) return (seen.loading || (await moved())) ? { ok: false, error: "navigated", stop: true } : { ok: false, error: "gone" };
       const until = Date.now() + wait;
       let loadingSince = 0;
       while (Date.now() < until) {
         if (seen.downloads.length) break;
         if (seen.tab) break;
         if (stop()) return { ok: false, error: "stopped" };
-        // The page started loading: a download it turns into shows up soon; else it went elsewhere.
+        // The page started loading: a download it turns into shows up soon; else it went elsewhere
+        // or loaded anew, and the elements found are gone either way.
         if (seen.loading && !loadingSince) loadingSince = Date.now();
-        if (loadingSince && Date.now() - loadingSince > grace && (await moved())) return { ok: false, error: "navigated", stop: true };
+        if (loadingSince && Date.now() - loadingSince > grace) {
+          if (await moved()) return { ok: false, error: "navigated", stop: true };
+          // Same address: loaded anew, or only its "#…" part changed. Only a page loaded anew has forgotten what was found.
+          let same = true;
+          if (alive) { try { same = await alive(item); } catch { same = false; } }
+          if (!same) return { ok: false, error: "navigated", stop: true };
+          loadingSince = Infinity;
+        }
         await sleep(poll);
       }
       if (seen.downloads.length) { catching = null; return await settle(seen.downloads[0]); }
       if (seen.tab) return await fromTab(seen);
+      // Nothing from the portal, but exactly one other download began after the click: most likely its document.
+      if (seen.others.length === 1) { claimed.add(seen.others[0].id); return await settle(seen.others[0].id); }
       return { ok: false, error: "nothing" };
     } finally {
       catching = null;
@@ -204,7 +231,12 @@ export async function runQueue({ items, tabId, pageUrl, folder, click, onStep, s
     const until = Date.now() + Math.max(wait / 2, 2000);
     while (Date.now() < until && !seen.downloads.length) {
       try { url = (await api.tabs.get(id)).url || ""; } catch { gone = true; }
-      if (/^https?:/i.test(url)) { seen.tab.origin = new URL(url).origin; break; }
+      if (/^https?:/i.test(url)) {
+        seen.tab.origin = new URL(url).origin;
+        // Downloads that came before the tab's address was known are looked at again.
+        for (const d of seen.others) if (fromSite(d, seen.tab.origin) && !seen.downloads.includes(d.id)) take(d);
+        break;
+      }
       if (gone) break;
       if (stop()) return { ok: false, error: "stopped" };
       await sleep(poll);
@@ -214,7 +246,12 @@ export async function runQueue({ items, tabId, pageUrl, folder, click, onStep, s
     while (!seen.downloads.length && Date.now() < extra && !gone) { await sleep(poll); try { await api.tabs.get(id); } catch { gone = true; } }
     let r;
     if (seen.downloads.length) { catching = null; r = await settle(seen.downloads[0]); }
-    else if (/^https?:/i.test(url) && !gone) r = await settle(await download(url));
+    else if (!gone) {
+      // The address it ended at, after redirects.
+      try { url = (await api.tabs.get(id)).url || url; } catch { gone = true; }
+      if (gone || !/^https?:/i.test(url)) return { ok: false, error: gone ? "nothing" : "tab_open" };
+      r = await settle(await download(url));
+    }
     else return { ok: false, error: gone ? "nothing" : "tab_open" };
     if (r.ok) api.tabs.remove(id).catch(() => {});
     return r;

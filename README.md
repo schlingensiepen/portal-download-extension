@@ -194,8 +194,8 @@ Once you are logged in to the portal, the extension can find the documents in th
 1. **Log in to the portal** and open the page with the documents, for example the list of invoices.
 2. **Click *Find documents on this page*.** The button is in an open job, below *Open the portal in a new tab*; from there the files go into the job's folder. It is also in the list of jobs, for a page that belongs to no job. The first time for a portal, the browser asks whether the extension may access that site. If you decline, nothing is searched.
 3. **Look at the page.** Everything that looks like a document is highlighted in yellow and numbered: links to files such as PDF, Word, Excel, TIFF, ZIP or XML, and buttons and icons that say *download*. The panel lists them with the same numbers. Click a name to scroll to it.
-4. **Choose.** Ticked are the documents that are new and surely downloads. Untick what is no document, or use *Tick all* and *Tick none*. Not ticked, with a note, are: documents downloaded from this job before (with their date), buttons that only say *PDF* or *Export* or send a form, and an address found twice.
-5. **Click *Start downloading*,** or *Only this one* beside a single document. The first time, the browser asks for the permission to download. The extension then works through the list one document at a time, slowly, and shows beside each what happened. *Stop* ends it after the current document.
+4. **Choose.** Ticked are the documents that are new and surely downloads. Untick what is no document, or use *Tick all* (which leaves the doubtful ones alone) and *Tick none*. Not ticked, with a note, are: documents downloaded from this job before (with their date), buttons that only say *PDF* or *Export* or send a form, and an address found twice.
+5. **Click *Start downloading*,** or *Only this one* beside a single document. The first time, the browser asks for the permission to download. The extension then works through the list one document at a time, slowly, and shows beside each what happened. *Stop* ends it at once; a download already under way may still finish. Leaving this view stops it too.
 6. **More pages:** if the portal spreads its documents over several pages, open the next page and search again.
 
 **Where the files go:** into the folder *Portal-Download/<job title>* inside the folder your browser saves downloads to (usually *Downloads*); for a page without a job, into *Portal-Download/<site>*. Documents downloaded before are remembered per job, or per site for pages without a job.
@@ -211,17 +211,19 @@ Once you are logged in to the portal, the extension can find the documents in th
 | *Saved as …* | Downloaded; the file name in the folder. | Nothing. |
 | *Downloaded on …* | Downloaded from this job before; not ticked. | Tick it to download it again. |
 | *Not ticked: it may not be a download* | A button that only says *PDF* or *Export*, or one that sends a form. | Tick it if you are sure. |
-| *the click started no download* | The button did nothing the browser counted as a download within 20 seconds. Some portals block automatic clicks, or open a pop-up the browser blocks. | Download it by hand. |
+| *Found twice; ticked only once* | The same address stands twice in the page. | Nothing. |
+| *it opened a tab without a document* | The button opened a tab, but no document came from it. The tab stays open. | Look at the tab; download by hand. |
+| *the click started no download* | The button did nothing the browser counted as a download within 20 seconds. Some portals block automatic clicks, or open a pop-up the browser blocks; Chrome may also ask once whether the site may download several files. | Download it by hand. |
 | *a web page came back instead of a document* | Usually the login expired. The page was deleted again. | Log in again, search again. |
-| *the page went to another address* | The click left the page; the rest is stopped. | Go back to the list and search again. |
+| *the page went to another address* | The click left the page or loaded it anew; the rest is stopped. | Go back to the list and search again. |
 | *the element is no longer in the page* | The page changed since the search. | Search again. |
-| *stopped* | You clicked *Stop*. The browser may still finish this one download. | Start again for the rest. |
+| *stopped* | You clicked *Stop*, or left this view. The browser may still finish this one download. | Start again for the rest. |
 | *still not finished after five minutes* | A very large or stuck download. | Look at the browser's downloads. |
 | other words, such as *NETWORK_FAILED* | The browser's own reason. | Try again later, or by hand. |
 
 A document that failed stays ticked, so that *Start downloading* tries it again.
 
-**What it never does:** log in, fill in or send a form, or click anything whose words name an action such as delete, remove, save, send, upload, cancel, order or pay. It works only when you click. It remembers which documents were downloaded, per job, in this browser only, as checksums that name no address and no document; *Forget which documents were downloaded* at the end of the list clears that for the job. Closing the panel takes the highlighting off the page and ends the downloads.
+**What it never does:** log in, fill in a form, or click anything whose words name an action such as delete, remove, save, send, upload, cancel, order or pay, or fetch an address that names one. A button that sends a form, or says *download* and an action at once, is only offered unticked, for you to decide. It works only when you click. It remembers which documents were downloaded, per job, in this browser only, as checksums that name no address and no document; *Forget which documents were downloaded* at the end of the list clears that for the job. Closing the panel takes the highlighting off the page and ends the downloads.
 
 **Close the run** afterwards as before, with *Succeeded* or *Failed*; downloading does not close it.
 

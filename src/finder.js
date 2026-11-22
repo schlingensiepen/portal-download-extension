@@ -10,11 +10,20 @@
 export function scan() {
   const FILE = /\.(pdf|docx?|xlsx?|odt|ods|rtf|csv|txt|xml|zip|tiff?|jpe?g|png|eml|msg|p7m|xps)(?:$|[?#;])/i;
   const MAYBE_URL = /download|attachment|getdoc|getfile|showdoc|viewdoc|filename=|format=(pdf|docx?|xlsx?)|mime=|\/files?\/|\/documents?\/[^/]*\d/i;
-  // Words that say "download"; words that only hint at a document; words of actions that change
-  // something, whose elements are never offered.
+  // Words that say "download"; words that only hint at a document.
   const DOWNLOAD = /download|herunterladen|runterladen|télécharger|descargar|baixar|下载|下載/i;
   const HINT = /\bpdf\b|\bdocx?\b|\bxlsx?\b|\bzip\b|exportieren|\bexport\b|abrufen/i;
-  const ACTION = /lösch|delete|remove|entfern|upload|hochlad|absend|\bsend|senden|submit|abmeld|logout|log out|sign out|kündig|cancel|storn|bestell|\border\b|bezahl|\bpay\b|speicher|\bsave\b|ändern|\bedit\b|bearbeit|\btrash|papierkorb|supprim|eliminar|borrar|excluir|apagar|删除|刪除|上传|上傳/i;
+  // Verbs of actions that change something, as whole words in what a person reads (text, title,
+  // label), in the languages of the panel. Such an element is never offered; with a download
+  // word as well ("save and download") it is offered unticked.
+  const W = (words) => new RegExp(`(?<![\\p{L}\\p{N}])(?:${words})(?![\\p{L}\\p{N}])`, "iu");
+  const ACTION = W("löschen|entfernen|hochladen|absenden|senden|abmelden|kündigen|stornieren|bestellen|bezahlen|zahlen|speichern|ändern|bearbeiten|papierkorb|delete|remove|upload|send|submit|log ?out|sign ?out|cancel|order|pay|save|edit|trash|supprimer|retirer|téléverser|envoyer|soumettre|déconnexion|annuler|commander|payer|enregistrer|modifier|eliminar|borrar|quitar|subir|enviar|cancelar|pagar|guardar|editar|excluir|apagar|remover|salvar|encomendar");
+  const ACTION_ZH = /删除|刪除|移除|上传|上傳|提交|发送|發送|退出|登出|取消|订购|訂購|支付|付款|保存|儲存|编辑|編輯/;
+  // Icons and class names of such actions only make an element doubtful.
+  const ACTION_ICON = /(?:^|[\s_-])(trash|delete|remove|times|close|edit|pencil|upload|save|floppy|share)(?:$|[\s_-])/i;
+  // Addresses that clearly change something are never fetched, whatever the link says; words
+  // that also name documents (storno, order) are not among them.
+  const ACTION_URL = /(?:^|[\/_\-.?=&])(delete|remove|destroy|drop|cancel|logout|signout|upload|send|submit|pay)(?:$|[\/_\-.?=&])/i;
   const CLICKABLE = "a, button, input[type=button], input[type=submit], input[type=image], [role=button], [role=link], [role=menuitem], [onclick]";
 
   // Every element, also inside open shadow roots.
@@ -29,10 +38,16 @@ export function scan() {
     return s.visibility !== "hidden" && s.display !== "none" && Number(s.opacity) > 0.05;
   };
   const text = (el) => (el.innerText || el.value || "").replace(/\s+/g, " ").trim();
-  // What the element says about itself, also through its icons: title, aria-label, class names.
-  const hints = (el) => {
-    const parts = [el.getAttribute("title"), el.getAttribute("aria-label"), el.getAttribute("alt"), el.getAttribute("download"), typeof el.className === "string" ? el.className : ""];
-    for (const c of el.querySelectorAll("i, svg, img, span, use")) parts.push(c.getAttribute("class"), c.getAttribute("title"), c.getAttribute("aria-label"), c.getAttribute("alt"), c.getAttribute("href"), c.getAttribute("xlink:href"), c.getAttribute("src"));
+  // What a person reads on the element and its icons: text, title, label, alternative text.
+  const human = (el) => {
+    const parts = [text(el), el.getAttribute("title"), el.getAttribute("aria-label"), el.getAttribute("alt")];
+    for (const c of el.querySelectorAll("i, svg, img, span, title")) parts.push(c.getAttribute("title"), c.getAttribute("aria-label"), c.getAttribute("alt"), c.tagName === "title" ? c.textContent : "");
+    return parts.filter(Boolean).join(" ");
+  };
+  // What only the markup says: class names and icon references of the element and its children.
+  const markup = (el) => {
+    const parts = [el.getAttribute("download"), typeof el.className === "string" ? el.className : ""];
+    for (const c of el.querySelectorAll("i, svg, img, span, use")) parts.push(c.getAttribute("class"), c.getAttribute("href"), c.getAttribute("xlink:href"), c.getAttribute("src"));
     return parts.filter(Boolean).join(" ");
   };
   const fileName = (url) => { try { const p = new URL(url).pathname; return decodeURIComponent(p.slice(p.lastIndexOf("/") + 1)); } catch { return ""; } };
@@ -45,8 +60,9 @@ export function scan() {
     const href = raw && !raw.startsWith("#") && !/^javascript:/i.test(raw) ? el.href : "";
     // Only http(s) addresses are downloaded as links; blob: and data: belong to the page and are clicked.
     const real = /^https?:/i.test(href);
-    const words = `${text(el)} ${hints(el)}`;
-    const said = hints(el).match(DOWNLOAD) || hints(el).match(HINT);
+    const reads = human(el), marks = markup(el);
+    const words = `${reads} ${marks}`;
+    const said = words.match(DOWNLOAD) || words.match(HINT);
     const label = (text(el) || el.getAttribute("aria-label") || el.getAttribute("title") || fileName(href) || (said ? `[${said[0]}]` : "")).slice(0, 100);
     // A submit button sends its form; one that only hints at a document may do something else.
     const submits = el.matches("input[type=submit], input[type=image], button[type=submit]") || (el.tagName === "BUTTON" && !el.getAttribute("type") && !!el.closest("form"));
@@ -56,8 +72,14 @@ export function scan() {
     else if (real && el.getAttribute("type") && /pdf|msword|officedocument|octet-stream|zip/i.test(el.getAttribute("type"))) { kind = "file"; reason = "type"; }
     else if (real && MAYBE_URL.test(href)) { kind = "link"; reason = "address"; }
     else if (DOWNLOAD.test(words) || HINT.test(words)) { kind = real ? "link" : "button"; reason = "words"; sure = DOWNLOAD.test(words) && !submits; }
-    // A link that names a file only downloads it; anything else whose words name an action is left out.
-    if (!kind || (kind !== "file" && ACTION.test(words))) continue;
+    if (!kind) continue;
+    // A link that names a file only downloads it. Anything else that names an action is left
+    // out, or offered unticked when it says "download" too; an action icon makes it doubtful.
+    if (kind !== "file") {
+      if (real && ACTION_URL.test(new URL(href).pathname + new URL(href).search)) continue;
+      if (ACTION.test(reads) || ACTION_ZH.test(reads)) { if (!DOWNLOAD.test(reads)) continue; sure = false; }
+      if (ACTION_ICON.test(marks)) sure = false;
+    }
     // The row it stands in (a table row, a list item) tells documents with the same button apart.
     const row = el.parentElement && el.parentElement.closest("tr, li, [role=row], [role=listitem], article");
     const context = row ? (row.innerText || "").replace(/\s+/g, " ").trim().slice(0, 160) : "";
@@ -146,7 +168,14 @@ export function show(i) {
 /** Runs in the page: clicks one candidate of this frame, as a person would. */
 export function press(i) {
   const el = (globalThis.__portalDownloadFound || [])[i];
-  if (!el || !el.isConnected) throw new Error("gone");
+  // Said, not thrown: a thrown error does not reach the panel the same way in every browser.
+  if (!el || !el.isConnected) return { gone: true };
   el.scrollIntoView({ block: "center" });
   el.click();
+  return { gone: false };
+}
+
+/** Runs in the page: whether this is still the page that was searched (a page loaded anew forgets what was found). */
+export function alive() {
+  return Array.isArray(globalThis.__portalDownloadFound);
 }

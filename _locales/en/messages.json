@@ -495,7 +495,7 @@
     "message": "Stop"
   },
   "docs_stopping": {
-    "message": "Stops after the current document."
+    "message": "Stops now; a download under way may still finish."
   },
   "docs_waiting": {
     "message": "Waiting."

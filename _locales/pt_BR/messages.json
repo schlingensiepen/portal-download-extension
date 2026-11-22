@@ -495,7 +495,7 @@
     "message": "Parar"
   },
   "docs_stopping": {
-    "message": "Para após o documento atual."
+    "message": "Para agora; um download em andamento ainda pode terminar."
   },
   "docs_waiting": {
     "message": "Aguardando."

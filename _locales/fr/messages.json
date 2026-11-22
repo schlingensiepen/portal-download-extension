@@ -495,7 +495,7 @@
     "message": "Arrêter"
   },
   "docs_stopping": {
-    "message": "S'arrête après le document en cours."
+    "message": "S'arrête maintenant ; un téléchargement en cours peut encore se terminer."
   },
   "docs_waiting": {
     "message": "En attente."

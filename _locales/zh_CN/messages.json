@@ -495,7 +495,7 @@
     "message": "停止"
   },
   "docs_stopping": {
-    "message": "将在当前文档完成后停止。"
+    "message": "立即停止；正在进行的下载可能仍会完成。"
   },
   "docs_waiting": {
     "message": "等待中。"

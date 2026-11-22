@@ -495,7 +495,7 @@
     "message": "Detener"
   },
   "docs_stopping": {
-    "message": "Se detiene tras el documento actual."
+    "message": "Se detiene ahora; una descarga en curso puede terminar aún."
   },
   "docs_waiting": {
     "message": "En espera."

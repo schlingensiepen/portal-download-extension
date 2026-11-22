@@ -6,7 +6,7 @@ import { Vault } from "./vault.js";
 import { ServiceBackend, localBackend, parseInvitation, CONTRACT } from "./backends.js";
 import { checkPassword, fromBase64 } from "./local.js";
 import { LANGUAGES, load, tag } from "./i18n.js";
-import { scan, mark, unmark, show, press } from "./finder.js";
+import { scan, mark, unmark, show, press, alive } from "./finder.js";
 import { runQueue, remembered, folderFor } from "./fetcher.js";
 
 const api = globalThis.browser ?? globalThis.chrome;
@@ -149,7 +149,7 @@ async function render() {
 // "fromTab" holds for the one view it was given to; a preview of a file only while its backend's management is shown.
 // Something typed or a file previewed, which a reload would lose.
 const typed = () => !!state.preview || [...document.querySelectorAll("#view input, #view textarea")].some((el) => el.type !== "file" && el.value && !el.readOnly && el.defaultValue !== el.value);
-const go = (view, extra = {}) => { if (view !== "job") state.keptNote = ""; Object.assign(state, { view, fromTab: false }, view === "manage" ? {} : { preview: null }, extra); render(); };
+const go = (view, extra = {}) => { if (view !== "docs" && state.docs && state.docs.running) state.docs.stop = true; if (view !== "job") state.keptNote = ""; Object.assign(state, { view, fromTab: false }, view === "manage" ? {} : { preview: null }, extra); render(); };
 
 // ------------------------------------------------------------------ views
 function viewUnlock() {
@@ -447,7 +447,8 @@ async function downloadDocuments(only) {
     render();
     await runQueue({
       items, tabId: d.tabId, pageUrl: d.url, folder: d.folder,
-      click: (it) => api.scripting.executeScript({ target: { tabId: d.tabId, frameIds: [it.frameId] }, func: press, args: [it.i] }),
+      click: (it) => api.scripting.executeScript({ target: { tabId: d.tabId, frameIds: [it.frameId] }, func: press, args: [it.i] }).then((r) => (r && r[0] && r[0].result) || { gone: true }),
+      alive: (it) => api.scripting.executeScript({ target: { tabId: d.tabId, frameIds: [it.frameId] }, func: alive }).then((r) => !!(r && r[0] && r[0].result)),
       stop: () => d.stop || state.docs !== d,
       onStep: async (n, status) => {
         const it = items.find((x) => x.n === n);
@@ -484,7 +485,7 @@ function viewDocs() {
   const card = h("div", { class: "card" }, h("h1", {}, d.job ? d.job.j.title : t("docs_title")),
     h("p", { class: "small" }, items.length ? t("docs_count", String(items.length)) : t("docs_none")),
     // Firefox lets an extension choose the folder only with the file name; see the README.
-    h("p", { class: "small muted" }, api.downloads && !api.downloads.onDeterminingFilename ? t("docs_folder_firefox", d.folder) : t("docs_folder", d.folder)),
+    h("p", { class: "small muted" }, api.runtime.getBrowserInfo ? t("docs_folder_firefox", d.folder) : t("docs_folder", d.folder)),
     h("div", { class: "row" },
       d.running
         ? h("button", { class: "btn bad", type: "button", onclick: () => { d.stop = true; toast(t("docs_stopping")); } }, t("docs_stop"))
@@ -492,7 +493,7 @@ function viewDocs() {
       h("button", { class: "btn", type: "button", disabled: d.running, onclick: findDocuments }, t("docs_again")),
       h("button", { class: "btn", type: "button", disabled: d.running, onclick: clearDocuments }, t("docs_clear"))),
     items.length ? h("div", { class: "row", style: "margin-top:6px" },
-      h("button", { class: "btn", type: "button", disabled: d.running, onclick: () => { for (const i of items) i.on = true; highlight(d); render(); } }, t("docs_tick_all")),
+      h("button", { class: "btn", type: "button", disabled: d.running, onclick: () => { for (const i of items) i.on = i.sure !== false && !i.twice; highlight(d); render(); } }, t("docs_tick_all")),
       h("button", { class: "btn", type: "button", disabled: d.running, onclick: () => { for (const i of items) i.on = false; highlight(d); render(); } }, t("docs_tick_none"))) : null);
   box.append(card);
   const kinds = { file: t("docs_kind_file"), link: t("docs_kind_link"), button: t("docs_kind_button") };

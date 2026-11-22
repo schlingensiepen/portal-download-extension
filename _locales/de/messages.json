@@ -495,7 +495,7 @@
     "message": "Anhalten"
   },
   "docs_stopping": {
-    "message": "Hält nach dem laufenden Dokument an."
+    "message": "Hält jetzt an; ein laufender Download wird vielleicht noch fertig."
   },
   "docs_waiting": {
     "message": "Wartet."

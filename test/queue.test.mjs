@@ -25,10 +25,14 @@ function start(d) {
   const id = world.next++;
   const item = { id, state: "in_progress", filename: d.url.split("/").pop(), finalUrl: d.url, ...d };
   world.downloads.set(id, item);
+  // late: the name is decided only when the server's headers come, after the click's wait ended.
+  const late = d.late || 0;
   setTimeout(() => {
     dl.onCreated.fire({ ...item });
-    dl.onDeterminingFilename.fire({ ...item }, (s) => { world.placed[id] = s ? s.filename : null; });
-    setTimeout(() => { item.state = "complete"; item.filename = `/home/u/Downloads/${world.placed[id] || item.filename}`; }, 20);
+    setTimeout(() => {
+      dl.onDeterminingFilename.fire({ ...item }, (s) => { world.placed[id] = s ? s.filename : null; });
+      setTimeout(() => { item.state = "complete"; item.filename = `/home/u/Downloads/${world.placed[id] || item.filename}`; }, 20);
+    }, late);
   }, 5);
   return id;
 }
@@ -42,7 +46,7 @@ const { runQueue } = await import(src);
 
 const run = (items, click, extra = {}) => {
   const steps = {};
-  return runQueue({ items, tabId: 1, pageUrl: PORTAL, folder: "Portal-Download/Strom", click, onStep: (n, s) => { if (typeof s === "object") steps[n] = s; }, stop: extra.stop || (() => false), pause: 0, wait: 400, grace: 100, poll: 10 }).then(() => steps);
+  return runQueue({ items, tabId: 1, pageUrl: PORTAL, folder: "Portal-Download/Strom", click, alive: extra.alive || null, onStep: (n, s) => { if (typeof s === "object") steps[n] = s; }, stop: extra.stop || (() => false), pause: 0, wait: 400, grace: 100, poll: 10 }).then(() => steps);
 };
 const tests = [];
 const test = (name, fn) => tests.push([name, fn]);
@@ -66,10 +70,46 @@ test("a button takes the portal's download, not one of another extension or site
   assert.equal(world.placed[2], null);
 });
 
+test("a document whose name is decided late still goes into the job's folder", async () => {
+  const s = await run([{ n: 1, label: "Download" }], async () => { start({ url: "https://portal.example/slow/5", referrer: PORTAL, mime: "application/pdf", late: 80 }); });
+  assert.equal(s[1].ok, true);
+  assert.equal(world.placed[1], "Portal-Download/Strom/5.pdf");
+});
+
 test("a download of the user during the wait is neither taken nor moved", async () => {
   const s = await run([{ n: 1, label: "Download" }], async () => { start({ url: "https://news.example/paper.pdf", referrer: "https://news.example/" }); });
   assert.equal(s[1].error, "nothing");
   assert.equal(world.placed[1], null);
+});
+
+test("a download without any origin after the click is taken when nothing else came", async () => {
+  const s = await run([{ n: 1, label: "Download" }], async () => { start({ url: "https://files.example/x/1", referrer: "", mime: "application/pdf" }); });
+  assert.equal(s[1].ok, true);
+  assert.equal(world.placed[1], "Portal-Download/Strom/1.pdf");
+});
+
+test("a button on another page of the same address is another document", async () => {
+  const { docKey } = await import(src);
+  assert.notEqual(docKey({ label: "Download", page: "https://p.example/detail.aspx?id=1" }), docKey({ label: "Download", page: "https://p.example/detail.aspx?id=2" }));
+  assert.notEqual(docKey({ label: "Download", page: "https://p.example/#/invoice/1" }), docKey({ label: "Download", page: "https://p.example/#/invoice/2" }));
+  assert.equal(docKey({ label: "Download", page: "https://p.example/d?id=1&sid=a" }), docKey({ label: "Download", page: "https://p.example/d?sid=b&id=1" }));
+});
+
+test("a page that loads anew stops the rest", async () => {
+  const s = await run([{ n: 1, label: "Weiter" }, { n: 2, url: "https://portal.example/b.pdf" }], async () => { tabs.onUpdated.fire(1, { status: "loading" }); }, { alive: async () => false });
+  assert.equal(s[1].error, "navigated");
+  assert.equal(s[2], undefined);
+});
+
+test("a change of the \"#…\" part only does not stop the rest", async () => {
+  const s = await run([{ n: 1, label: "[download]" }, { n: 2, url: "https://portal.example/b.pdf" }], async () => { tabs.onUpdated.fire(1, { status: "loading" }); }, { alive: async () => true });
+  assert.equal(s[1].error, "nothing");
+  assert.equal(s[2].ok, true);
+});
+
+test("an element gone from the page is said so", async () => {
+  const s = await run([{ n: 1, label: "Download" }], async () => ({ gone: true }));
+  assert.equal(s[1].error, "gone");
 });
 
 test("a web page instead of a document is a failure and deleted", async () => {

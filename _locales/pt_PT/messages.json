@@ -495,7 +495,7 @@
     "message": "Parar"
   },
   "docs_stopping": {
-    "message": "Para após o documento atual."
+    "message": "Para agora; uma transferência em curso ainda pode terminar."
   },
   "docs_waiting": {
     "message": "A aguardar."
