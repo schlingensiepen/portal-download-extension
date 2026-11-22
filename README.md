@@ -6,7 +6,7 @@
 > [!NOTE]
 > **Why this exists.** Invoices, notices and statements from many companies no longer come by post or e-mail; they sit in a portal, and I have to fetch them myself. That is an utter bad habit. Every company has its own portal, there is no common procedure, and the only reason I can think of is the belief that this proves delivery. It annoys me enormously. portal-download does not solve the problem; it only makes it bearable for me, and I am not happy with it. The [GitHub discussions](https://github.com/schlingensiepen/portal-download-extension/discussions) are open and read: please post your experience, wishes, suggestions and bugs there.
 
-![The extension's side panel beside a portal (made up for the picture)](store/screenshot-1-de.png)
+![The extension's side panel beside a portal (made up for the picture)](store/screenshot-1-en.png)
 
 The extension shows your due portal downloads in one list in the browser's side panel. The portal opens in a normal tab beside it. You copy the login with one click and close the run as succeeded or failed.
 
@@ -41,7 +41,16 @@ The browser reminds you now and then that a developer extension is active. It ma
 
 **The toolbar button** opens the side panel (Firefox: the sidebar). In Chrome and Edge, pin it first: click the puzzle piece in the toolbar, then the pin beside *Portal-Download*.
 
-**Permissions.** The browser may name the permission to *read your browsing history*. It stands for one thing: the extension reads the address and title of the tab you are looking at. It needs them for **+** and for *Add the current page as a job*. It keeps them in memory only, and neither stores nor sends them. Access to a service is asked for when you add that service, and for that service only.
+**Permissions.** The extension asks for these:
+
+| Permission | What for |
+|---|---|
+| `storage`, `unlimitedStorage` | Keeping your backends and the local store in the browser's storage for this extension. |
+| `sidePanel` | Showing the panel beside the page. |
+| `tabs` | Reading the address and title of the active tab, and opening a portal in a new tab. |
+| access to one address, asked for later | Reaching a service. The browser asks when you add that service, and for that service only. |
+
+While the panel is open, it follows the address and title of the tab you are looking at, in memory only. It needs them at hand when you click **+** or *Add the current page as a job*. It neither stores nor sends them. The browser's wording *read your browsing history* is its general text for the `tabs` permission.
 
 ## The panel
 
@@ -51,7 +60,7 @@ The browser reminds you now and then that a developer extension is active. It ma
 | Top, **+** | Add a service or a local store. |
 | Top, **⚙** | Manage the chosen backend: exchange jobs as a file, and more. Choose one backend first; under *All* the button is greyed out. |
 | Middle | The list of jobs, the most urgent first. Under *All*, each job names its backend. |
-| Foot | *Project page*, *Feedback*, the version, and **the language menu**. |
+| Foot | *Project page*, *Feedback*, the version, and after it **the language menu**: a drop-down list whose first entry is *As the browser*. |
 
 Some things concern one backend and are greyed out under *All*: *Add the current page as a job* and **⚙**.
 
@@ -98,11 +107,11 @@ The panel then says *Closed – due again on …*. After *Succeeded* that is tod
 Somebody who runs a Portal-Download service gives you an invitation link.
 
 1. **Make your computer trust the service's certificate first.** Follow the [certificate instructions](https://github.com/schlingensiepen/portal-download/blob/main/docs/install.md#certificates) of the service. Chrome and Edge do not count a certificate that was only accepted on a warning page.
-2. Open the invitation link in a tab.
+2. Open the invitation link in a tab. The page *Accept the invitation* appears. Leave it as it is; you need not accept anything on that page.
 3. Click **+** in the panel, then *Take the invitation from the current tab*.
-4. Allow the extension to reach that service.
+4. The browser asks whether the extension may access the service's address. Allow it.
 
-The backend menu now shows the service, and the list shows its jobs.
+The backend menu now shows the service, and the list shows its jobs. The extension alone is enough: you need not sign in to the service's web application first.
 
 - If you already use the service's web application, open **My devices** there and click **Add to the browser extension** instead of step 2. That link serves once, within the hour.
 - The extension gets an access of its own, named after the browser and the system. It shows up among your devices in the service and can be revoked there.
@@ -124,6 +133,7 @@ Under **⚙** of *This browser*:
 
 | Action | What it does |
 |---|---|
+| *Export the jobs*, *Read a file in* | Writes the jobs to a file, or takes jobs from a file. See [Exchanging jobs](#exchanging-jobs). |
 | *Change the passphrase* | Sets a new passphrase. |
 | *Lock now* | Locks the store at once. |
 | *Delete the local store* | Deletes the store with its jobs. The services stay, and their tokens lie unencrypted again. Export the jobs first. |
@@ -136,8 +146,10 @@ Jobs travel as a ZIP file between backends: from the local store to a service, b
 
 **Export the jobs:**
 
-1. Enter a password for the file and click *Download encrypted*. The file is encrypted with AES-256.
-2. Or click *Download without password*, and again when it asks *Logins in plain text – really?*.
+- **With a password:** enter a password for the file and click *Download encrypted*. The file is encrypted with AES-256.
+- **Without a password:** click *Download without password*. The button then reads *Logins in plain text – really?*. Click it a second time within four seconds; otherwise nothing is written.
+
+The local store must be unlocked for this. While it is locked, the panel shows only the unlock card.
 
 The file is named `portal-download-jobs-<date>.zip`. The browser saves it where it saves downloads. It holds every job with its login, its history and the deleted jobs. **Without a password, the logins in it are in plain text.**
 
@@ -178,7 +190,7 @@ Removing the extension deletes everything it kept in this browser. If you skippe
 English, German, French, Spanish, Portuguese (Brazil and Portugal) and Chinese (simplified and traditional).
 
 - The panel follows the browser's language. The language menu at the panel's foot chooses another one.
-- The translations other than English and German were made by machine. Corrections are welcome: see the issue of each language among the [issues](https://github.com/schlingensiepen/portal-download-extension/issues), or write in the [discussions](https://github.com/schlingensiepen/portal-download-extension/discussions).
+- The translations other than English and German were made by machine. Corrections are welcome. Each language has an issue of its own in the issues list: <https://github.com/schlingensiepen/portal-download-extension/issues>. The [discussions](https://github.com/schlingensiepen/portal-download-extension/discussions) are open too.
 - Messages that come from a service are in English. So are some messages of the local store about input it refuses.
 
 ## Privacy
