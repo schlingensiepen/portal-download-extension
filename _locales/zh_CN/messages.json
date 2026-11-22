@@ -562,5 +562,62 @@
   },
   "docs_hidden": {
     "message": "另有 $1 个被略过，因为其文字或地址表示删除、退出或上传等操作。"
+  },
+  "watch_offer": {
+    "message": "缺少文档或有错误？演示一下您是如何下载的"
+  },
+  "watch_title": {
+    "message": "关于此门户的反馈"
+  },
+  "watch_intro": {
+    "message": "请像平时一样在页面中下载一个文档。扩展会记录您点击了什么，以便您将其作为反馈发送给我们。这样我们就能看到此门户如何提供文档。"
+  },
+  "watch_what_tab": {
+    "message": "仅限此标签页及其打开的标签页；在第一次下载、两分钟后或您停止时结束。"
+  },
+  "watch_what_click": {
+    "message": "每次点击：元素的类型、其文字、其地址的形式，以及搜索对它的判断。"
+  },
+  "watch_what_private": {
+    "message": "数字、电子邮件地址和地址中的参数值会被涂黑。任何内容都不会离开您的电脑：您会看到文本，并决定是否复制。"
+  },
+  "watch_start": {
+    "message": "开始观察"
+  },
+  "watch_refused": {
+    "message": "没有此网站和下载的访问权限，无法进行观察。"
+  },
+  "watch_now": {
+    "message": "现在请像平时一样在页面中下载一个文档。"
+  },
+  "watch_count": {
+    "message": "已记录的点击：$1"
+  },
+  "watch_stop": {
+    "message": "停止并显示文本"
+  },
+  "watch_end_download": {
+    "message": "下载已开始；观察已结束。"
+  },
+  "watch_end_timeout": {
+    "message": "两分钟内没有下载；观察已结束。"
+  },
+  "watch_end_stopped": {
+    "message": "观察已停止。"
+  },
+  "watch_end_gone": {
+    "message": "标签页已关闭；观察已结束。"
+  },
+  "watch_check": {
+    "message": "发送前请阅读文本。链接或按钮文字中的姓名无法被识别：请删除所有个人信息。"
+  },
+  "watch_name_portal": {
+    "message": "注明门户（$1）"
+  },
+  "watch_copy": {
+    "message": "复制文本"
+  },
+  "watch_form": {
+    "message": "打开反馈表单"
   }
 }

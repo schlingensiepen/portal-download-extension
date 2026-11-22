@@ -562,5 +562,62 @@
   },
   "docs_hidden": {
     "message": "$1 weitere ausgelassen, weil ihre Beschriftung oder Adresse eine Handlung nennt, etwa löschen, abmelden oder hochladen."
+  },
+  "watch_offer": {
+    "message": "Fehlt etwas oder stimmt etwas nicht? Zeig mir, wie du herunterlädst"
+  },
+  "watch_title": {
+    "message": "Rückmeldung zu diesem Portal"
+  },
+  "watch_intro": {
+    "message": "Lade ein Dokument in der Seite so herunter, wie du es immer tust. Die Erweiterung schreibt auf, was du anklickst, damit du es uns als Rückmeldung schicken kannst. Daran sehen wir, wie dieses Portal seine Dokumente anbietet."
+  },
+  "watch_what_tab": {
+    "message": "Nur dieser Tab und die Tabs, die er öffnet; es endet beim ersten Download, nach zwei Minuten oder wenn du es beendest."
+  },
+  "watch_what_click": {
+    "message": "Zu jedem Klick: die Art des Elements, seine Worte, die Form seiner Adresse und was die Suche daraus gemacht hat."
+  },
+  "watch_what_private": {
+    "message": "Zahlen, E-Mail-Adressen und die Werte in Adressen werden geschwärzt. Nichts verlässt deinen Computer: Du siehst den Text und entscheidest, ob du ihn kopierst."
+  },
+  "watch_start": {
+    "message": "Zuschauen beginnen"
+  },
+  "watch_refused": {
+    "message": "Ohne Zugriff auf diese Seite und auf die Downloads kann nichts beobachtet werden."
+  },
+  "watch_now": {
+    "message": "Lade jetzt ein Dokument in der Seite herunter, wie du es immer tust."
+  },
+  "watch_count": {
+    "message": "Notierte Klicks: $1"
+  },
+  "watch_stop": {
+    "message": "Beenden und Text zeigen"
+  },
+  "watch_end_download": {
+    "message": "Ein Download hat begonnen; das Zuschauen ist beendet."
+  },
+  "watch_end_timeout": {
+    "message": "Kein Download innerhalb von zwei Minuten; das Zuschauen ist beendet."
+  },
+  "watch_end_stopped": {
+    "message": "Das Zuschauen wurde beendet."
+  },
+  "watch_end_gone": {
+    "message": "Der Tab wurde geschlossen; das Zuschauen ist beendet."
+  },
+  "watch_check": {
+    "message": "Lies den Text, bevor du ihn schickst. Namen in den Worten eines Links oder Knopfs lassen sich nicht erkennen: Lösche alles Persönliche."
+  },
+  "watch_name_portal": {
+    "message": "Das Portal nennen ($1)"
+  },
+  "watch_copy": {
+    "message": "Text kopieren"
+  },
+  "watch_form": {
+    "message": "Rückmeldeformular öffnen"
   }
 }

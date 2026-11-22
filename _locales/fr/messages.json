@@ -562,5 +562,62 @@
   },
   "docs_hidden": {
     "message": "$1 autres laissés de côté, car leurs mots ou leur adresse désignent une action comme supprimer, se déconnecter ou téléverser."
+  },
+  "watch_offer": {
+    "message": "Il manque quelque chose ou une erreur ? Montrez-moi comment vous téléchargez"
+  },
+  "watch_title": {
+    "message": "Retour sur ce portail"
+  },
+  "watch_intro": {
+    "message": "Téléchargez un document de la page comme d'habitude. L'extension note ce sur quoi vous cliquez, pour que vous puissiez nous l'envoyer comme retour. Cela nous montre comment ce portail propose ses documents."
+  },
+  "watch_what_tab": {
+    "message": "Seulement cet onglet et les onglets qu'il ouvre ; cela s'arrête au premier téléchargement, après deux minutes ou quand vous l'arrêtez."
+  },
+  "watch_what_click": {
+    "message": "Pour chaque clic : le type d'élément, ses mots, la forme de son adresse et ce que la recherche en a fait."
+  },
+  "watch_what_private": {
+    "message": "Les nombres, les adresses e-mail et les valeurs dans les adresses sont masqués. Rien ne quitte votre ordinateur : vous voyez le texte et décidez de le copier ou non."
+  },
+  "watch_start": {
+    "message": "Commencer l'observation"
+  },
+  "watch_refused": {
+    "message": "Sans accès à ce site et aux téléchargements, rien ne peut être observé."
+  },
+  "watch_now": {
+    "message": "Téléchargez maintenant un document de la page, comme d'habitude."
+  },
+  "watch_count": {
+    "message": "Clics notés : $1"
+  },
+  "watch_stop": {
+    "message": "Arrêter et afficher le texte"
+  },
+  "watch_end_download": {
+    "message": "Un téléchargement a commencé ; l'observation est terminée."
+  },
+  "watch_end_timeout": {
+    "message": "Aucun téléchargement en deux minutes ; l'observation est terminée."
+  },
+  "watch_end_stopped": {
+    "message": "L'observation a été arrêtée."
+  },
+  "watch_end_gone": {
+    "message": "L'onglet a été fermé ; l'observation est terminée."
+  },
+  "watch_check": {
+    "message": "Lisez le texte avant de l'envoyer. Les noms dans les mots d'un lien ou d'un bouton ne peuvent pas être reconnus : supprimez tout ce qui est personnel."
+  },
+  "watch_name_portal": {
+    "message": "Nommer le portail ($1)"
+  },
+  "watch_copy": {
+    "message": "Copier le texte"
+  },
+  "watch_form": {
+    "message": "Ouvrir le formulaire de retour"
   }
 }

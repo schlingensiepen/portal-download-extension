@@ -8,6 +8,8 @@ import { checkPassword, fromBase64 } from "./local.js";
 import { LANGUAGES, load, tag } from "./i18n.js";
 import { scan, mark, unmark, show, press, alive } from "./finder.js";
 import { runQueue, remembered, folderFor } from "./fetcher.js";
+import { observe, unobserve } from "./observer.js";
+import { buildReport } from "./report.js";
 
 const api = globalThis.browser ?? globalThis.chrome;
 const vault = new Vault();
@@ -135,14 +137,16 @@ async function render() {
     if (state.vaultState === "locked") {
       // Nothing of the store stays on screen or in memory while it is locked; a download queue stops.
       if (state.docs) { state.docs.stop = true; unhighlight(state.docs); state.docs = null; }
+      if (state.watch) { endWatching("stopped"); state.watch = null; }
       Object.assign(state, { job: null, preview: null, done: null, view: "list" });
       return view.replaceChildren(viewUnlock());
     }
     // A job and its editing carry their own backend, also under "All"; management and a new job need one chosen.
     if ((["manage", "new"].includes(state.view) && !current()) || (["job", "edit"].includes(state.view) && !(state.job && state.backends.some((x) => x.id === state.job.b.id)))) state.view = "list";
     if (state.view === "docs" && !state.docs) state.view = "list";
+    if (state.view === "watch" && !state.watch) state.view = "list";
     const v = state.view;
-    const content = v === "docs" ? viewDocs() : v === "job" ? viewJob() : v === "add" ? viewAdd() : v === "manage" ? await viewManage() : v === "new" || v === "edit" ? await viewNew() : await viewList();
+    const content = v === "watch" ? viewWatch() : v === "docs" ? viewDocs() : v === "job" ? viewJob() : v === "add" ? viewAdd() : v === "manage" ? await viewManage() : v === "new" || v === "edit" ? await viewNew() : await viewList();
     // A slower render that started earlier does not cover a later one.
     if (mine === renders) view.replaceChildren(content);
   } catch (e) { fail(e); }
@@ -150,7 +154,7 @@ async function render() {
 // "fromTab" holds for the one view it was given to; a preview of a file only while its backend's management is shown.
 // Something typed or a file previewed, which a reload would lose.
 const typed = () => !!state.preview || [...document.querySelectorAll("#view input, #view textarea")].some((el) => el.type !== "file" && el.value && !el.readOnly && el.defaultValue !== el.value);
-const go = (view, extra = {}) => { if (view !== "docs" && state.docs && state.docs.running) state.docs.stop = true; if (view !== "job") state.keptNote = ""; Object.assign(state, { view, fromTab: false }, view === "manage" ? {} : { preview: null }, extra); render(); };
+const go = (view, extra = {}) => { if (view !== "docs" && state.docs && state.docs.running) state.docs.stop = true; if (view !== "watch" && state.watch) { endWatching("stopped"); state.watch = null; } if (view !== "job") state.keptNote = ""; Object.assign(state, { view, fromTab: false }, view === "manage" ? {} : { preview: null }, extra); render(); };
 
 // ------------------------------------------------------------------ views
 function viewUnlock() {
@@ -188,6 +192,7 @@ async function viewList() {
     box.append(h("div", { class: "card" }, h("h1", {}, t("welcome_title")), h("p", { class: "small" }, t("welcome_text")),
       h("button", { class: "btn primary", type: "button", onclick: () => go("add") }, t("add_title"))));
     box.append(h("button", { class: "btn wide", type: "button", onclick: findDocuments }, t("docs_find")));
+    box.append(watchOffer());
     return box;
   }
   // What concerns one backend is greyed out under "All".
@@ -230,6 +235,7 @@ function viewJob() {
   if (j.last_run) box.append(h("p", { class: "small muted" }, t("last_run", t(j.last_run.outcome), fmtDateTime(j.last_run.finished_at), j.last_run.by), j.last_run.note ? h("div", { class: "pre" }, j.last_run.note) : null));
   box.append(h("button", { class: "btn primary wide", type: "button", onclick: () => { if (/^https?:\/\//i.test(j.entry_url)) api.tabs.create({ url: j.entry_url }); } }, t("open_portal")));
   box.append(h("button", { class: "btn wide", type: "button", style: "margin-top:6px", onclick: findDocuments }, t("docs_find")));
+  box.append(watchOffer());
   const login = h("div", { class: "card" });
   for (const [k, v] of [["username", j.username], ["password", j.password]]) {
     if (!v) continue;
@@ -512,7 +518,137 @@ function viewDocs() {
       h("div", { class: "small muted" }, `${kinds[it.kind]} · ${why[it.reason]}${where ? ` · ${where}` : ""}`),
       h("div", { class: "small status" }, docLine(it))));
   }
+  if (!d.running) box.append(watchOffer());
   if (items.some((i) => i.done) && !d.running) box.append(h("button", { class: "btn wide", type: "button", onclick: async () => { await remembered.forget(d.scope); for (const i of items) { i.done = null; i.on = i.sure !== false && !i.twice; } await highlight(d); render(); } }, t("docs_forget")));
+  return box;
+}
+
+// Watching the user download one document, for a feedback on a portal (observer.js, report.js).
+// Only the active tab and the tabs it opens, only after the user agreed, until the first
+// download or two minutes; the text is shown blacked out, and only the user copies it.
+const FEEDBACK_FORM = "https://github.com/schlingensiepen/portal-download-extension/issues/new?template=portal-feedback.yml";
+const WATCH_FOR = 2 * 60000;
+const watchOffer = () => h("button", { class: "btn wide small", type: "button", style: "margin-top:6px", onclick: () => {
+  if (!/^https?:/i.test(state.tabUrl) || state.tabId == null) return toast(t("docs_no_page"), true);
+  go("watch", { watch: { phase: "ask", tabId: state.tabId, url: state.tabUrl, back: state.view === "job" ? { view: "job", job: state.job } : { view: "list" } } });
+} }, t("watch_offer"));
+async function startWatching() {
+  const w = state.watch;
+  if (!w || w.phase !== "ask") return;
+  const site = new URL(w.url);
+  if (site.protocol === "http:" && !["localhost", "127.0.0.1"].includes(site.hostname)) return toast(t("docs_http"), true);
+  try {
+    // The first thing the click awaits: access to this portal, and to the browser's downloads (to see one start).
+    if (!(await api.permissions.request({ origins: [originPattern(w.url)], permissions: ["downloads"] }))) return toast(t("watch_refused"), true);
+    if (state.docs) { const d = state.docs; d.stop = true; state.docs = null; await unhighlight(d); }
+    Object.assign(w, { phase: "watching", token: crypto.randomUUID(), origin: site.origin, clicks: [], events: [], tabs: new Set([w.tabId]), download: null, ended: "" });
+    const inject = (tabId) => api.scripting.executeScript({ target: { tabId, allFrames: true }, func: scan })
+      .catch(() => api.scripting.executeScript({ target: { tabId }, func: scan }))
+      .then(() => api.scripting.executeScript({ target: { tabId, allFrames: true }, func: observe, args: [w.token] }).catch(() => api.scripting.executeScript({ target: { tabId }, func: observe, args: [w.token] })))
+      .catch(() => { /* a page of another site, or none yet: its clicks are not noted */ });
+    w.listeners = {
+      message: (msg, sender, reply) => {
+        if (!msg || msg.portalDownloadClick !== w.token || sender.id !== api.runtime.id || !sender.tab || !w.tabs.has(sender.tab.id) || state.watch !== w || w.phase !== "watching") return;
+        w.clicks.push(msg.click);
+        if (w.clicks.length > 20) w.clicks.shift();
+        reply(true);
+        const n = document.querySelector("[data-watch-count]");
+        if (n) n.textContent = t("watch_count", String(w.clicks.length));
+      },
+      updated: (tabId, info, tab) => {
+        if (!w.tabs.has(tabId) || info.status !== "complete") return;
+        w.events.push({ at: Date.now(), kind: "page", url: (tab && tab.url) || "" });
+        inject(tabId);
+      },
+      created: (tab) => {
+        if (!w.tabs.has(tab.openerTabId)) return;
+        w.tabs.add(tab.id);
+        w.events.push({ at: Date.now(), kind: "tab", url: tab.pendingUrl || tab.url || "" });
+      },
+      removed: (tabId) => { if (tabId === w.tabId) endWatching("gone"); },
+      download: (d) => {
+        // Downloads of other extensions are not the user's.
+        if (d.byExtensionId && d.byExtensionId !== api.runtime.id) return;
+        w.download = { mime: d.mime, filename: d.filename, url: d.url, finalUrl: d.finalUrl, referrer: d.referrer, id: d.id };
+        // The file name is decided a moment later.
+        setTimeout(async () => {
+          try { const [x] = await api.downloads.search({ id: d.id }); if (x) Object.assign(w.download, { mime: x.mime || w.download.mime, filename: x.filename || w.download.filename }); } catch { /* as it came */ }
+          endWatching("download");
+        }, 1500);
+      },
+    };
+    api.runtime.onMessage.addListener(w.listeners.message);
+    api.tabs.onUpdated.addListener(w.listeners.updated);
+    api.tabs.onCreated.addListener(w.listeners.created);
+    api.tabs.onRemoved.addListener(w.listeners.removed);
+    api.downloads.onCreated.addListener(w.listeners.download);
+    w.timer = setTimeout(() => endWatching("timeout"), WATCH_FOR);
+    await inject(w.tabId);
+    render();
+  } catch (e) { endWatching("stopped"); fail(e); }
+}
+/** Ends a watch: listeners off, the page stops noting, the text is shown. */
+function endWatching(why) {
+  const w = state.watch;
+  if (!w || w.phase !== "watching") return;
+  w.phase = "done"; w.ended = why;
+  clearTimeout(w.timer);
+  const L = w.listeners || {};
+  try {
+    api.runtime.onMessage.removeListener(L.message);
+    api.tabs.onUpdated.removeListener(L.updated);
+    api.tabs.onCreated.removeListener(L.created);
+    api.tabs.onRemoved.removeListener(L.removed);
+    api.downloads?.onCreated.removeListener(L.download);
+  } catch { /* already gone */ }
+  for (const tabId of w.tabs) api.scripting.executeScript({ target: { tabId, allFrames: true }, func: unobserve }).catch(() => {});
+  if (state.view === "watch") render();
+}
+/** The browser's name and main version, for the report. */
+function browserName() {
+  const ua = navigator.userAgent;
+  const m = /Firefox\/(\d+)/.exec(ua) || /Edg\/(\d+)/.exec(ua) || /Chrom(?:e|ium)\/(\d+)/.exec(ua);
+  const name = /Firefox\//.test(ua) ? "Firefox" : /Edg\//.test(ua) ? "Edge" : "Chrome";
+  return m ? `${name} ${m[1]}` : name;
+}
+function viewWatch() {
+  const w = state.watch;
+  const box = h("div", {});
+  const back = () => { const b = w.back || { view: "list" }; go(b.view, b.job ? { job: b.job } : {}); };
+  if (w.phase === "ask") {
+    box.append(h("div", { class: "card" }, h("h1", {}, t("watch_title")),
+      h("p", { class: "small" }, t("watch_intro")),
+      h("ul", { class: "small" }, h("li", {}, t("watch_what_tab")), h("li", {}, t("watch_what_click")), h("li", {}, t("watch_what_private"))),
+      h("div", { class: "row" },
+        h("button", { class: "btn primary", type: "button", onclick: startWatching }, t("watch_start")),
+        h("button", { class: "btn", type: "button", onclick: back }, t("cancel")))));
+    return box;
+  }
+  if (w.phase === "watching") {
+    box.append(h("div", { class: "card" }, h("h1", {}, t("watch_title")),
+      h("p", {}, t("watch_now")),
+      h("p", { class: "small muted", "data-watch-count": "" }, t("watch_count", String(w.clicks.length))),
+      h("button", { class: "btn bad", type: "button", onclick: () => endWatching("stopped") }, t("watch_stop"))));
+    return box;
+  }
+  let host = "";
+  try { host = new URL(w.url).host; } catch { /* none */ }
+  if (w.named === undefined) w.named = true;
+  const make = () => buildReport(w, { version: api.runtime.getManifest().version, browser: browserName(), namePortal: w.named });
+  const text = h("textarea", { rows: "16", style: "width:100%;font:12px ui-monospace,monospace", "aria-label": t("watch_title") });
+  text.value = make();
+  const name = h("input", { type: "checkbox", checked: w.named });
+  name.addEventListener("change", () => { w.named = name.checked; text.value = make(); });
+  const copyBtn = h("button", { class: "btn primary", type: "button", onclick: () => copy(text.value, copyBtn) }, t("watch_copy"));
+  const ended = { download: t("watch_end_download"), timeout: t("watch_end_timeout"), stopped: t("watch_end_stopped"), gone: t("watch_end_gone") };
+  box.append(h("div", { class: "card" }, h("h1", {}, t("watch_title")),
+    h("p", { class: "small" }, ended[w.ended] || ""),
+    h("p", { class: "small" }, t("watch_check")),
+    host ? h("label", { class: "small row" }, name, t("watch_name_portal", host)) : null,
+    text,
+    h("div", { class: "row", style: "margin-top:6px" }, copyBtn,
+      h("button", { class: "btn", type: "button", onclick: () => api.tabs.create({ url: FEEDBACK_FORM }) }, t("watch_form")),
+      h("button", { class: "btn", type: "button", onclick: back }, t("back")))));
   return box;
 }
 
@@ -662,7 +798,7 @@ for (const [sel, label] of [["#project", t("project_page")], ["#feedback", t("fe
 }
 $("#version").textContent = `v${api.runtime.getManifest().version}`;
 // Closing the panel takes the highlighting off the page and ends a queue.
-addEventListener("pagehide", () => { const d = state.docs; if (d) { d.stop = true; unhighlight(d); } });
+addEventListener("pagehide", () => { const d = state.docs; if (d) { d.stop = true; unhighlight(d); } if (state.watch) endWatching("stopped"); });
 // Another panel of this browser may unlock, lock or add a service.
 api.storage.onChanged.addListener(async (changes, area) => {
   if (area === "local" && changes.language && (changes.language.newValue ?? "auto") !== chosenLanguage && !typed()) return location.reload(); if (area === "local" || area === "session") { try { await loadBackends(); } catch { return; } if (state.view === "list" || state.view === "add" || state.vaultState === "locked") render(); else renderTop(); } });

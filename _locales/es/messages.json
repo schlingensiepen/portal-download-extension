@@ -562,5 +562,62 @@
   },
   "docs_hidden": {
     "message": "$1 más omitidos, porque sus palabras o su dirección nombran una acción como eliminar, cerrar sesión o subir."
+  },
+  "watch_offer": {
+    "message": "¿Falta algo o algo está mal? Muéstrame cómo descargas"
+  },
+  "watch_title": {
+    "message": "Comentarios sobre este portal"
+  },
+  "watch_intro": {
+    "message": "Descarga un documento de la página como siempre. La extensión anota lo que pulsas, para que puedas enviárnoslo como comentario. Así vemos cómo ofrece este portal sus documentos."
+  },
+  "watch_what_tab": {
+    "message": "Solo esta pestaña y las que abra; termina con la primera descarga, tras dos minutos o cuando lo detengas."
+  },
+  "watch_what_click": {
+    "message": "Por cada clic: el tipo de elemento, sus palabras, la forma de su dirección y lo que la búsqueda hizo con él."
+  },
+  "watch_what_private": {
+    "message": "Los números, las direcciones de correo y los valores de las direcciones se tachan. Nada sale de tu ordenador: ves el texto y decides si lo copias."
+  },
+  "watch_start": {
+    "message": "Empezar a observar"
+  },
+  "watch_refused": {
+    "message": "Sin acceso a este sitio y a las descargas no se puede observar nada."
+  },
+  "watch_now": {
+    "message": "Descarga ahora un documento de la página, como siempre."
+  },
+  "watch_count": {
+    "message": "Clics anotados: $1"
+  },
+  "watch_stop": {
+    "message": "Detener y mostrar el texto"
+  },
+  "watch_end_download": {
+    "message": "Ha empezado una descarga; la observación ha terminado."
+  },
+  "watch_end_timeout": {
+    "message": "Ninguna descarga en dos minutos; la observación ha terminado."
+  },
+  "watch_end_stopped": {
+    "message": "La observación se ha detenido."
+  },
+  "watch_end_gone": {
+    "message": "La pestaña se ha cerrado; la observación ha terminado."
+  },
+  "watch_check": {
+    "message": "Lee el texto antes de enviarlo. Los nombres en las palabras de un enlace o botón no se pueden reconocer: borra todo lo personal."
+  },
+  "watch_name_portal": {
+    "message": "Nombrar el portal ($1)"
+  },
+  "watch_copy": {
+    "message": "Copiar el texto"
+  },
+  "watch_form": {
+    "message": "Abrir el formulario de comentarios"
   }
 }

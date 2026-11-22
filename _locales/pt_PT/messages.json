@@ -562,5 +562,62 @@
   },
   "docs_hidden": {
     "message": "Mais $1 deixados de fora, porque as palavras ou o endereço indicam uma ação como eliminar, terminar sessão ou carregar."
+  },
+  "watch_offer": {
+    "message": "Falta algo ou algo está errado? Mostre como transfere"
+  },
+  "watch_title": {
+    "message": "Comentários sobre este portal"
+  },
+  "watch_intro": {
+    "message": "Transfira um documento da página como faz sempre. A extensão regista aquilo em que clica, para que o possa enviar como comentário. Assim vemos como este portal disponibiliza os seus documentos."
+  },
+  "watch_what_tab": {
+    "message": "Apenas este separador e os que ele abrir; termina na primeira transferência, após dois minutos ou quando parar."
+  },
+  "watch_what_click": {
+    "message": "Para cada clique: o tipo de elemento, as suas palavras, a forma do endereço e o que a pesquisa fez com ele."
+  },
+  "watch_what_private": {
+    "message": "Números, endereços de e-mail e os valores nos endereços são ocultados. Nada sai do seu computador: vê o texto e decide se o copia."
+  },
+  "watch_start": {
+    "message": "Começar a observar"
+  },
+  "watch_refused": {
+    "message": "Sem acesso a este site e às transferências, nada pode ser observado."
+  },
+  "watch_now": {
+    "message": "Agora transfira um documento da página, como faz sempre."
+  },
+  "watch_count": {
+    "message": "Cliques registados: $1"
+  },
+  "watch_stop": {
+    "message": "Parar e mostrar o texto"
+  },
+  "watch_end_download": {
+    "message": "Começou uma transferência; a observação terminou."
+  },
+  "watch_end_timeout": {
+    "message": "Nenhuma transferência em dois minutos; a observação terminou."
+  },
+  "watch_end_stopped": {
+    "message": "A observação foi interrompida."
+  },
+  "watch_end_gone": {
+    "message": "O separador foi fechado; a observação terminou."
+  },
+  "watch_check": {
+    "message": "Leia o texto antes de o enviar. Nomes nas palavras de uma ligação ou botão não podem ser reconhecidos: apague tudo o que for pessoal."
+  },
+  "watch_name_portal": {
+    "message": "Indicar o portal ($1)"
+  },
+  "watch_copy": {
+    "message": "Copiar o texto"
+  },
+  "watch_form": {
+    "message": "Abrir o formulário de comentários"
   }
 }

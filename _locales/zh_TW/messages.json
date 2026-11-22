@@ -562,5 +562,62 @@
   },
   "docs_hidden": {
     "message": "另有 $1 個被略過，因為其文字或網址表示刪除、登出或上傳等操作。"
+  },
+  "watch_offer": {
+    "message": "缺少文件或有錯誤？示範一下您如何下載"
+  },
+  "watch_title": {
+    "message": "關於此入口網站的意見回饋"
+  },
+  "watch_intro": {
+    "message": "請像平常一樣在頁面中下載一份文件。擴充功能會記錄您點擊了什麼，讓您可以將其作為意見回饋寄給我們。這樣我們就能看到此入口網站如何提供文件。"
+  },
+  "watch_what_tab": {
+    "message": "僅限此分頁及其開啟的分頁；在第一次下載、兩分鐘後或您停止時結束。"
+  },
+  "watch_what_click": {
+    "message": "每次點擊：元素的類型、其文字、其網址的形式，以及搜尋對它的判斷。"
+  },
+  "watch_what_private": {
+    "message": "數字、電子郵件地址和網址中的參數值會被塗黑。任何內容都不會離開您的電腦：您會看到文字，並決定是否複製。"
+  },
+  "watch_start": {
+    "message": "開始觀察"
+  },
+  "watch_refused": {
+    "message": "沒有此網站和下載的存取權限，無法進行觀察。"
+  },
+  "watch_now": {
+    "message": "現在請像平常一樣在頁面中下載一份文件。"
+  },
+  "watch_count": {
+    "message": "已記錄的點擊：$1"
+  },
+  "watch_stop": {
+    "message": "停止並顯示文字"
+  },
+  "watch_end_download": {
+    "message": "下載已開始；觀察已結束。"
+  },
+  "watch_end_timeout": {
+    "message": "兩分鐘內沒有下載；觀察已結束。"
+  },
+  "watch_end_stopped": {
+    "message": "觀察已停止。"
+  },
+  "watch_end_gone": {
+    "message": "分頁已關閉；觀察已結束。"
+  },
+  "watch_check": {
+    "message": "寄出前請閱讀文字。連結或按鈕文字中的姓名無法被辨識：請刪除所有個人資訊。"
+  },
+  "watch_name_portal": {
+    "message": "註明入口網站（$1）"
+  },
+  "watch_copy": {
+    "message": "複製文字"
+  },
+  "watch_form": {
+    "message": "開啟意見回饋表單"
   }
 }

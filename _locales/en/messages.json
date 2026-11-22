@@ -562,5 +562,62 @@
   },
   "docs_hidden": {
     "message": "$1 more left out, because their words or address name an action such as delete, log out or upload."
+  },
+  "watch_offer": {
+    "message": "Something missing or wrong? Show me how you download"
+  },
+  "watch_title": {
+    "message": "Feedback on this portal"
+  },
+  "watch_intro": {
+    "message": "Download one document in the page as you always do. The extension writes down what you click, so that you can send it to us as a feedback. That shows us how this portal offers its documents."
+  },
+  "watch_what_tab": {
+    "message": "Only this tab and the tabs it opens; it ends at the first download, after two minutes, or when you stop it."
+  },
+  "watch_what_click": {
+    "message": "For each click: the kind of element, its words, the form of its address, and what the search made of it."
+  },
+  "watch_what_private": {
+    "message": "Numbers, e-mail addresses and the values in addresses are blacked out. Nothing leaves your computer: you see the text and decide whether to copy it."
+  },
+  "watch_start": {
+    "message": "Start watching"
+  },
+  "watch_refused": {
+    "message": "Without access to this site and to the downloads, nothing can be watched."
+  },
+  "watch_now": {
+    "message": "Now download one document in the page, as you always do."
+  },
+  "watch_count": {
+    "message": "Clicks noted: $1"
+  },
+  "watch_stop": {
+    "message": "Stop and show the text"
+  },
+  "watch_end_download": {
+    "message": "A download started; watching has ended."
+  },
+  "watch_end_timeout": {
+    "message": "No download within two minutes; watching has ended."
+  },
+  "watch_end_stopped": {
+    "message": "Watching was stopped."
+  },
+  "watch_end_gone": {
+    "message": "The tab was closed; watching has ended."
+  },
+  "watch_check": {
+    "message": "Read the text before you send it. Names in the words of a link or button cannot be recognised: delete anything personal."
+  },
+  "watch_name_portal": {
+    "message": "Name the portal ($1)"
+  },
+  "watch_copy": {
+    "message": "Copy the text"
+  },
+  "watch_form": {
+    "message": "Open the feedback form"
   }
 }

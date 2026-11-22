@@ -562,5 +562,62 @@
   },
   "docs_hidden": {
     "message": "Mais $1 deixados de fora, porque as palavras ou o endereço indicam uma ação como excluir, sair ou enviar arquivo."
+  },
+  "watch_offer": {
+    "message": "Falta algo ou algo está errado? Mostre como você baixa"
+  },
+  "watch_title": {
+    "message": "Feedback sobre este portal"
+  },
+  "watch_intro": {
+    "message": "Baixe um documento da página como sempre faz. A extensão anota o que você clica, para que você possa nos enviar como feedback. Assim vemos como este portal oferece seus documentos."
+  },
+  "watch_what_tab": {
+    "message": "Só esta aba e as abas que ela abrir; termina no primeiro download, após dois minutos ou quando você parar."
+  },
+  "watch_what_click": {
+    "message": "Para cada clique: o tipo de elemento, suas palavras, a forma do endereço e o que a busca fez com ele."
+  },
+  "watch_what_private": {
+    "message": "Números, endereços de e-mail e os valores nos endereços são ocultados. Nada sai do seu computador: você vê o texto e decide se o copia."
+  },
+  "watch_start": {
+    "message": "Começar a observar"
+  },
+  "watch_refused": {
+    "message": "Sem acesso a este site e aos downloads, nada pode ser observado."
+  },
+  "watch_now": {
+    "message": "Agora baixe um documento da página, como sempre faz."
+  },
+  "watch_count": {
+    "message": "Cliques anotados: $1"
+  },
+  "watch_stop": {
+    "message": "Parar e mostrar o texto"
+  },
+  "watch_end_download": {
+    "message": "Um download começou; a observação terminou."
+  },
+  "watch_end_timeout": {
+    "message": "Nenhum download em dois minutos; a observação terminou."
+  },
+  "watch_end_stopped": {
+    "message": "A observação foi interrompida."
+  },
+  "watch_end_gone": {
+    "message": "A aba foi fechada; a observação terminou."
+  },
+  "watch_check": {
+    "message": "Leia o texto antes de enviar. Nomes nas palavras de um link ou botão não podem ser reconhecidos: apague tudo o que for pessoal."
+  },
+  "watch_name_portal": {
+    "message": "Nomear o portal ($1)"
+  },
+  "watch_copy": {
+    "message": "Copiar o texto"
+  },
+  "watch_form": {
+    "message": "Abrir o formulário de feedback"
   }
 }
