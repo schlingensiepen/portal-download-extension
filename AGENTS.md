@@ -17,6 +17,7 @@ Working on it:
 - **Tests:** `node test/contract.mjs ../product/contract-tests` (with the service checked out beside this repository, as in the workshop, or cloned as the CI does), `node test/zip.test.mjs`, `node test/messages.test.mjs`. `node build.mjs` packs `dist/` with `build/zip.mjs`, a plain ZIP writer, the same bytes for the same sources.
 - **A new text:** add the key with its message to every `_locales/<lang>/messages.json`, with the same `$1`… placeholders; `messages.test.mjs` fails on a key used but missing, or kept but unused.
 - **Releasing:** set `version` in `manifest.json`, commit, tag `v<version>` (the CI refuses a tag that differs from the manifest), push the tag. The CI tests, packs, has Mozilla sign the file as unlisted (secrets `AMO_JWT_ISSUER`, `AMO_JWT_SECRET`) and creates the GitHub release with the ZIP and the `.xpi`. Set `PRODUCT_REF` in the CI to the tag of the service whose scenarios the release passes.
+- **Store pages:** `store/listing.md` holds the texts, `store/logo-300.png` (from `build/store-logo.py`) and the screenshots; `store/amo-metadata.json` goes with every signing at Mozilla, now on the listed channel.
 - **What is kept:** `storage.local` holds `services` (a list of `{id, name, base, token}`) while no local store exists. With one, it holds only `vault`: `{salt, iterations, sealed: {iv, data}}`, where `data` is AES-GCM of `{services, local}`; `local` is `{next_id, jobs: {id: job with changed times}, runs: [...], deleted: {guid: …}}`. The unlocked key lies in `storage.session` as `vaultKey`.
 
 Rules that hold:

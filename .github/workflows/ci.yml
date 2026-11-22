@@ -42,14 +42,14 @@ jobs:
           v=$(node -p 'require("./manifest.json").version')
           [ "$GITHUB_REF_NAME" = "v$v" ] || { echo "::error::tag $GITHUB_REF_NAME, manifest version $v"; exit 1; }
       - run: node build.mjs
-      - name: Signed file for Firefox (unlisted on addons.mozilla.org)
+      - name: Signed file for Firefox (listed on addons.mozilla.org)
         env:
           AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
           AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
         run: |
           if [ -z "$AMO_JWT_ISSUER" ] || [ -z "$AMO_JWT_SECRET" ]; then echo "::error::the secrets AMO_JWT_ISSUER and AMO_JWT_SECRET are missing"; exit 1; fi
           mkdir -p dist/unpacked && cd dist/unpacked && unzip -q ../portal-download-*.zip
-          npx --yes web-ext@10.7.0 sign --channel unlisted --source-dir . --artifacts-dir ../signed --api-key "$AMO_JWT_ISSUER" --api-secret "$AMO_JWT_SECRET"
+          npx --yes web-ext@10.7.0 sign --channel listed --amo-metadata ../../store/amo-metadata.json --source-dir . --artifacts-dir ../signed --api-key "$AMO_JWT_ISSUER" --api-secret "$AMO_JWT_SECRET"
       - name: Release with both files
         env: { GH_TOKEN: "${{ github.token }}" }
         run: |
