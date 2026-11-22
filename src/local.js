@@ -55,10 +55,12 @@ function checkLogin(field, s) {
   // Control characters as Rust's char::is_control: C0, DEL and C1.
   if (/[\u0000-\u001f\u007f-\u009f]/.test(s)) throw bad("login_invalid", `\`${field}\` contains a line break or another control character. Enter the login in one line and send again.`);
 }
+// White space as Rust's char::is_whitespace sees it (with U+0085, without U+FEFF).
+const RUST_SPACE = /[\t\n\v\f\r \u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]/;
 function checkUrl(u) {
   const t = String(u).trim();
   // Bytes of UTF-8, as the service counts them.
-  if (!(t.startsWith("https://") || t.startsWith("http://")) || new TextEncoder().encode(t).length > 2000 || /\s/.test(t)) {
+  if (!(t.startsWith("https://") || t.startsWith("http://")) || new TextEncoder().encode(t).length > 2000 || RUST_SPACE.test(t)) {
     throw bad("entry_url_invalid", "`entry_url` must be a web address starting with https:// (or http://), without spaces. Copy it from the browser's address bar.");
   }
   return t;

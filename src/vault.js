@@ -37,6 +37,9 @@ async function remember(key) {
   await api.storage.session.set({ vaultKey: b64(raw) });
 }
 
+/** One change of the stored content at a time, across every panel of this browser. */
+export const withVaultLock = (fn) => (globalThis.navigator?.locks ? navigator.locks.request("portal-download-vault", fn) : fn());
+
 export class Vault {
   /** "plain" (no local backend), "locked" or "open". */
   async state() {
@@ -73,6 +76,11 @@ export class Vault {
 
   async lock() { await api.storage.session.remove("vaultKey"); }
 
+  /** Reads, changes and writes the content under the lock; fn changes the content in place. */
+  update(fn) {
+    return withVaultLock(async () => { const c = await this.read(); const r = await fn(c); await this.write(c); return r; });
+  }
+
   /** Creates the local backend: from now on everything lies under the passphrase. */
   async createLocal(passphrase) {
     const { services, vault } = await api.storage.local.get(["services", "vault"]);
@@ -86,7 +94,8 @@ export class Vault {
     await remember(key);
   }
 
-  async changePassphrase(passphrase) {
+  async changePassphrase(passphrase) { return withVaultLock(() => this.#changePassphrase(passphrase)); }
+  async #changePassphrase(passphrase) {
     const content = await this.read();
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const key = await deriveKey(passphrase, salt);
@@ -96,12 +105,13 @@ export class Vault {
 
   /** For a forgotten passphrase: deletes the local store and every service kept with it. */
   async forget() {
-    await api.storage.local.remove(["vault", "services"]);
+    await withVaultLock(() => api.storage.local.remove(["vault", "services"]));
     await this.lock();
   }
 
   /** Removes the local backend and its jobs; the services stay, without the passphrase. */
-  async removeLocal() {
+  async removeLocal() { return withVaultLock(() => this.#removeLocal()); }
+  async #removeLocal() {
     const content = await this.read();
     await api.storage.local.set({ services: content.services });
     await api.storage.local.remove("vault");

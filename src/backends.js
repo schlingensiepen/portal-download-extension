@@ -3,6 +3,7 @@
 // with code, kind and message, as the service's API does.
 
 import { LocalBackend, OpError, CONTRACT } from "./local.js";
+import { withVaultLock } from "./vault.js";
 
 export { CONTRACT };
 
@@ -42,7 +43,7 @@ export function localBackend(vault) {
   // One change of the store at a time, across every panel of this browser: each call reads,
   // changes and writes the whole store.
   const call = b.call.bind(b);
-  b.call = (...args) => (globalThis.navigator?.locks ? navigator.locks.request("portal-download-vault", () => call(...args)) : call(...args));
+  b.call = (...args) => withVaultLock(() => call(...args));
   return b;
 }
 

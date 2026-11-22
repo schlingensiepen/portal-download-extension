@@ -65,7 +65,7 @@ function confirmButton(label, question, cls, action) {
   b.addEventListener("click", async () => {
     if (!armed) { armed = true; b.textContent = question; setTimeout(() => { armed = false; b.textContent = label; }, 4000); return; }
     armed = false; b.disabled = true;
-    try { await action(); } finally { b.disabled = false; b.textContent = label; }
+    try { await action(); } catch (e) { fail(e); } finally { b.disabled = false; b.textContent = label; }
   });
   return b;
 }
@@ -137,6 +137,8 @@ async function render() {
   } catch (e) { fail(e); }
 }
 // "fromTab" holds for the one view it was given to; a preview of a file only while its backend's management is shown.
+// Something typed or a file previewed, which a reload would lose.
+const typed = () => !!state.preview || [...document.querySelectorAll("#view input, #view textarea")].some((el) => el.type !== "file" && el.value && !el.readOnly && el.defaultValue !== el.value);
 const go = (view, extra = {}) => { Object.assign(state, { view, fromTab: false }, view === "manage" ? {} : { preview: null }, extra); render(); };
 
 // ------------------------------------------------------------------ views
@@ -187,7 +189,7 @@ async function viewList() {
   }));
   for (const b of chosen) if (state.problems[b.id]) box.append(h("div", { class: "card alert small" }, state.problems[b.id]));
   all.sort((x, y) => (x.j.next_due < y.j.next_due ? -1 : x.j.next_due > y.j.next_due ? 1 : x.j.title.localeCompare(y.j.title)));
-  if (!all.length && !Object.keys(state.problems).length) box.append(h("p", { class: "muted" }, t("no_jobs")));
+  if (!all.length && !chosen.some((b) => state.problems[b.id])) box.append(h("p", { class: "muted" }, t("no_jobs")));
   for (const { b, j } of all) {
     box.append(h("div", { class: "card job", onclick: () => go("job", { job: { b, j }, done: null }) },
       h("div", { class: "row" }, urgency(j.urgency_days), h("strong", { class: "grow" }, j.title)),
@@ -330,9 +332,7 @@ async function addFromTab() {
     const r = await probe.call("invitation.redeem", { token: inv.token, label, kind: "extension" });
     const id = `s${Date.now().toString(36)}`;
     // Read anew: another window may have changed the store while the service answered.
-    const latest = await vault.read();
-    latest.services.push({ id, name: `${new URL(inv.base).host} (${r.name})`, base: inv.base, token: r.device_token });
-    await vault.write(latest);
+    await vault.update((latest) => { latest.services.push({ id, name: `${new URL(inv.base).host} (${r.name})`, base: inv.base, token: r.device_token }); });
     await loadBackends();
     state.choice = id;
     toast(t("service_added", r.name));
@@ -358,9 +358,7 @@ async function viewManage() {
     box.append(h("div", { class: "card" }, h("p", { class: "small" }, t("remove_service_text")),
       confirmButton(t("remove_service"), t("really"), "bad", async () => {
         try { const d = await b.call("device.list"); await b.call("device.revoke", { device_id: d.current_device_id }); } catch (e) { if (!["device_revoked", "credential_unknown", "user_deactivated"].includes(e.kind)) { console.error(e); toast(t("revoke_failed"), true); } }
-        const content = await vault.read();
-        content.services = content.services.filter((s) => s.id !== b.id);
-        await vault.write(content);
+        const content = await vault.update((c) => { c.services = c.services.filter((s) => s.id !== b.id); return c; });
         const pattern = originPattern(b.service.base);
         if (!content.services.some((s) => originPattern(s.base) === pattern)) api.permissions.remove({ origins: [pattern] }).catch(() => {});
         await loadBackends(); state.choice = "all"; go("list");
@@ -473,7 +471,7 @@ document.documentElement.lang = locale;
   sel.value = chosenLanguage;
   sel.addEventListener("change", async () => {
     // Reloading draws the panel anew; what is typed or previewed would be lost.
-    if ((["new", "edit"].includes(state.view) || state.preview) && !confirm(t("language_discard"))) { sel.value = chosenLanguage; return; }
+    if (typed() && !confirm(t("language_discard"))) { sel.value = chosenLanguage; return; }
     await api.storage.local.set({ language: sel.value });
     location.reload();
   });
@@ -487,5 +485,5 @@ for (const [sel, label] of [["#project", t("project_page")], ["#feedback", t("fe
 $("#version").textContent = `v${api.runtime.getManifest().version}`;
 // Another panel of this browser may unlock, lock or add a service.
 api.storage.onChanged.addListener(async (changes, area) => {
-  if (area === "local" && changes.language && (changes.language.newValue ?? "auto") !== chosenLanguage && !["new", "edit"].includes(state.view) && !state.preview) return location.reload(); if (area === "local" || area === "session") { await loadBackends(); if (state.view === "list" || state.view === "add" || state.vaultState === "locked") render(); else renderTop(); } });
+  if (area === "local" && changes.language && (changes.language.newValue ?? "auto") !== chosenLanguage && !typed()) return location.reload(); if (area === "local" || area === "session") { await loadBackends(); if (state.view === "list" || state.view === "add" || state.vaultState === "locked") render(); else renderTop(); } });
 loadBackends().then(render, fail);
