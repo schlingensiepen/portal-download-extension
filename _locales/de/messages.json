@@ -165,7 +165,7 @@
     "message": "Feedback"
   },
   "file_password": {
-    "message": "Passwort für die Datei (8 bis 200 Zeichen ohne Umlaute)"
+    "message": "Passwort für die Datei (8 bis 200 Zeichen: Buchstaben A–Z, Ziffern, Satzzeichen)"
   },
   "file_password_in": {
     "message": "Passwort der Datei, falls sie eines hat"
@@ -208,6 +208,12 @@
   },
   "interval_weeks": {
     "message": "Alle … Wochen"
+  },
+  "language": {
+    "message": "Sprache"
+  },
+  "language_auto": {
+    "message": "Wie der Browser"
   },
   "last_run": {
     "message": "Zuletzt: $1, $2, von $3"

@@ -21,6 +21,7 @@ jobs:
       - run: node test/contract.mjs product/contract-tests
       - run: node test/zip.test.mjs
       - run: node test/messages.test.mjs
+      - run: node test/i18n.test.mjs
       - run: node build.mjs
       - name: Lint as Firefox's add-on checker does
         run: |

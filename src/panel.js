@@ -5,11 +5,16 @@
 import { Vault } from "./vault.js";
 import { ServiceBackend, localBackend, parseInvitation, CONTRACT } from "./backends.js";
 import { checkPassword, fromBase64 } from "./local.js";
+import { LANGUAGES, load, tag } from "./i18n.js";
 
 const api = globalThis.browser ?? globalThis.chrome;
 const vault = new Vault();
 const $ = (s) => document.querySelector(s);
-const t = (key, ...subs) => api.i18n.getMessage(key, subs.map(String)) || key;
+// The chosen language is read before anything is drawn.
+const { language: chosenLanguage = "auto" } = await api.storage.local.get("language");
+const lang = await load(api, chosenLanguage);
+const t = lang.t;
+const locale = tag(lang.code);
 
 /** An element with attributes, text and children; text goes in as text only. */
 function h(tag, attrs = {}, ...children) {
@@ -39,8 +44,8 @@ function explain(e) {
   return e.message || String(e);
 }
 const fail = (e) => { console.error(e); toast(explain(e), true); };
-const fmtDate = (iso) => (iso ? new Date(iso.length === 10 ? iso + "T00:00:00" : iso).toLocaleDateString(undefined, { day: "2-digit", month: "2-digit", year: "numeric" }) : "–");
-const fmtDateTime = (iso) => (iso ? new Date(iso).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" }) : "–");
+const fmtDate = (iso) => (iso ? new Date(iso.length === 10 ? iso + "T00:00:00" : iso).toLocaleDateString(locale, { day: "2-digit", month: "2-digit", year: "numeric" }) : "–");
+const fmtDateTime = (iso) => (iso ? new Date(iso).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" }) : "–");
 function urgency(days) {
   if (days === -1) return h("span", { class: "chip bad" }, t("overdue_one"));
   if (days < 0) return h("span", { class: "chip bad" }, t("overdue", -days));
@@ -440,7 +445,15 @@ function previewCard(b) {
 $("#choose").addEventListener("change", (e) => { state.choice = e.target.value; state.preview = null; go("list"); });
 $("#add").addEventListener("click", () => go("add"));
 $("#manage").addEventListener("click", () => go("manage"));
-document.documentElement.lang = api.i18n.getUILanguage();
+document.documentElement.lang = locale;
+// The language, chosen at the foot; "auto" follows the browser. A change draws the panel anew.
+{
+  const sel = $("#language");
+  sel.setAttribute("aria-label", t("language"));
+  sel.append(new Option(t("language_auto"), "auto"), ...Object.entries(LANGUAGES).map(([code, name]) => new Option(name, code)));
+  sel.value = chosenLanguage;
+  sel.addEventListener("change", async () => { await api.storage.local.set({ language: sel.value }); location.reload(); });
+}
 $("#choose").setAttribute("aria-label", t("backend"));
 // The links at the foot open in a tab of their own.
 for (const [sel, label] of [["#project", t("project_page")], ["#feedback", t("feedback")]]) {

@@ -1,0 +1,422 @@
+{
+  "action_keep_both": {
+    "message": "两者都保留"
+  },
+  "action_reactivate": {
+    "message": "恢复"
+  },
+  "action_replace": {
+    "message": "替换此处的任务，保留其历史"
+  },
+  "action_skip": {
+    "message": "跳过"
+  },
+  "add_from_tab": {
+    "message": "从当前标签页获取邀请"
+  },
+  "add_page": {
+    "message": "将当前页面添加为任务"
+  },
+  "add_service_text": {
+    "message": "在标签页中打开该服务的邀请链接，或在其网页应用的“My devices”下点击“Add to the browser extension”，然后在该标签页显示时按下此按钮。扩展只会请求访问该服务的权限。"
+  },
+  "add_service_title": {
+    "message": "添加服务"
+  },
+  "add_title": {
+    "message": "添加服务或本地存储"
+  },
+  "all": {
+    "message": "全部"
+  },
+  "already_added": {
+    "message": "此服务已添加。"
+  },
+  "back": {
+    "message": "← 返回"
+  },
+  "backend": {
+    "message": "后端"
+  },
+  "btn_failed": {
+    "message": "失败"
+  },
+  "btn_succeeded": {
+    "message": "成功"
+  },
+  "cancel": {
+    "message": "取消"
+  },
+  "case_deleted": {
+    "message": "此处已于 $1 删除。"
+  },
+  "case_known": {
+    "message": "与此处不同；请逐项选择。"
+  },
+  "case_old_address": {
+    "message": "此处使用新地址 $1；请逐项选择。"
+  },
+  "case_replaces": {
+    "message": "“$1”的新地址（此处仍为 $2）。"
+  },
+  "choose_backend": {
+    "message": "请先选择一个后端。"
+  },
+  "choose_file": {
+    "message": "请先选择一个文件。"
+  },
+  "contract_blocks": {
+    "message": "此服务使用的接口版本不同；在较旧的一方更新之前，无法结束运行或读入文件。"
+  },
+  "contract_mismatch": {
+    "message": "$1 使用接口版本 $2，本扩展使用 $3。请更新较旧的一方。"
+  },
+  "copied": {
+    "message": "已复制 ✓"
+  },
+  "copy": {
+    "message": "复制"
+  },
+  "copy_refused": {
+    "message": "浏览器不允许复制。"
+  },
+  "create": {
+    "message": "创建"
+  },
+  "created": {
+    "message": "已创建。"
+  },
+  "delete": {
+    "message": "删除"
+  },
+  "deleted": {
+    "message": "已删除。"
+  },
+  "device_label": {
+    "message": "$1 扩展 $2"
+  },
+  "done": {
+    "message": "已结束 – 下次到期日 $1。"
+  },
+  "due_in": {
+    "message": "$1 天后到期"
+  },
+  "due_today": {
+    "message": "今天到期"
+  },
+  "due_tomorrow": {
+    "message": "明天到期"
+  },
+  "edit": {
+    "message": "编辑"
+  },
+  "edit_job": {
+    "message": "编辑任务"
+  },
+  "entry_url": {
+    "message": "入口页面（URL）"
+  },
+  "err_access_gone": {
+    "message": "此扩展对该服务的访问权限已被撤销，或该用户已被停用。请移除该服务，并用新链接重新添加。"
+  },
+  "err_locked": {
+    "message": "此扩展的存储已锁定。"
+  },
+  "err_unreachable": {
+    "message": "无法连接到该服务。服务是否在运行，这台电脑是否信任其证书？Chrome 和 Edge 需要将该服务的证书颁发机构导入为受信任的根证书。"
+  },
+  "err_unreadable": {
+    "message": "服务返回的内容无法识别。"
+  },
+  "err_vault_exists": {
+    "message": "另一个窗口已创建了本地存储。"
+  },
+  "every_weeks": {
+    "message": "每隔几周？"
+  },
+  "exchange_text": {
+    "message": "文件包含所有任务及其登录信息、历史记录和已删除的任务。所有 Portal-Download 服务和本扩展都可读入此文件。"
+  },
+  "exchange_title": {
+    "message": "导出任务"
+  },
+  "export_encrypted": {
+    "message": "加密下载"
+  },
+  "export_plain": {
+    "message": "不设密码下载"
+  },
+  "export_plain_really": {
+    "message": "登录信息为明文 – 确定吗？"
+  },
+  "export_reminder": {
+    "message": "请不时导出此浏览器中的任务：忘记的口令无法找回。"
+  },
+  "ext_description": {
+    "message": "在侧边栏中显示所有 Portal-Download 服务以及此浏览器中存储的到期门户下载。"
+  },
+  "ext_name": {
+    "message": "Portal-Download"
+  },
+  "failed": {
+    "message": "失败"
+  },
+  "feedback": {
+    "message": "反馈"
+  },
+  "file_password": {
+    "message": "文件密码（8 至 200 个字符：字母 A–Z、数字、标点符号，不含中文或重音字母）"
+  },
+  "file_password_in": {
+    "message": "文件密码（如有）"
+  },
+  "file_too_large": {
+    "message": "文件超过 48 MB，不是交换文件。"
+  },
+  "forgot_button": {
+    "message": "删除存储和服务"
+  },
+  "forgot_text": {
+    "message": "口令无法找回。您只能删除本地存储及其中的任务和随之保存的服务，然后用新链接重新添加服务。"
+  },
+  "forgot_title": {
+    "message": "忘记口令？"
+  },
+  "here": {
+    "message": "此处"
+  },
+  "hide": {
+    "message": "隐藏"
+  },
+  "import_apply": {
+    "message": "读入"
+  },
+  "import_preview": {
+    "message": "预览将有哪些变更"
+  },
+  "import_title": {
+    "message": "读入文件"
+  },
+  "imported": {
+    "message": "已读入 – 新增：$1，更新：$2，恢复：$3，替换：$4，跳过：$5，新增运行：$6。"
+  },
+  "in_file": {
+    "message": "文件中"
+  },
+  "instructions_md": {
+    "message": "说明"
+  },
+  "interval_weeks": {
+    "message": "每 … 周"
+  },
+  "language": {
+    "message": "语言"
+  },
+  "language_auto": {
+    "message": "跟随浏览器"
+  },
+  "last_run": {
+    "message": "最近：$1，$2，由 $3"
+  },
+  "local_create": {
+    "message": "创建本地存储"
+  },
+  "local_created": {
+    "message": "本地存储已就绪。"
+  },
+  "local_name": {
+    "message": "此浏览器"
+  },
+  "local_remove": {
+    "message": "删除本地存储"
+  },
+  "local_remove_text": {
+    "message": "删除本地存储及其中的任务；服务会保留，但其令牌将重新以未加密形式保存。请先导出任务。"
+  },
+  "local_text": {
+    "message": "仅存在于此浏览器中的任务存储，以口令加密。创建后，服务的令牌也将受口令保护，每次启动浏览器后扩展都会要求输入口令。"
+  },
+  "local_title": {
+    "message": "在此浏览器中保存任务"
+  },
+  "lock": {
+    "message": "立即锁定"
+  },
+  "login_hidden": {
+    "message": "此后端不向这台设备显示登录信息。"
+  },
+  "login_local": {
+    "message": "登录信息保存在此浏览器中，并以口令加密。"
+  },
+  "login_plain": {
+    "message": "登录信息以明文保存，所有使用此后端的人都能看到。"
+  },
+  "manage_title": {
+    "message": "管理所选后端"
+  },
+  "new_job": {
+    "message": "新建任务"
+  },
+  "next_due": {
+    "message": "下次到期日"
+  },
+  "next_job": {
+    "message": "下一个任务"
+  },
+  "no_invitation": {
+    "message": "当前标签页中没有 Portal-Download 服务的邀请链接。"
+  },
+  "no_jobs": {
+    "message": "没有任务。"
+  },
+  "no_login": {
+    "message": "未保存登录信息。"
+  },
+  "not_encrypted": {
+    "message": "返回的文件未加密；未保存任何内容。"
+  },
+  "note": {
+    "message": "备注（可选）"
+  },
+  "note_placeholder": {
+    "message": "例如缺少了什么"
+  },
+  "open_portal": {
+    "message": "在新标签页中打开门户"
+  },
+  "overdue": {
+    "message": "已逾期 $1 天"
+  },
+  "overdue_one": {
+    "message": "已逾期 1 天"
+  },
+  "passphrase": {
+    "message": "口令"
+  },
+  "passphrase_again": {
+    "message": "再次输入口令"
+  },
+  "passphrase_change": {
+    "message": "更改口令"
+  },
+  "passphrase_changed": {
+    "message": "口令已更改。今后请使用新口令。"
+  },
+  "passphrase_differs": {
+    "message": "两次输入的口令不一致。"
+  },
+  "passphrase_new": {
+    "message": "新口令"
+  },
+  "passphrase_short": {
+    "message": "口令至少需要 10 个字符。"
+  },
+  "passphrase_warning": {
+    "message": "忘记的口令无法找回：除非已导出，否则此浏览器中的任务将丢失。请不时导出。"
+  },
+  "passphrase_wrong": {
+    "message": "口令错误。"
+  },
+  "password": {
+    "message": "密码"
+  },
+  "password_needed": {
+    "message": "请输入密码，或不设密码下载。"
+  },
+  "people_left_out": {
+    "message": "此文件是完整备份：本存储只读入其中的任务，不包括用户、设备和令牌。"
+  },
+  "permission_refused": {
+    "message": "没有该权限，扩展无法连接到服务。"
+  },
+  "preselected_hint": {
+    "message": "每个字段默认选择较新的一方，到期日则选择较近的一个；请按需更改，然后读入。"
+  },
+  "preview_decide": {
+    "message": "请决定：$1"
+  },
+  "preview_new": {
+    "message": "因为是新的而采用：$1"
+  },
+  "preview_same": {
+    "message": "因为相同而采用：$1"
+  },
+  "preview_title": {
+    "message": "读入文件将产生的变更"
+  },
+  "project_page": {
+    "message": "项目主页"
+  },
+  "really": {
+    "message": "确定吗？"
+  },
+  "remove_service": {
+    "message": "移除服务"
+  },
+  "remove_service_text": {
+    "message": "将该服务从此扩展中移除，并撤销此扩展在该服务上的访问权限。"
+  },
+  "retry_days": {
+    "message": "失败后重试间隔（天）"
+  },
+  "revoke_failed": {
+    "message": "无法撤销该处的访问权限；请在该服务网页应用的“My devices”下撤销。"
+  },
+  "runs_more": {
+    "message": "+$1 次运行"
+  },
+  "runs_one": {
+    "message": "+1 次运行"
+  },
+  "save": {
+    "message": "保存"
+  },
+  "saved": {
+    "message": "已保存。"
+  },
+  "schedule": {
+    "message": "到期 $1 · 每 $2 周"
+  },
+  "service_added": {
+    "message": "已添加；已以 $1 身份登录。"
+  },
+  "show": {
+    "message": "显示"
+  },
+  "signed_out": {
+    "message": "$1：此扩展的访问权限已失效。请移除该服务，并用新链接重新添加。"
+  },
+  "succeeded": {
+    "message": "成功"
+  },
+  "title": {
+    "message": "标题"
+  },
+  "unlock": {
+    "message": "解锁"
+  },
+  "unlock_text": {
+    "message": "请输入此扩展存储的口令。"
+  },
+  "unlock_title": {
+    "message": "已锁定"
+  },
+  "url_hint": {
+    "message": "新地址会使其在交换时被视为新任务；其历史会保留。"
+  },
+  "username": {
+    "message": "用户名"
+  },
+  "webapp_open": {
+    "message": "打开网页应用"
+  },
+  "webapp_text": {
+    "message": "此服务的用户、设备、代理和完整备份均在其网页应用中管理。"
+  },
+  "welcome_text": {
+    "message": "通过邀请链接添加 Portal-Download 服务，或仅在此浏览器中保存任务。"
+  },
+  "welcome_title": {
+    "message": "尚无后端"
+  }
+}

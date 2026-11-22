@@ -1,0 +1,422 @@
+{
+  "action_keep_both": {
+    "message": "garder les deux"
+  },
+  "action_reactivate": {
+    "message": "la rétablir"
+  },
+  "action_replace": {
+    "message": "remplacer la tâche ici, garder son historique"
+  },
+  "action_skip": {
+    "message": "ignorer"
+  },
+  "add_from_tab": {
+    "message": "Reprendre l’invitation de l’onglet actuel"
+  },
+  "add_page": {
+    "message": "Ajouter la page actuelle comme tâche"
+  },
+  "add_service_text": {
+    "message": "Ouvrez un lien d'invitation du service dans un onglet, ou « Add to the browser extension » sous « My devices » dans son application web, puis appuyez sur ce bouton pendant que cet onglet est affiché. L'extension demande uniquement l'autorisation d'accéder à ce service."
+  },
+  "add_service_title": {
+    "message": "Ajouter un service"
+  },
+  "add_title": {
+    "message": "Ajouter un service ou un stockage local"
+  },
+  "all": {
+    "message": "Tous"
+  },
+  "already_added": {
+    "message": "Ce service est déjà ajouté."
+  },
+  "back": {
+    "message": "← Retour"
+  },
+  "backend": {
+    "message": "Backend"
+  },
+  "btn_failed": {
+    "message": "Échec"
+  },
+  "btn_succeeded": {
+    "message": "Réussi"
+  },
+  "cancel": {
+    "message": "Annuler"
+  },
+  "case_deleted": {
+    "message": "Supprimée ici le $1."
+  },
+  "case_known": {
+    "message": "Diffère d’ici ; choisissez champ par champ."
+  },
+  "case_old_address": {
+    "message": "Ici sous la nouvelle adresse $1 ; choisissez champ par champ."
+  },
+  "case_replaces": {
+    "message": "Nouvelle adresse pour « $1 » (ici encore $2)."
+  },
+  "choose_backend": {
+    "message": "Choisissez d’abord un backend."
+  },
+  "choose_file": {
+    "message": "Choisissez d’abord un fichier."
+  },
+  "contract_blocks": {
+    "message": "Ce service utilise une autre version de l’interface ; la clôture des exécutions et l’importation de fichiers restent bloquées jusqu’à la mise à jour du côté le plus ancien."
+  },
+  "contract_mismatch": {
+    "message": "$1 utilise la version $2 de l’interface, cette extension la version $3. Mettez à jour le côté le plus ancien."
+  },
+  "copied": {
+    "message": "Copié ✓"
+  },
+  "copy": {
+    "message": "Copier"
+  },
+  "copy_refused": {
+    "message": "Le navigateur n’a pas autorisé la copie."
+  },
+  "create": {
+    "message": "Créer"
+  },
+  "created": {
+    "message": "Créé."
+  },
+  "delete": {
+    "message": "Supprimer"
+  },
+  "deleted": {
+    "message": "Supprimé."
+  },
+  "device_label": {
+    "message": "Extension $1 $2"
+  },
+  "done": {
+    "message": "Clôturée – à refaire le $1."
+  },
+  "due_in": {
+    "message": "à faire dans $1 jours"
+  },
+  "due_today": {
+    "message": "à faire aujourd’hui"
+  },
+  "due_tomorrow": {
+    "message": "à faire demain"
+  },
+  "edit": {
+    "message": "Modifier"
+  },
+  "edit_job": {
+    "message": "Modifier la tâche"
+  },
+  "entry_url": {
+    "message": "Page d’accueil (URL)"
+  },
+  "err_access_gone": {
+    "message": "L’accès de cette extension au service a été révoqué ou la personne désactivée. Supprimez le service et ajoutez-le de nouveau avec un nouveau lien."
+  },
+  "err_locked": {
+    "message": "Le stockage de cette extension est verrouillé."
+  },
+  "err_unreachable": {
+    "message": "Le service est injoignable. Fonctionne-t-il, et cet ordinateur fait-il confiance à son certificat ? Chrome et Edge exigent que l’autorité de certification du service soit importée comme racine de confiance."
+  },
+  "err_unreadable": {
+    "message": "La réponse du service est incompréhensible."
+  },
+  "err_vault_exists": {
+    "message": "Une autre fenêtre a entre-temps créé le stockage local."
+  },
+  "every_weeks": {
+    "message": "Toutes les combien de semaines ?"
+  },
+  "exchange_text": {
+    "message": "Le fichier contient toutes les tâches avec leurs identifiants, leur historique et les tâches supprimées. Tout service Portal-Download et cette extension peuvent le lire."
+  },
+  "exchange_title": {
+    "message": "Exporter les tâches"
+  },
+  "export_encrypted": {
+    "message": "Télécharger chiffré"
+  },
+  "export_plain": {
+    "message": "Télécharger sans mot de passe"
+  },
+  "export_plain_really": {
+    "message": "Identifiants en clair – vraiment ?"
+  },
+  "export_reminder": {
+    "message": "Exportez de temps en temps les tâches de ce navigateur : une phrase secrète oubliée est irrécupérable."
+  },
+  "ext_description": {
+    "message": "Les téléchargements de portails à faire de chaque service Portal-Download, et d’un stockage dans ce navigateur, dans le panneau latéral."
+  },
+  "ext_name": {
+    "message": "Portal-Download"
+  },
+  "failed": {
+    "message": "échec"
+  },
+  "feedback": {
+    "message": "Retour d’expérience"
+  },
+  "file_password": {
+    "message": "Mot de passe du fichier (8 à 200 caractères : lettres A–Z sans accents, chiffres, ponctuation)"
+  },
+  "file_password_in": {
+    "message": "Mot de passe du fichier, s’il en a un"
+  },
+  "file_too_large": {
+    "message": "Le fichier dépasse 48 Mo ; ce n’est pas un fichier d’échange."
+  },
+  "forgot_button": {
+    "message": "Supprimer le stockage et les services"
+  },
+  "forgot_text": {
+    "message": "La phrase secrète est irrécupérable. Vous pouvez seulement supprimer le stockage local avec ses tâches et les services qui y sont conservés, puis ajouter de nouveau les services avec de nouveaux liens."
+  },
+  "forgot_title": {
+    "message": "Phrase secrète oubliée ?"
+  },
+  "here": {
+    "message": "Ici"
+  },
+  "hide": {
+    "message": "Masquer"
+  },
+  "import_apply": {
+    "message": "Importer"
+  },
+  "import_preview": {
+    "message": "Afficher ce qui changerait"
+  },
+  "import_title": {
+    "message": "Importer un fichier"
+  },
+  "imported": {
+    "message": "Importé – ajoutées : $1, mises à jour : $2, rétablies : $3, remplacées : $4, ignorées : $5, exécutions ajoutées : $6."
+  },
+  "in_file": {
+    "message": "Dans le fichier"
+  },
+  "instructions_md": {
+    "message": "Instructions"
+  },
+  "interval_weeks": {
+    "message": "Toutes les … semaines"
+  },
+  "language": {
+    "message": "Langue"
+  },
+  "language_auto": {
+    "message": "Comme le navigateur"
+  },
+  "last_run": {
+    "message": "Dernière : $1, $2, par $3"
+  },
+  "local_create": {
+    "message": "Créer le stockage local"
+  },
+  "local_created": {
+    "message": "Le stockage local est prêt."
+  },
+  "local_name": {
+    "message": "Ce navigateur"
+  },
+  "local_remove": {
+    "message": "Supprimer le stockage local"
+  },
+  "local_remove_text": {
+    "message": "Supprime le stockage local avec ses tâches ; les services restent, et leurs jetons ne sont de nouveau plus chiffrés. Exportez d’abord les tâches."
+  },
+  "local_text": {
+    "message": "Un stockage de tâches dans ce navigateur uniquement, chiffré par une phrase secrète. Une fois créé, les jetons des services sont eux aussi protégés par la phrase secrète, et l’extension la demande à chaque démarrage du navigateur."
+  },
+  "local_title": {
+    "message": "Garder les tâches dans ce navigateur"
+  },
+  "lock": {
+    "message": "Verrouiller maintenant"
+  },
+  "login_hidden": {
+    "message": "Ce backend n’affiche pas les identifiants à cet appareil."
+  },
+  "login_local": {
+    "message": "Les identifiants sont conservés dans ce navigateur, chiffrés par la phrase secrète."
+  },
+  "login_plain": {
+    "message": "Les identifiants sont conservés en clair, visibles de tous ceux qui utilisent ce backend."
+  },
+  "manage_title": {
+    "message": "Gérer le backend choisi"
+  },
+  "new_job": {
+    "message": "Nouvelle tâche"
+  },
+  "next_due": {
+    "message": "Prochaine échéance"
+  },
+  "next_job": {
+    "message": "Tâche suivante"
+  },
+  "no_invitation": {
+    "message": "L’onglet actuel n’affiche aucun lien d’invitation d’un service Portal-Download."
+  },
+  "no_jobs": {
+    "message": "Aucune tâche."
+  },
+  "no_login": {
+    "message": "Aucun identifiant enregistré."
+  },
+  "not_encrypted": {
+    "message": "Le fichier est revenu non chiffré ; rien n’a été enregistré."
+  },
+  "note": {
+    "message": "Note (facultatif)"
+  },
+  "note_placeholder": {
+    "message": "p. ex. ce qui manquait"
+  },
+  "open_portal": {
+    "message": "Ouvrir le portail dans un nouvel onglet"
+  },
+  "overdue": {
+    "message": "en retard de $1 jours"
+  },
+  "overdue_one": {
+    "message": "en retard de 1 jour"
+  },
+  "passphrase": {
+    "message": "Phrase secrète"
+  },
+  "passphrase_again": {
+    "message": "Répéter la phrase secrète"
+  },
+  "passphrase_change": {
+    "message": "Changer la phrase secrète"
+  },
+  "passphrase_changed": {
+    "message": "La phrase secrète est changée. Utilisez désormais la nouvelle."
+  },
+  "passphrase_differs": {
+    "message": "Les deux phrases secrètes diffèrent."
+  },
+  "passphrase_new": {
+    "message": "Nouvelle phrase secrète"
+  },
+  "passphrase_short": {
+    "message": "La phrase secrète doit comporter au moins 10 caractères."
+  },
+  "passphrase_warning": {
+    "message": "Une phrase secrète oubliée est irrécupérable : les tâches de ce navigateur sont alors perdues, sauf si vous les avez exportées. Exportez-les de temps en temps."
+  },
+  "passphrase_wrong": {
+    "message": "La phrase secrète est incorrecte."
+  },
+  "password": {
+    "message": "Mot de passe"
+  },
+  "password_needed": {
+    "message": "Saisissez un mot de passe, ou téléchargez sans."
+  },
+  "people_left_out": {
+    "message": "Le fichier est une sauvegarde complète : ce stockage ne lit que ses tâches, pas les personnes, appareils et jetons."
+  },
+  "permission_refused": {
+    "message": "Sans l’autorisation, l’extension ne peut pas joindre le service."
+  },
+  "preselected_hint": {
+    "message": "Pour chaque champ, le côté le plus récent est choisi, et pour une échéance la plus proche ; modifiez ce que vous voulez, puis importez."
+  },
+  "preview_decide": {
+    "message": "Veuillez décider : $1"
+  },
+  "preview_new": {
+    "message": "Repris, car nouveau : $1"
+  },
+  "preview_same": {
+    "message": "Repris, car identique : $1"
+  },
+  "preview_title": {
+    "message": "Ce que fait l’importation du fichier"
+  },
+  "project_page": {
+    "message": "Page du projet"
+  },
+  "really": {
+    "message": "Vraiment ?"
+  },
+  "remove_service": {
+    "message": "Supprimer le service"
+  },
+  "remove_service_text": {
+    "message": "Supprime le service de cette extension et y révoque l’accès de cette extension."
+  },
+  "retry_days": {
+    "message": "Après un échec, jours"
+  },
+  "revoke_failed": {
+    "message": "L'accès n'a pas pu y être révoqué ; révoquez-le dans l'application web du service, sous « My devices »."
+  },
+  "runs_more": {
+    "message": "+$1 exécutions"
+  },
+  "runs_one": {
+    "message": "+1 exécution"
+  },
+  "save": {
+    "message": "Enregistrer"
+  },
+  "saved": {
+    "message": "Enregistré."
+  },
+  "schedule": {
+    "message": "à faire le $1 · toutes les $2 semaines"
+  },
+  "service_added": {
+    "message": "Ajouté ; connecté en tant que $1."
+  },
+  "show": {
+    "message": "Afficher"
+  },
+  "signed_out": {
+    "message": "$1 : l’accès de cette extension n’est plus valide. Supprimez le service et ajoutez-le de nouveau avec un nouveau lien."
+  },
+  "succeeded": {
+    "message": "réussi"
+  },
+  "title": {
+    "message": "Titre"
+  },
+  "unlock": {
+    "message": "Déverrouiller"
+  },
+  "unlock_text": {
+    "message": "Saisissez la phrase secrète du stockage de cette extension."
+  },
+  "unlock_title": {
+    "message": "Verrouillé"
+  },
+  "url_hint": {
+    "message": "Une nouvelle adresse en fait une nouvelle tâche pour l’échange ; son historique reste."
+  },
+  "username": {
+    "message": "Nom d’utilisateur"
+  },
+  "webapp_open": {
+    "message": "Ouvrir l’application web"
+  },
+  "webapp_text": {
+    "message": "Les personnes, appareils, agents et la sauvegarde complète de ce service se gèrent dans son application web."
+  },
+  "welcome_text": {
+    "message": "Ajoutez un service Portal-Download avec un lien d’invitation, ou gardez les tâches uniquement dans ce navigateur."
+  },
+  "welcome_title": {
+    "message": "Pas encore de backend"
+  }
+}

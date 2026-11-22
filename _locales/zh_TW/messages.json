@@ -1,0 +1,422 @@
+{
+  "action_keep_both": {
+    "message": "兩者都保留"
+  },
+  "action_reactivate": {
+    "message": "恢復"
+  },
+  "action_replace": {
+    "message": "取代此處的任務，保留其歷史紀錄"
+  },
+  "action_skip": {
+    "message": "略過"
+  },
+  "add_from_tab": {
+    "message": "從目前的分頁取得邀請"
+  },
+  "add_page": {
+    "message": "將目前的頁面新增為任務"
+  },
+  "add_service_text": {
+    "message": "在分頁中開啟該服務的邀請連結，或在其網頁應用程式的「My devices」下點選「Add to the browser extension」，然後在該分頁顯示時按下此按鈕。擴充功能只會要求存取該服務的權限。"
+  },
+  "add_service_title": {
+    "message": "新增服務"
+  },
+  "add_title": {
+    "message": "新增服務或本機儲存空間"
+  },
+  "all": {
+    "message": "全部"
+  },
+  "already_added": {
+    "message": "此服務已新增。"
+  },
+  "back": {
+    "message": "← 返回"
+  },
+  "backend": {
+    "message": "後端"
+  },
+  "btn_failed": {
+    "message": "失敗"
+  },
+  "btn_succeeded": {
+    "message": "成功"
+  },
+  "cancel": {
+    "message": "取消"
+  },
+  "case_deleted": {
+    "message": "此處已於 $1 刪除。"
+  },
+  "case_known": {
+    "message": "與此處不同；請逐項選擇。"
+  },
+  "case_old_address": {
+    "message": "此處使用新位址 $1；請逐項選擇。"
+  },
+  "case_replaces": {
+    "message": "「$1」的新位址（此處仍為 $2）。"
+  },
+  "choose_backend": {
+    "message": "請先選擇一個後端。"
+  },
+  "choose_file": {
+    "message": "請先選擇一個檔案。"
+  },
+  "contract_blocks": {
+    "message": "此服務使用的介面版本不同；在較舊的一方更新之前，無法結束執行或讀入檔案。"
+  },
+  "contract_mismatch": {
+    "message": "$1 使用介面版本 $2，本擴充功能使用 $3。請更新較舊的一方。"
+  },
+  "copied": {
+    "message": "已複製 ✓"
+  },
+  "copy": {
+    "message": "複製"
+  },
+  "copy_refused": {
+    "message": "瀏覽器不允許複製。"
+  },
+  "create": {
+    "message": "建立"
+  },
+  "created": {
+    "message": "已建立。"
+  },
+  "delete": {
+    "message": "刪除"
+  },
+  "deleted": {
+    "message": "已刪除。"
+  },
+  "device_label": {
+    "message": "$1 擴充功能 $2"
+  },
+  "done": {
+    "message": "已結束 – 下次到期日 $1。"
+  },
+  "due_in": {
+    "message": "$1 天後到期"
+  },
+  "due_today": {
+    "message": "今天到期"
+  },
+  "due_tomorrow": {
+    "message": "明天到期"
+  },
+  "edit": {
+    "message": "編輯"
+  },
+  "edit_job": {
+    "message": "編輯任務"
+  },
+  "entry_url": {
+    "message": "入口頁面（URL）"
+  },
+  "err_access_gone": {
+    "message": "此擴充功能對該服務的存取權限已被撤銷，或該使用者已被停用。請移除該服務，並以新連結重新新增。"
+  },
+  "err_locked": {
+    "message": "此擴充功能的儲存空間已鎖定。"
+  },
+  "err_unreachable": {
+    "message": "無法連線到該服務。服務是否正在執行，這台電腦是否信任其憑證？Chrome 和 Edge 需要將該服務的憑證授權單位匯入為受信任的根憑證。"
+  },
+  "err_unreadable": {
+    "message": "服務回應的內容無法辨識。"
+  },
+  "err_vault_exists": {
+    "message": "另一個視窗已建立了本機儲存空間。"
+  },
+  "every_weeks": {
+    "message": "每隔幾週？"
+  },
+  "exchange_text": {
+    "message": "檔案包含所有任務及其登入資訊、歷史紀錄和已刪除的任務。所有 Portal-Download 服務和本擴充功能都能讀入此檔案。"
+  },
+  "exchange_title": {
+    "message": "匯出任務"
+  },
+  "export_encrypted": {
+    "message": "加密下載"
+  },
+  "export_plain": {
+    "message": "不設密碼下載"
+  },
+  "export_plain_really": {
+    "message": "登入資訊為明文 – 確定嗎？"
+  },
+  "export_reminder": {
+    "message": "請不時匯出此瀏覽器中的任務：忘記的密碼短語無法找回。"
+  },
+  "ext_description": {
+    "message": "在側邊欄中顯示所有 Portal-Download 服務以及此瀏覽器中儲存的到期入口網站下載。"
+  },
+  "ext_name": {
+    "message": "Portal-Download"
+  },
+  "failed": {
+    "message": "失敗"
+  },
+  "feedback": {
+    "message": "意見回饋"
+  },
+  "file_password": {
+    "message": "檔案密碼（8 至 200 個字元：字母 A–Z、數字、標點符號，不含中文或重音字母）"
+  },
+  "file_password_in": {
+    "message": "檔案密碼（如有）"
+  },
+  "file_too_large": {
+    "message": "檔案超過 48 MB，不是交換檔案。"
+  },
+  "forgot_button": {
+    "message": "刪除儲存空間和服務"
+  },
+  "forgot_text": {
+    "message": "密碼短語無法找回。您只能刪除本機儲存空間及其中的任務和隨之保存的服務，然後以新連結重新新增服務。"
+  },
+  "forgot_title": {
+    "message": "忘記密碼短語？"
+  },
+  "here": {
+    "message": "此處"
+  },
+  "hide": {
+    "message": "隱藏"
+  },
+  "import_apply": {
+    "message": "讀入"
+  },
+  "import_preview": {
+    "message": "預覽將有哪些變更"
+  },
+  "import_title": {
+    "message": "讀入檔案"
+  },
+  "imported": {
+    "message": "已讀入 – 新增：$1，更新：$2，恢復：$3，取代：$4，略過：$5，新增執行：$6。"
+  },
+  "in_file": {
+    "message": "檔案中"
+  },
+  "instructions_md": {
+    "message": "說明"
+  },
+  "interval_weeks": {
+    "message": "每 … 週"
+  },
+  "language": {
+    "message": "語言"
+  },
+  "language_auto": {
+    "message": "跟隨瀏覽器"
+  },
+  "last_run": {
+    "message": "最近：$1，$2，由 $3"
+  },
+  "local_create": {
+    "message": "建立本機儲存空間"
+  },
+  "local_created": {
+    "message": "本機儲存空間已就緒。"
+  },
+  "local_name": {
+    "message": "此瀏覽器"
+  },
+  "local_remove": {
+    "message": "刪除本機儲存空間"
+  },
+  "local_remove_text": {
+    "message": "刪除本機儲存空間及其中的任務；服務會保留，但其權杖將重新以未加密形式儲存。請先匯出任務。"
+  },
+  "local_text": {
+    "message": "僅存在於此瀏覽器中的任務儲存空間，以密碼短語加密。建立後，服務的權杖也會受密碼短語保護，每次啟動瀏覽器後擴充功能都會要求輸入密碼短語。"
+  },
+  "local_title": {
+    "message": "在此瀏覽器中儲存任務"
+  },
+  "lock": {
+    "message": "立即鎖定"
+  },
+  "login_hidden": {
+    "message": "此後端不向這台裝置顯示登入資訊。"
+  },
+  "login_local": {
+    "message": "登入資訊儲存在此瀏覽器中，並以密碼短語加密。"
+  },
+  "login_plain": {
+    "message": "登入資訊以明文儲存，所有使用此後端的人都看得到。"
+  },
+  "manage_title": {
+    "message": "管理所選後端"
+  },
+  "new_job": {
+    "message": "新增任務"
+  },
+  "next_due": {
+    "message": "下次到期日"
+  },
+  "next_job": {
+    "message": "下一個任務"
+  },
+  "no_invitation": {
+    "message": "目前的分頁中沒有 Portal-Download 服務的邀請連結。"
+  },
+  "no_jobs": {
+    "message": "沒有任務。"
+  },
+  "no_login": {
+    "message": "未儲存登入資訊。"
+  },
+  "not_encrypted": {
+    "message": "傳回的檔案未加密；未儲存任何內容。"
+  },
+  "note": {
+    "message": "備註（選填）"
+  },
+  "note_placeholder": {
+    "message": "例如缺少了什麼"
+  },
+  "open_portal": {
+    "message": "在新分頁中開啟入口網站"
+  },
+  "overdue": {
+    "message": "已逾期 $1 天"
+  },
+  "overdue_one": {
+    "message": "已逾期 1 天"
+  },
+  "passphrase": {
+    "message": "密碼短語"
+  },
+  "passphrase_again": {
+    "message": "再次輸入密碼短語"
+  },
+  "passphrase_change": {
+    "message": "變更密碼短語"
+  },
+  "passphrase_changed": {
+    "message": "密碼短語已變更。今後請使用新的密碼短語。"
+  },
+  "passphrase_differs": {
+    "message": "兩次輸入的密碼短語不一致。"
+  },
+  "passphrase_new": {
+    "message": "新密碼短語"
+  },
+  "passphrase_short": {
+    "message": "密碼短語至少需要 10 個字元。"
+  },
+  "passphrase_warning": {
+    "message": "忘記的密碼短語無法找回：除非已匯出，否則此瀏覽器中的任務將會遺失。請不時匯出。"
+  },
+  "passphrase_wrong": {
+    "message": "密碼短語錯誤。"
+  },
+  "password": {
+    "message": "密碼"
+  },
+  "password_needed": {
+    "message": "請輸入密碼，或不設密碼下載。"
+  },
+  "people_left_out": {
+    "message": "此檔案是完整備份：本儲存空間只讀入其中的任務，不包括使用者、裝置和權杖。"
+  },
+  "permission_refused": {
+    "message": "沒有該權限，擴充功能無法連線到服務。"
+  },
+  "preselected_hint": {
+    "message": "每個欄位預設選擇較新的一方，到期日則選擇較近的一個；請依需要變更，然後讀入。"
+  },
+  "preview_decide": {
+    "message": "請決定：$1"
+  },
+  "preview_new": {
+    "message": "因為是新的而採用：$1"
+  },
+  "preview_same": {
+    "message": "因為相同而採用：$1"
+  },
+  "preview_title": {
+    "message": "讀入檔案將產生的變更"
+  },
+  "project_page": {
+    "message": "專案首頁"
+  },
+  "really": {
+    "message": "確定嗎？"
+  },
+  "remove_service": {
+    "message": "移除服務"
+  },
+  "remove_service_text": {
+    "message": "將該服務從此擴充功能中移除，並撤銷此擴充功能在該服務上的存取權限。"
+  },
+  "retry_days": {
+    "message": "失敗後重試間隔（天）"
+  },
+  "revoke_failed": {
+    "message": "無法撤銷該處的存取權限；請在該服務網頁應用程式的「My devices」下撤銷。"
+  },
+  "runs_more": {
+    "message": "+$1 次執行"
+  },
+  "runs_one": {
+    "message": "+1 次執行"
+  },
+  "save": {
+    "message": "儲存"
+  },
+  "saved": {
+    "message": "已儲存。"
+  },
+  "schedule": {
+    "message": "到期 $1 · 每 $2 週"
+  },
+  "service_added": {
+    "message": "已新增；已以 $1 身分登入。"
+  },
+  "show": {
+    "message": "顯示"
+  },
+  "signed_out": {
+    "message": "$1：此擴充功能的存取權限已失效。請移除該服務，並以新連結重新新增。"
+  },
+  "succeeded": {
+    "message": "成功"
+  },
+  "title": {
+    "message": "標題"
+  },
+  "unlock": {
+    "message": "解鎖"
+  },
+  "unlock_text": {
+    "message": "請輸入此擴充功能儲存空間的密碼短語。"
+  },
+  "unlock_title": {
+    "message": "已鎖定"
+  },
+  "url_hint": {
+    "message": "新位址會使其在交換時被視為新任務；其歷史紀錄會保留。"
+  },
+  "username": {
+    "message": "使用者名稱"
+  },
+  "webapp_open": {
+    "message": "開啟網頁應用程式"
+  },
+  "webapp_text": {
+    "message": "此服務的使用者、裝置、代理程式和完整備份均在其網頁應用程式中管理。"
+  },
+  "welcome_text": {
+    "message": "透過邀請連結新增 Portal-Download 服務，或僅在此瀏覽器中儲存任務。"
+  },
+  "welcome_title": {
+    "message": "尚無後端"
+  }
+}

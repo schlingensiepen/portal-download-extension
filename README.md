@@ -49,9 +49,13 @@ Under **+**, *Keep jobs in this browser* creates a store of jobs in this browser
 
 Under ⚙ of a backend, *Export the jobs* writes a ZIP file with every job, its login, its history and the deleted jobs, encrypted with AES-256 when you give a password (8 to 200 characters, no umlauts, no space at either end); without one the logins are in plain text and the extension asks first. *Read a file in* takes such a file from any Portal-Download service or from this extension: it first shows what would be taken over as new, what is the same, and where you decide, field by field, which side to keep (the newer side is chosen; for a due date the nearer one). No run is lost. Reading in copies: to move jobs, read them in on the other backend and then delete them where they were; a deleted job then stays deleted on both sides when files travel again.
 
+## Languages
+
+English, German, French, Spanish, Portuguese (Brazil and Portugal) and Chinese (simplified and traditional). The panel follows the browser's language; the menu at its foot chooses another. The translations other than English and German were made by machine: corrections are welcome in the issue of each language and in the [discussions](https://github.com/schlingensiepen/portal-download-extension/discussions). Messages that come from a service are in English.
+
 ## Privacy
 
-The extension collects no data; requests go only to the services you add. Details in [PRIVACY.md](PRIVACY.md).
+The extension collects no data. Everything stays in the browser, or goes to a Portal-Download service you run yourself. Details in [PRIVACY.md](PRIVACY.md).
 
 ## Safari
 

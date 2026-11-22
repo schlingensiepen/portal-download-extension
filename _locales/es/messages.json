@@ -1,0 +1,422 @@
+{
+  "action_keep_both": {
+    "message": "conservar ambas"
+  },
+  "action_reactivate": {
+    "message": "recuperarla"
+  },
+  "action_replace": {
+    "message": "reemplazar la tarea aquí, conservar su historial"
+  },
+  "action_skip": {
+    "message": "omitir"
+  },
+  "add_from_tab": {
+    "message": "Tomar la invitación de la pestaña actual"
+  },
+  "add_page": {
+    "message": "Añadir la página actual como tarea"
+  },
+  "add_service_text": {
+    "message": "Abre un enlace de invitación del servicio en una pestaña, o «Add to the browser extension» en «My devices» de su aplicación web, y pulsa este botón mientras esa pestaña está visible. La extensión solo pide permiso para acceder a ese servicio."
+  },
+  "add_service_title": {
+    "message": "Añadir un servicio"
+  },
+  "add_title": {
+    "message": "Añadir un servicio o un almacén local"
+  },
+  "all": {
+    "message": "Todas"
+  },
+  "already_added": {
+    "message": "Este servicio ya está añadido."
+  },
+  "back": {
+    "message": "← Atrás"
+  },
+  "backend": {
+    "message": "Backend"
+  },
+  "btn_failed": {
+    "message": "Falló"
+  },
+  "btn_succeeded": {
+    "message": "Correcto"
+  },
+  "cancel": {
+    "message": "Cancelar"
+  },
+  "case_deleted": {
+    "message": "Eliminada aquí el $1."
+  },
+  "case_known": {
+    "message": "Difiere de aquí; elige por campo."
+  },
+  "case_old_address": {
+    "message": "Aquí con la nueva dirección $1; elige por campo."
+  },
+  "case_replaces": {
+    "message": "Nueva dirección para «$1» (aquí todavía $2)."
+  },
+  "choose_backend": {
+    "message": "Elige primero un backend."
+  },
+  "choose_file": {
+    "message": "Elige primero un archivo."
+  },
+  "contract_blocks": {
+    "message": "Este servicio usa otra versión de la interfaz; cerrar ejecuciones e importar archivos siguen bloqueados hasta que se actualice el lado más antiguo."
+  },
+  "contract_mismatch": {
+    "message": "$1 usa la versión $2 de la interfaz, esta extensión la $3. Actualiza el lado más antiguo."
+  },
+  "copied": {
+    "message": "Copiado ✓"
+  },
+  "copy": {
+    "message": "Copiar"
+  },
+  "copy_refused": {
+    "message": "El navegador no permitió copiar."
+  },
+  "create": {
+    "message": "Crear"
+  },
+  "created": {
+    "message": "Creado."
+  },
+  "delete": {
+    "message": "Eliminar"
+  },
+  "deleted": {
+    "message": "Eliminado."
+  },
+  "device_label": {
+    "message": "Extensión de $1 $2"
+  },
+  "done": {
+    "message": "Cerrada – vence de nuevo el $1."
+  },
+  "due_in": {
+    "message": "vence en $1 días"
+  },
+  "due_today": {
+    "message": "vence hoy"
+  },
+  "due_tomorrow": {
+    "message": "vence mañana"
+  },
+  "edit": {
+    "message": "Editar"
+  },
+  "edit_job": {
+    "message": "Editar tarea"
+  },
+  "entry_url": {
+    "message": "Página de entrada (URL)"
+  },
+  "err_access_gone": {
+    "message": "El acceso de esta extensión al servicio fue revocado o la persona desactivada. Quita el servicio y añádelo de nuevo con un enlace nuevo."
+  },
+  "err_locked": {
+    "message": "El almacén de esta extensión está bloqueado."
+  },
+  "err_unreachable": {
+    "message": "No se puede acceder al servicio. ¿Está en marcha y confía este equipo en su certificado? Chrome y Edge necesitan que la autoridad de certificación del servicio esté importada como raíz de confianza."
+  },
+  "err_unreadable": {
+    "message": "El servicio responde de forma ininteligible."
+  },
+  "err_vault_exists": {
+    "message": "Otra ventana ha creado mientras tanto el almacén local."
+  },
+  "every_weeks": {
+    "message": "¿Cada cuántas semanas?"
+  },
+  "exchange_text": {
+    "message": "El archivo contiene todas las tareas con sus credenciales, su historial y las tareas eliminadas. Cualquier servicio Portal-Download y esta extensión pueden leerlo."
+  },
+  "exchange_title": {
+    "message": "Exportar las tareas"
+  },
+  "export_encrypted": {
+    "message": "Descargar cifrado"
+  },
+  "export_plain": {
+    "message": "Descargar sin contraseña"
+  },
+  "export_plain_really": {
+    "message": "Credenciales en texto plano – ¿seguro?"
+  },
+  "export_reminder": {
+    "message": "Exporta de vez en cuando las tareas de este navegador: una frase de contraseña olvidada no se puede recuperar."
+  },
+  "ext_description": {
+    "message": "Las descargas de portales pendientes de cada servicio Portal-Download, y de un almacén en este navegador, en el panel lateral."
+  },
+  "ext_name": {
+    "message": "Portal-Download"
+  },
+  "failed": {
+    "message": "falló"
+  },
+  "feedback": {
+    "message": "Comentarios"
+  },
+  "file_password": {
+    "message": "Contraseña del archivo (8 a 200 caracteres: letras A–Z sin tildes ni ñ, cifras, signos de puntuación)"
+  },
+  "file_password_in": {
+    "message": "Contraseña del archivo, si la tiene"
+  },
+  "file_too_large": {
+    "message": "El archivo supera los 48 MB; no es un archivo de intercambio."
+  },
+  "forgot_button": {
+    "message": "Eliminar el almacén y los servicios"
+  },
+  "forgot_text": {
+    "message": "La frase de contraseña no se puede recuperar. Solo puedes eliminar el almacén local con sus tareas y los servicios guardados en él, y volver a añadir los servicios con enlaces nuevos."
+  },
+  "forgot_title": {
+    "message": "¿Olvidaste la frase de contraseña?"
+  },
+  "here": {
+    "message": "Aquí"
+  },
+  "hide": {
+    "message": "Ocultar"
+  },
+  "import_apply": {
+    "message": "Importar"
+  },
+  "import_preview": {
+    "message": "Mostrar qué cambiaría"
+  },
+  "import_title": {
+    "message": "Importar un archivo"
+  },
+  "imported": {
+    "message": "Importado – añadidas: $1, actualizadas: $2, recuperadas: $3, reemplazadas: $4, omitidas: $5, ejecuciones añadidas: $6."
+  },
+  "in_file": {
+    "message": "En el archivo"
+  },
+  "instructions_md": {
+    "message": "Instrucciones"
+  },
+  "interval_weeks": {
+    "message": "Cada … semanas"
+  },
+  "language": {
+    "message": "Idioma"
+  },
+  "language_auto": {
+    "message": "Como el navegador"
+  },
+  "last_run": {
+    "message": "Última: $1, $2, por $3"
+  },
+  "local_create": {
+    "message": "Crear el almacén local"
+  },
+  "local_created": {
+    "message": "El almacén local está listo."
+  },
+  "local_name": {
+    "message": "Este navegador"
+  },
+  "local_remove": {
+    "message": "Eliminar el almacén local"
+  },
+  "local_remove_text": {
+    "message": "Elimina el almacén local con sus tareas; los servicios permanecen y sus tokens vuelven a quedar sin cifrar. Exporta antes las tareas."
+  },
+  "local_text": {
+    "message": "Un almacén de tareas solo en este navegador, cifrado con una frase de contraseña. Una vez creado, los tokens de los servicios también quedan protegidos por ella, y la extensión la pide en cada inicio del navegador."
+  },
+  "local_title": {
+    "message": "Guardar tareas en este navegador"
+  },
+  "lock": {
+    "message": "Bloquear ahora"
+  },
+  "login_hidden": {
+    "message": "Este backend no muestra credenciales a este dispositivo."
+  },
+  "login_local": {
+    "message": "Las credenciales se guardan en este navegador, cifradas con la frase de contraseña."
+  },
+  "login_plain": {
+    "message": "Las credenciales se guardan en texto plano, visibles para todos los que usan este backend."
+  },
+  "manage_title": {
+    "message": "Gestionar el backend elegido"
+  },
+  "new_job": {
+    "message": "Nueva tarea"
+  },
+  "next_due": {
+    "message": "Próximo vencimiento"
+  },
+  "next_job": {
+    "message": "Siguiente tarea"
+  },
+  "no_invitation": {
+    "message": "La pestaña actual no muestra ningún enlace de invitación de un servicio Portal-Download."
+  },
+  "no_jobs": {
+    "message": "Sin tareas."
+  },
+  "no_login": {
+    "message": "No hay credenciales guardadas."
+  },
+  "not_encrypted": {
+    "message": "El archivo volvió sin cifrar; no se guardó nada."
+  },
+  "note": {
+    "message": "Nota (opcional)"
+  },
+  "note_placeholder": {
+    "message": "p. ej. qué faltaba"
+  },
+  "open_portal": {
+    "message": "Abrir el portal en una pestaña nueva"
+  },
+  "overdue": {
+    "message": "vencida hace $1 días"
+  },
+  "overdue_one": {
+    "message": "vencida hace 1 día"
+  },
+  "passphrase": {
+    "message": "Frase de contraseña"
+  },
+  "passphrase_again": {
+    "message": "Repetir la frase de contraseña"
+  },
+  "passphrase_change": {
+    "message": "Cambiar la frase de contraseña"
+  },
+  "passphrase_changed": {
+    "message": "La frase de contraseña ha cambiado. Usa la nueva a partir de ahora."
+  },
+  "passphrase_differs": {
+    "message": "Las dos frases de contraseña no coinciden."
+  },
+  "passphrase_new": {
+    "message": "Nueva frase de contraseña"
+  },
+  "passphrase_short": {
+    "message": "La frase de contraseña necesita al menos 10 caracteres."
+  },
+  "passphrase_warning": {
+    "message": "Una frase de contraseña olvidada no se puede recuperar: las tareas de este navegador se pierden, salvo que las hayas exportado. Expórtalas de vez en cuando."
+  },
+  "passphrase_wrong": {
+    "message": "La frase de contraseña es incorrecta."
+  },
+  "password": {
+    "message": "Contraseña"
+  },
+  "password_needed": {
+    "message": "Introduce una contraseña, o descarga sin ella."
+  },
+  "people_left_out": {
+    "message": "El archivo es una copia de seguridad completa: este almacén solo lee sus tareas, no las personas, dispositivos ni tokens."
+  },
+  "permission_refused": {
+    "message": "Sin el permiso, la extensión no puede acceder al servicio."
+  },
+  "preselected_hint": {
+    "message": "Se elige el lado más reciente de cada campo, y en un vencimiento el más cercano; cambia lo que quieras y luego importa."
+  },
+  "preview_decide": {
+    "message": "Decide, por favor: $1"
+  },
+  "preview_new": {
+    "message": "Tomado, porque es nuevo: $1"
+  },
+  "preview_same": {
+    "message": "Tomado, porque es igual: $1"
+  },
+  "preview_title": {
+    "message": "Qué hace la importación del archivo"
+  },
+  "project_page": {
+    "message": "Página del proyecto"
+  },
+  "really": {
+    "message": "¿Seguro?"
+  },
+  "remove_service": {
+    "message": "Quitar el servicio"
+  },
+  "remove_service_text": {
+    "message": "Quita el servicio de esta extensión y revoca allí el acceso de esta extensión."
+  },
+  "retry_days": {
+    "message": "Tras un fallo, días"
+  },
+  "revoke_failed": {
+    "message": "No se pudo revocar el acceso allí; revócalo en la aplicación web del servicio, en «My devices»."
+  },
+  "runs_more": {
+    "message": "+$1 ejecuciones"
+  },
+  "runs_one": {
+    "message": "+1 ejecución"
+  },
+  "save": {
+    "message": "Guardar"
+  },
+  "saved": {
+    "message": "Guardado."
+  },
+  "schedule": {
+    "message": "vence $1 · cada $2 semanas"
+  },
+  "service_added": {
+    "message": "Añadido; sesión iniciada como $1."
+  },
+  "show": {
+    "message": "Mostrar"
+  },
+  "signed_out": {
+    "message": "$1: el acceso de esta extensión ya no es válido. Quita el servicio y añádelo de nuevo con un enlace nuevo."
+  },
+  "succeeded": {
+    "message": "correcto"
+  },
+  "title": {
+    "message": "Título"
+  },
+  "unlock": {
+    "message": "Desbloquear"
+  },
+  "unlock_text": {
+    "message": "Introduce la frase de contraseña del almacén de esta extensión."
+  },
+  "unlock_title": {
+    "message": "Bloqueado"
+  },
+  "url_hint": {
+    "message": "Una dirección nueva la convierte en una tarea nueva para el intercambio; su historial se conserva."
+  },
+  "username": {
+    "message": "Nombre de usuario"
+  },
+  "webapp_open": {
+    "message": "Abrir la aplicación web"
+  },
+  "webapp_text": {
+    "message": "Las personas, dispositivos, agentes y la copia de seguridad completa de este servicio se gestionan en su aplicación web."
+  },
+  "welcome_text": {
+    "message": "Añade un servicio Portal-Download con un enlace de invitación, o guarda las tareas solo en este navegador."
+  },
+  "welcome_title": {
+    "message": "Aún no hay backend"
+  }
+}

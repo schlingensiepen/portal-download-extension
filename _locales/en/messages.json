@@ -18,7 +18,7 @@
     "message": "Add the current page as a job"
   },
   "add_service_text": {
-    "message": "Open an invitation link of the service in a tab, or “Add to the browser extension” under My devices of its web application, and press this button while that tab is shown. The extension asks for permission to reach that service only."
+    "message": "Open an invitation link of the service in a tab, or “Add to the browser extension” under “My devices” of its web application, and press this button while that tab is shown. The extension asks for permission to reach that service only."
   },
   "add_service_title": {
     "message": "Add a service"
@@ -165,7 +165,7 @@
     "message": "Feedback"
   },
   "file_password": {
-    "message": "Password for the file (8 to 200 characters without umlauts)"
+    "message": "Password for the file (8 to 200 characters: letters A–Z, digits, punctuation)"
   },
   "file_password_in": {
     "message": "Password of the file, if it has one"
@@ -208,6 +208,12 @@
   },
   "interval_weeks": {
     "message": "Every … weeks"
+  },
+  "language": {
+    "message": "Language"
+  },
+  "language_auto": {
+    "message": "As the browser"
   },
   "last_run": {
     "message": "Last: $1, $2, by $3"
@@ -354,7 +360,7 @@
     "message": "After a failure, days"
   },
   "revoke_failed": {
-    "message": "The access there could not be revoked; revoke it in the service's web application under My devices."
+    "message": "The access there could not be revoked; revoke it in the service's web application under “My devices”."
   },
   "runs_more": {
     "message": "+$1 runs"
