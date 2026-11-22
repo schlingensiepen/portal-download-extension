@@ -440,11 +440,8 @@
   "docs_title": {
     "message": "Dokumente auf dieser Seite"
   },
-  "docs_trial": {
-    "message": "Ein Versuch für Version 1.0: Er findet und markiert nur. Schreib in den Discussions, was er übersehen oder falsch markiert hat."
-  },
   "docs_count": {
-    "message": "$1 gefunden, in der Seite gelb markiert und nummeriert. Nimm den Haken weg, wo es kein Dokument ist; ein Klick auf den Namen scrollt dorthin."
+    "message": "$1 gefunden, in der Seite gelb markiert und nummeriert. Nimm den Haken weg, wo es kein Dokument ist; ein Klick auf den Namen scrollt dorthin. Schon früher geladene Dokumente sind nicht angehakt."
   },
   "docs_none": {
     "message": "Nichts gefunden, das nach einem Dokument aussieht."
@@ -454,6 +451,9 @@
   },
   "docs_refused": {
     "message": "Ohne Zugriff auf diese Seite kann die Erweiterung sie nicht durchsuchen."
+  },
+  "docs_refused_downloads": {
+    "message": "Ohne die Berechtigung zum Herunterladen kann die Erweiterung nur markieren."
   },
   "docs_again": {
     "message": "Neu suchen"
@@ -484,5 +484,50 @@
   },
   "docs_why_words": {
     "message": "Wörter oder Symbol"
+  },
+  "docs_folder": {
+    "message": "Gespeichert in $1 in Deinem Download-Ordner."
+  },
+  "docs_download": {
+    "message": "Angehakte herunterladen ($1)"
+  },
+  "docs_stop": {
+    "message": "Anhalten"
+  },
+  "docs_stopping": {
+    "message": "Hält nach dem laufenden Dokument an."
+  },
+  "docs_waiting": {
+    "message": "Wartet."
+  },
+  "docs_running": {
+    "message": "Lädt …"
+  },
+  "docs_saved": {
+    "message": "Gespeichert als $1."
+  },
+  "docs_failed": {
+    "message": "Nicht geladen: $1"
+  },
+  "docs_done_before": {
+    "message": "Geladen am $1."
+  },
+  "docs_finished": {
+    "message": "$1 von $2 Dokumenten geladen."
+  },
+  "docs_forget": {
+    "message": "Vergessen, welche Dokumente geladen wurden"
+  },
+  "docs_err_nothing": {
+    "message": "der Klick hat keinen Download gestartet"
+  },
+  "docs_err_navigated": {
+    "message": "die Seite ist zu einer anderen Adresse gewechselt; der Rest ist angehalten"
+  },
+  "docs_err_tab": {
+    "message": "er hat einen Tab ohne Dokument geöffnet"
+  },
+  "docs_err_timeout": {
+    "message": "nach fünf Minuten noch nicht fertig"
   }
 }

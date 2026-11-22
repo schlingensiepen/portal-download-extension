@@ -57,7 +57,9 @@ export function scan() {
   // Kept in this frame's isolated world for mark(), unmark() and show().
   globalThis.__portalDownloadUnmark?.();
   globalThis.__portalDownloadFound = kept.map((f) => f.el);
-  return { url: location.href, items: kept.map(({ kind, reason, label, url }, i) => ({ i, kind, reason, label, url })) };
+  // Buttons with the same words are told apart by their order.
+  const seen = {};
+  return { url: location.href, items: kept.map(({ kind, reason, label, url }, i) => ({ i, kind, reason, label, url, nth: url ? 0 : (seen[label] = (seen[label] ?? -1) + 1) })) };
 }
 
 /** Runs in the page: highlights the given candidates of this frame, [[index, number], ...]. */
@@ -115,4 +117,12 @@ export function unmark() {
 export function show(i) {
   const el = (globalThis.__portalDownloadFound || [])[i];
   if (el && el.isConnected) el.scrollIntoView({ block: "center", behavior: "smooth" });
+}
+
+/** Runs in the page: clicks one candidate of this frame, as a person would. */
+export function press(i) {
+  const el = (globalThis.__portalDownloadFound || [])[i];
+  if (!el || !el.isConnected) throw new Error("gone");
+  el.scrollIntoView({ block: "center" });
+  el.click();
 }

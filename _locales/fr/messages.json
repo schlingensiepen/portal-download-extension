@@ -435,54 +435,99 @@
     "message": "La phrase secrète est correcte, mais le stockage est illisible ; il est endommagé. Supprimez-le sous « Phrase secrète oubliée ? », créez un nouveau stockage local, importez votre dernier export des tâches et ajoutez à nouveau vos services avec de nouveaux liens d'invitation."
   },
   "docs_find": {
-    "message": "Find documents on this page"
+    "message": "Trouver les documents de cette page"
   },
   "docs_title": {
-    "message": "Documents on this page"
-  },
-  "docs_trial": {
-    "message": "A trial for version 1.0: it only finds and highlights. Tell us in the discussions what it missed or marked wrongly."
+    "message": "Documents de cette page"
   },
   "docs_count": {
-    "message": "$1 found, highlighted in yellow and numbered in the page. Untick what is no document; click a name to scroll to it."
+    "message": "$1 trouvés, surlignés en jaune et numérotés dans la page. Décochez ce qui n'est pas un document ; cliquez sur un nom pour y aller. Les documents déjà téléchargés sont décochés."
   },
   "docs_none": {
-    "message": "Nothing found that looks like a document."
+    "message": "Rien trouvé qui ressemble à un document."
   },
   "docs_no_page": {
-    "message": "Open the portal page in the active tab first."
+    "message": "Ouvrez d'abord la page du portail dans l'onglet actif."
   },
   "docs_refused": {
-    "message": "Without access to this page the extension cannot search it."
+    "message": "Sans accès à cette page, l'extension ne peut pas la parcourir."
+  },
+  "docs_refused_downloads": {
+    "message": "Sans l'autorisation de télécharger, l'extension peut seulement surligner."
   },
   "docs_again": {
-    "message": "Search again"
+    "message": "Chercher à nouveau"
   },
   "docs_clear": {
-    "message": "Remove the highlighting"
+    "message": "Retirer le surlignage"
   },
   "docs_kind_file": {
-    "message": "File"
+    "message": "Fichier"
   },
   "docs_kind_link": {
-    "message": "Link, probably a file"
+    "message": "Lien, probablement un fichier"
   },
   "docs_kind_button": {
-    "message": "Button"
+    "message": "Bouton"
   },
   "docs_why_attr": {
-    "message": "marked for download"
+    "message": "marqué pour le téléchargement"
   },
   "docs_why_name": {
-    "message": "file name"
+    "message": "nom de fichier"
   },
   "docs_why_type": {
-    "message": "file type"
+    "message": "type de fichier"
   },
   "docs_why_address": {
-    "message": "address"
+    "message": "adresse"
   },
   "docs_why_words": {
-    "message": "words or icon"
+    "message": "mots ou icône"
+  },
+  "docs_folder": {
+    "message": "Enregistrés dans $1 de votre dossier de téléchargement."
+  },
+  "docs_download": {
+    "message": "Télécharger les éléments cochés ($1)"
+  },
+  "docs_stop": {
+    "message": "Arrêter"
+  },
+  "docs_stopping": {
+    "message": "S'arrête après le document en cours."
+  },
+  "docs_waiting": {
+    "message": "En attente."
+  },
+  "docs_running": {
+    "message": "Téléchargement…"
+  },
+  "docs_saved": {
+    "message": "Enregistré sous $1."
+  },
+  "docs_failed": {
+    "message": "Non téléchargé : $1"
+  },
+  "docs_done_before": {
+    "message": "Téléchargé le $1."
+  },
+  "docs_finished": {
+    "message": "$1 documents sur $2 téléchargés."
+  },
+  "docs_forget": {
+    "message": "Oublier quels documents ont été téléchargés"
+  },
+  "docs_err_nothing": {
+    "message": "le clic n'a lancé aucun téléchargement"
+  },
+  "docs_err_navigated": {
+    "message": "la page est passée à une autre adresse ; la suite est arrêtée"
+  },
+  "docs_err_tab": {
+    "message": "il a ouvert un onglet sans document"
+  },
+  "docs_err_timeout": {
+    "message": "toujours pas terminé après cinq minutes"
   }
 }

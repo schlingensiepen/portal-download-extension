@@ -435,54 +435,99 @@
     "message": "口令正确，但存储无法读取，已损坏。请在“忘记口令？”下删除它，新建一个本地存储，导入最近一次导出的任务，并用新的邀请链接重新添加服务。"
   },
   "docs_find": {
-    "message": "Find documents on this page"
+    "message": "查找此页面上的文档"
   },
   "docs_title": {
-    "message": "Documents on this page"
-  },
-  "docs_trial": {
-    "message": "A trial for version 1.0: it only finds and highlights. Tell us in the discussions what it missed or marked wrongly."
+    "message": "此页面上的文档"
   },
   "docs_count": {
-    "message": "$1 found, highlighted in yellow and numbered in the page. Untick what is no document; click a name to scroll to it."
+    "message": "找到 $1 个，已在页面中以黄色标出并编号。请取消勾选不是文档的项目；点击名称可滚动到该处。之前已下载的文档不会勾选。"
   },
   "docs_none": {
-    "message": "Nothing found that looks like a document."
+    "message": "未找到看起来像文档的内容。"
   },
   "docs_no_page": {
-    "message": "Open the portal page in the active tab first."
+    "message": "请先在当前标签页中打开门户页面。"
   },
   "docs_refused": {
-    "message": "Without access to this page the extension cannot search it."
+    "message": "没有此页面的访问权限，扩展无法搜索它。"
+  },
+  "docs_refused_downloads": {
+    "message": "没有下载权限，扩展只能标出文档。"
   },
   "docs_again": {
-    "message": "Search again"
+    "message": "重新查找"
   },
   "docs_clear": {
-    "message": "Remove the highlighting"
+    "message": "取消标记"
   },
   "docs_kind_file": {
-    "message": "File"
+    "message": "文件"
   },
   "docs_kind_link": {
-    "message": "Link, probably a file"
+    "message": "链接，可能是文件"
   },
   "docs_kind_button": {
-    "message": "Button"
+    "message": "按钮"
   },
   "docs_why_attr": {
-    "message": "marked for download"
+    "message": "标记为下载"
   },
   "docs_why_name": {
-    "message": "file name"
+    "message": "文件名"
   },
   "docs_why_type": {
-    "message": "file type"
+    "message": "文件类型"
   },
   "docs_why_address": {
-    "message": "address"
+    "message": "地址"
   },
   "docs_why_words": {
-    "message": "words or icon"
+    "message": "文字或图标"
+  },
+  "docs_folder": {
+    "message": "保存到下载文件夹中的 $1。"
+  },
+  "docs_download": {
+    "message": "下载已勾选的项目（$1）"
+  },
+  "docs_stop": {
+    "message": "停止"
+  },
+  "docs_stopping": {
+    "message": "将在当前文档完成后停止。"
+  },
+  "docs_waiting": {
+    "message": "等待中。"
+  },
+  "docs_running": {
+    "message": "正在下载…"
+  },
+  "docs_saved": {
+    "message": "已保存为 $1。"
+  },
+  "docs_failed": {
+    "message": "未下载：$1"
+  },
+  "docs_done_before": {
+    "message": "已于 $1 下载。"
+  },
+  "docs_finished": {
+    "message": "已下载 $2 个文档中的 $1 个。"
+  },
+  "docs_forget": {
+    "message": "忘记已下载过哪些文档"
+  },
+  "docs_err_nothing": {
+    "message": "点击未开始任何下载"
+  },
+  "docs_err_navigated": {
+    "message": "页面转到了其他地址；其余项目已停止"
+  },
+  "docs_err_tab": {
+    "message": "打开了一个没有文档的标签页"
+  },
+  "docs_err_timeout": {
+    "message": "五分钟后仍未完成"
   }
 }

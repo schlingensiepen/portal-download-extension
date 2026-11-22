@@ -435,54 +435,99 @@
     "message": "La frase de contraseña es correcta, pero el almacén no se puede leer; está dañado. Elimínalo en «¿Olvidaste la frase de contraseña?», crea un nuevo almacén local, importa tu última exportación de las tareas y vuelve a añadir tus servicios con nuevos enlaces de invitación."
   },
   "docs_find": {
-    "message": "Find documents on this page"
+    "message": "Buscar documentos en esta página"
   },
   "docs_title": {
-    "message": "Documents on this page"
-  },
-  "docs_trial": {
-    "message": "A trial for version 1.0: it only finds and highlights. Tell us in the discussions what it missed or marked wrongly."
+    "message": "Documentos de esta página"
   },
   "docs_count": {
-    "message": "$1 found, highlighted in yellow and numbered in the page. Untick what is no document; click a name to scroll to it."
+    "message": "$1 encontrados, resaltados en amarillo y numerados en la página. Desmarca lo que no sea un documento; haz clic en un nombre para ir a él. Los documentos ya descargados aparecen sin marcar."
   },
   "docs_none": {
-    "message": "Nothing found that looks like a document."
+    "message": "No se encontró nada que parezca un documento."
   },
   "docs_no_page": {
-    "message": "Open the portal page in the active tab first."
+    "message": "Abre primero la página del portal en la pestaña activa."
   },
   "docs_refused": {
-    "message": "Without access to this page the extension cannot search it."
+    "message": "Sin acceso a esta página, la extensión no puede buscar en ella."
+  },
+  "docs_refused_downloads": {
+    "message": "Sin el permiso para descargar, la extensión solo puede resaltar."
   },
   "docs_again": {
-    "message": "Search again"
+    "message": "Buscar de nuevo"
   },
   "docs_clear": {
-    "message": "Remove the highlighting"
+    "message": "Quitar el resaltado"
   },
   "docs_kind_file": {
-    "message": "File"
+    "message": "Archivo"
   },
   "docs_kind_link": {
-    "message": "Link, probably a file"
+    "message": "Enlace, probablemente un archivo"
   },
   "docs_kind_button": {
-    "message": "Button"
+    "message": "Botón"
   },
   "docs_why_attr": {
-    "message": "marked for download"
+    "message": "marcado para descarga"
   },
   "docs_why_name": {
-    "message": "file name"
+    "message": "nombre de archivo"
   },
   "docs_why_type": {
-    "message": "file type"
+    "message": "tipo de archivo"
   },
   "docs_why_address": {
-    "message": "address"
+    "message": "dirección"
   },
   "docs_why_words": {
-    "message": "words or icon"
+    "message": "palabras o icono"
+  },
+  "docs_folder": {
+    "message": "Se guardan en $1 dentro de tu carpeta de descargas."
+  },
+  "docs_download": {
+    "message": "Descargar los marcados ($1)"
+  },
+  "docs_stop": {
+    "message": "Detener"
+  },
+  "docs_stopping": {
+    "message": "Se detiene tras el documento actual."
+  },
+  "docs_waiting": {
+    "message": "En espera."
+  },
+  "docs_running": {
+    "message": "Descargando…"
+  },
+  "docs_saved": {
+    "message": "Guardado como $1."
+  },
+  "docs_failed": {
+    "message": "No descargado: $1"
+  },
+  "docs_done_before": {
+    "message": "Descargado el $1."
+  },
+  "docs_finished": {
+    "message": "$1 de $2 documentos descargados."
+  },
+  "docs_forget": {
+    "message": "Olvidar qué documentos se descargaron"
+  },
+  "docs_err_nothing": {
+    "message": "el clic no inició ninguna descarga"
+  },
+  "docs_err_navigated": {
+    "message": "la página cambió a otra dirección; el resto se detuvo"
+  },
+  "docs_err_tab": {
+    "message": "abrió una pestaña sin documento"
+  },
+  "docs_err_timeout": {
+    "message": "sin terminar tras cinco minutos"
   }
 }

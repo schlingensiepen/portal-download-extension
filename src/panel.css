@@ -44,3 +44,4 @@ td, th { text-align: left; padding: 3px 4px; border-bottom: 1px solid var(--line
 [hidden] { display: none !important; }
 .doc .badge { display: inline-block; min-width: 18px; padding: 0 4px; border-radius: 9px; background: #f2c200; color: #1d2b2a; font-weight: bold; font-size: 12px; text-align: center; }
 .doc a { overflow-wrap: anywhere; }
+.doc.failed { border-color: var(--bad); }

@@ -440,11 +440,8 @@
   "docs_title": {
     "message": "Documents on this page"
   },
-  "docs_trial": {
-    "message": "A trial for version 1.0: it only finds and highlights. Tell us in the discussions what it missed or marked wrongly."
-  },
   "docs_count": {
-    "message": "$1 found, highlighted in yellow and numbered in the page. Untick what is no document; click a name to scroll to it."
+    "message": "$1 found, highlighted in yellow and numbered in the page. Untick what is no document; click a name to scroll to it. Documents downloaded before are unticked."
   },
   "docs_none": {
     "message": "Nothing found that looks like a document."
@@ -454,6 +451,9 @@
   },
   "docs_refused": {
     "message": "Without access to this page the extension cannot search it."
+  },
+  "docs_refused_downloads": {
+    "message": "Without the permission to download, the extension can only highlight."
   },
   "docs_again": {
     "message": "Search again"
@@ -484,5 +484,50 @@
   },
   "docs_why_words": {
     "message": "words or icon"
+  },
+  "docs_folder": {
+    "message": "Saved into $1 in your download folder."
+  },
+  "docs_download": {
+    "message": "Download the ticked ones ($1)"
+  },
+  "docs_stop": {
+    "message": "Stop"
+  },
+  "docs_stopping": {
+    "message": "Stops after the current document."
+  },
+  "docs_waiting": {
+    "message": "Waiting."
+  },
+  "docs_running": {
+    "message": "Downloading…"
+  },
+  "docs_saved": {
+    "message": "Saved as $1."
+  },
+  "docs_failed": {
+    "message": "Not downloaded: $1"
+  },
+  "docs_done_before": {
+    "message": "Downloaded on $1."
+  },
+  "docs_finished": {
+    "message": "$1 of $2 documents downloaded."
+  },
+  "docs_forget": {
+    "message": "Forget which documents were downloaded"
+  },
+  "docs_err_nothing": {
+    "message": "the click started no download"
+  },
+  "docs_err_navigated": {
+    "message": "the page went to another address; the rest is stopped"
+  },
+  "docs_err_tab": {
+    "message": "it opened a tab without a document"
+  },
+  "docs_err_timeout": {
+    "message": "still not finished after five minutes"
   }
 }

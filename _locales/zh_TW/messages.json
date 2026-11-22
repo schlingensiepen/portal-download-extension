@@ -435,54 +435,99 @@
     "message": "密碼短語正確，但儲存區無法讀取，已損壞。請在「忘記密碼短語？」下刪除它，建立新的本機儲存區，匯入最近一次匯出的任務，並用新的邀請連結重新加入服務。"
   },
   "docs_find": {
-    "message": "Find documents on this page"
+    "message": "尋找此頁面上的文件"
   },
   "docs_title": {
-    "message": "Documents on this page"
-  },
-  "docs_trial": {
-    "message": "A trial for version 1.0: it only finds and highlights. Tell us in the discussions what it missed or marked wrongly."
+    "message": "此頁面上的文件"
   },
   "docs_count": {
-    "message": "$1 found, highlighted in yellow and numbered in the page. Untick what is no document; click a name to scroll to it."
+    "message": "找到 $1 個，已在頁面中以黃色標示並編號。請取消勾選不是文件的項目；點選名稱可捲動到該處。先前已下載的文件不會勾選。"
   },
   "docs_none": {
-    "message": "Nothing found that looks like a document."
+    "message": "找不到看起來像文件的內容。"
   },
   "docs_no_page": {
-    "message": "Open the portal page in the active tab first."
+    "message": "請先在目前分頁中開啟入口網站頁面。"
   },
   "docs_refused": {
-    "message": "Without access to this page the extension cannot search it."
+    "message": "沒有此頁面的存取權限，擴充功能無法搜尋它。"
+  },
+  "docs_refused_downloads": {
+    "message": "沒有下載權限，擴充功能只能標示文件。"
   },
   "docs_again": {
-    "message": "Search again"
+    "message": "重新尋找"
   },
   "docs_clear": {
-    "message": "Remove the highlighting"
+    "message": "移除標示"
   },
   "docs_kind_file": {
-    "message": "File"
+    "message": "檔案"
   },
   "docs_kind_link": {
-    "message": "Link, probably a file"
+    "message": "連結，可能是檔案"
   },
   "docs_kind_button": {
-    "message": "Button"
+    "message": "按鈕"
   },
   "docs_why_attr": {
-    "message": "marked for download"
+    "message": "標示為下載"
   },
   "docs_why_name": {
-    "message": "file name"
+    "message": "檔案名稱"
   },
   "docs_why_type": {
-    "message": "file type"
+    "message": "檔案類型"
   },
   "docs_why_address": {
-    "message": "address"
+    "message": "網址"
   },
   "docs_why_words": {
-    "message": "words or icon"
+    "message": "文字或圖示"
+  },
+  "docs_folder": {
+    "message": "儲存到下載資料夾中的 $1。"
+  },
+  "docs_download": {
+    "message": "下載已勾選的項目（$1）"
+  },
+  "docs_stop": {
+    "message": "停止"
+  },
+  "docs_stopping": {
+    "message": "將在目前的文件完成後停止。"
+  },
+  "docs_waiting": {
+    "message": "等待中。"
+  },
+  "docs_running": {
+    "message": "正在下載…"
+  },
+  "docs_saved": {
+    "message": "已儲存為 $1。"
+  },
+  "docs_failed": {
+    "message": "未下載：$1"
+  },
+  "docs_done_before": {
+    "message": "已於 $1 下載。"
+  },
+  "docs_finished": {
+    "message": "已下載 $2 個文件中的 $1 個。"
+  },
+  "docs_forget": {
+    "message": "忘記已下載過哪些文件"
+  },
+  "docs_err_nothing": {
+    "message": "點選後沒有開始任何下載"
+  },
+  "docs_err_navigated": {
+    "message": "頁面轉到了其他網址；其餘項目已停止"
+  },
+  "docs_err_tab": {
+    "message": "開啟了一個沒有文件的分頁"
+  },
+  "docs_err_timeout": {
+    "message": "五分鐘後仍未完成"
   }
 }

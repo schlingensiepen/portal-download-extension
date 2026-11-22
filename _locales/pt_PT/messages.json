@@ -435,54 +435,99 @@
     "message": "A frase-passe está correta, mas o armazenamento não pode ser lido; está danificado. Elimine-o em “Esqueceu-se da frase-passe?”, crie um novo armazenamento local, importe a sua última exportação das tarefas e adicione novamente os seus serviços com novas ligações de convite."
   },
   "docs_find": {
-    "message": "Find documents on this page"
+    "message": "Encontrar documentos nesta página"
   },
   "docs_title": {
-    "message": "Documents on this page"
-  },
-  "docs_trial": {
-    "message": "A trial for version 1.0: it only finds and highlights. Tell us in the discussions what it missed or marked wrongly."
+    "message": "Documentos desta página"
   },
   "docs_count": {
-    "message": "$1 found, highlighted in yellow and numbered in the page. Untick what is no document; click a name to scroll to it."
+    "message": "$1 encontrados, realçados a amarelo e numerados na página. Desmarque o que não for documento; clique num nome para ir até ele. Os documentos já transferidos aparecem desmarcados."
   },
   "docs_none": {
-    "message": "Nothing found that looks like a document."
+    "message": "Nada encontrado que pareça um documento."
   },
   "docs_no_page": {
-    "message": "Open the portal page in the active tab first."
+    "message": "Abra primeiro a página do portal no separador ativo."
   },
   "docs_refused": {
-    "message": "Without access to this page the extension cannot search it."
+    "message": "Sem acesso a esta página, a extensão não a pode pesquisar."
+  },
+  "docs_refused_downloads": {
+    "message": "Sem a permissão para transferir, a extensão só pode realçar."
   },
   "docs_again": {
-    "message": "Search again"
+    "message": "Pesquisar novamente"
   },
   "docs_clear": {
-    "message": "Remove the highlighting"
+    "message": "Remover o realce"
   },
   "docs_kind_file": {
-    "message": "File"
+    "message": "Ficheiro"
   },
   "docs_kind_link": {
-    "message": "Link, probably a file"
+    "message": "Ligação, provavelmente um ficheiro"
   },
   "docs_kind_button": {
-    "message": "Button"
+    "message": "Botão"
   },
   "docs_why_attr": {
-    "message": "marked for download"
+    "message": "marcado para transferência"
   },
   "docs_why_name": {
-    "message": "file name"
+    "message": "nome do ficheiro"
   },
   "docs_why_type": {
-    "message": "file type"
+    "message": "tipo de ficheiro"
   },
   "docs_why_address": {
-    "message": "address"
+    "message": "endereço"
   },
   "docs_why_words": {
-    "message": "words or icon"
+    "message": "palavras ou ícone"
+  },
+  "docs_folder": {
+    "message": "Guardados em $1 na sua pasta de transferências."
+  },
+  "docs_download": {
+    "message": "Transferir os marcados ($1)"
+  },
+  "docs_stop": {
+    "message": "Parar"
+  },
+  "docs_stopping": {
+    "message": "Para após o documento atual."
+  },
+  "docs_waiting": {
+    "message": "A aguardar."
+  },
+  "docs_running": {
+    "message": "A transferir…"
+  },
+  "docs_saved": {
+    "message": "Guardado como $1."
+  },
+  "docs_failed": {
+    "message": "Não transferido: $1"
+  },
+  "docs_done_before": {
+    "message": "Transferido em $1."
+  },
+  "docs_finished": {
+    "message": "$1 de $2 documentos transferidos."
+  },
+  "docs_forget": {
+    "message": "Esquecer que documentos foram transferidos"
+  },
+  "docs_err_nothing": {
+    "message": "o clique não iniciou nenhuma transferência"
+  },
+  "docs_err_navigated": {
+    "message": "a página mudou para outro endereço; o resto foi interrompido"
+  },
+  "docs_err_tab": {
+    "message": "abriu um separador sem documento"
+  },
+  "docs_err_timeout": {
+    "message": "ainda não terminou após cinco minutos"
   }
 }

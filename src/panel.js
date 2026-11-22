@@ -6,7 +6,8 @@ import { Vault } from "./vault.js";
 import { ServiceBackend, localBackend, parseInvitation, CONTRACT } from "./backends.js";
 import { checkPassword, fromBase64 } from "./local.js";
 import { LANGUAGES, load, tag } from "./i18n.js";
-import { scan, mark, unmark, show } from "./finder.js";
+import { scan, mark, unmark, show, press } from "./finder.js";
+import { runQueue, remembered, folderFor } from "./fetcher.js";
 
 const api = globalThis.browser ?? globalThis.chrome;
 const vault = new Vault();
@@ -380,20 +381,35 @@ async function addFromTab() {
   }
 }
 
-// Documents in the active tab, a trial for 1.0: found, numbered and highlighted in yellow.
+// Documents in the active tab: found, numbered and highlighted in yellow, then downloaded one
+// after the other into a folder of the job. What was downloaded is remembered per job (or per
+// site, without a job) and offered unticked next time.
 async function findDocuments() {
   const url = state.tabUrl, tabId = state.tabId;
   if (!/^https?:/i.test(url) || tabId == null) return toast(t("docs_no_page"), true);
+  // The job it was started from; a new search keeps it.
+  const job = state.view === "job" ? state.job : state.view === "docs" && state.docs ? state.docs.job : null;
   try {
     // The first thing the click awaits, as Firefox requires: access to this portal only.
     if (!(await api.permissions.request({ origins: [originPattern(url)] }))) return toast(t("docs_refused"), true);
+    if (state.docs) await unhighlight(state.docs);
     let results;
     // Every frame the extension may reach; frames of other addresses are left out.
     try { results = await api.scripting.executeScript({ target: { tabId, allFrames: true }, func: scan }); }
     catch { results = await api.scripting.executeScript({ target: { tabId }, func: scan }); }
+    const scope = job ? `job:${job.b.id}:${job.j.job_id}` : `site:${new URL(url).hostname}`;
+    const known = await remembered.get(scope);
     let n = 0;
-    const frames = results.filter((r) => r && r.result).map((r) => ({ frameId: r.frameId, url: r.result.url, items: r.result.items.map((it) => ({ ...it, n: ++n, on: true })) }));
-    state.docs = { tabId, url, frames };
+    const frames = [];
+    for (const r of results.filter((x) => x && x.result)) {
+      const items = [];
+      for (const it of r.result.items) {
+        const key = await remembered.keyOf(it);
+        items.push({ ...it, frameId: r.frameId, n: ++n, key, done: known[key] || null, on: !known[key], status: null });
+      }
+      frames.push({ frameId: r.frameId, url: r.result.url, items });
+    }
+    state.docs = { tabId, url, job, scope, folder: folderFor(job && job.j, url), frames, running: false, stop: false };
     await highlight();
     go("docs");
   } catch (e) { fail(e); }
@@ -402,31 +418,83 @@ async function highlight() {
   const d = state.docs;
   await Promise.all(d.frames.map((f) => api.scripting.executeScript({ target: { tabId: d.tabId, frameIds: [f.frameId] }, func: mark, args: [f.items.filter((i) => i.on).map((i) => [i.i, i.n])] }).catch(() => {})));
 }
+const unhighlight = (d) => Promise.all(d.frames.map((f) => api.scripting.executeScript({ target: { tabId: d.tabId, frameIds: [f.frameId] }, func: unmark }).catch(() => {})));
 async function clearDocuments() {
   const d = state.docs;
+  if (d) d.stop = true;
   state.docs = null;
-  if (d) await Promise.all(d.frames.map((f) => api.scripting.executeScript({ target: { tabId: d.tabId, frameIds: [f.frameId] }, func: unmark }).catch(() => {})));
-  go("list");
+  if (d) await unhighlight(d);
+  go(d && d.job ? "job" : "list", d && d.job ? { job: d.job } : {});
+}
+async function downloadDocuments() {
+  const d = state.docs;
+  if (!d || d.running) return;
+  try {
+    // The first thing the click awaits: the permission to download, asked once.
+    if (!(await api.permissions.request({ permissions: ["downloads"] }))) return toast(t("docs_refused_downloads"), true);
+    const items = d.frames.flatMap((f) => f.items).filter((i) => i.on);
+    if (!items.length) return;
+    d.running = true; d.stop = false;
+    for (const i of items) i.status = "waiting";
+    render();
+    await runQueue({
+      items, tabId: d.tabId, pageUrl: d.url, folder: d.folder,
+      click: (it) => api.scripting.executeScript({ target: { tabId: d.tabId, frameIds: [it.frameId] }, func: press, args: [it.i] }),
+      stop: () => d.stop || state.docs !== d,
+      onStep: async (n, status) => {
+        const it = items.find((x) => x.n === n);
+        it.status = status;
+        if (status && status.ok) { it.done = new Date().toISOString().slice(0, 10); it.on = false; await remembered.add(d.scope, [it.key]); }
+        // Only the document's own line changes, so that the stop button stays where it is.
+        const row = document.querySelector(`[data-doc="${n}"]`);
+        if (row && state.docs === d && state.view === "docs") { row.querySelector(".status").textContent = docLine(it); row.classList.toggle("failed", !!(status && status.ok === false)); }
+      },
+    });
+    for (const i of items) if (i.status === "waiting") i.status = null;
+    d.running = false;
+    await highlight();
+    if (state.docs === d && state.view === "docs") render();
+    const ok = items.filter((i) => i.status && i.status.ok).length;
+    toast(t("docs_finished", String(ok), String(items.length)), ok < items.length);
+  } catch (e) { d.running = false; render(); fail(e); }
+}
+/** The state of one found document: waiting, downloading, saved, failed, or downloaded before. */
+function docLine(it) {
+  const errors = { nothing: t("docs_err_nothing"), navigated: t("docs_err_navigated"), tab_open: t("docs_err_tab"), tab_closed: t("docs_err_tab"), timeout: t("docs_err_timeout") };
+  const st = it.status;
+  return st === "waiting" ? t("docs_waiting") : st === "running" ? t("docs_running")
+    : st && st.ok ? t("docs_saved", (st.file || "").split(/[\\/]/).pop() || "?")
+    : st ? t("docs_failed", errors[st.error] || st.error) : it.done ? t("docs_done_before", fmtDate(it.done)) : "";
 }
 function viewDocs() {
   const d = state.docs;
-  const items = d.frames.flatMap((f) => f.items.map((it) => ({ ...it, f })));
+  const items = d.frames.flatMap((f) => f.items);
+  const ticked = items.filter((i) => i.on).length;
   const box = h("div", {});
-  const card = h("div", { class: "card" }, h("h1", {}, t("docs_title")), h("p", { class: "small muted" }, t("docs_trial")),
+  if (d.job) box.append(h("button", { class: "btn", type: "button", disabled: d.running, onclick: () => go("job", { job: d.job }) }, t("back")));
+  const card = h("div", { class: "card" }, h("h1", {}, d.job ? d.job.j.title : t("docs_title")),
     h("p", { class: "small" }, items.length ? t("docs_count", String(items.length)) : t("docs_none")),
-    h("div", { class: "row" }, h("button", { class: "btn", type: "button", onclick: findDocuments }, t("docs_again")), h("button", { class: "btn", type: "button", onclick: clearDocuments }, t("docs_clear"))));
+    h("p", { class: "small muted" }, t("docs_folder", d.folder)),
+    h("div", { class: "row" },
+      d.running
+        ? h("button", { class: "btn bad", type: "button", onclick: () => { d.stop = true; toast(t("docs_stopping")); } }, t("docs_stop"))
+        : h("button", { class: "btn primary", type: "button", disabled: !ticked, onclick: downloadDocuments }, t("docs_download", String(ticked))),
+      h("button", { class: "btn", type: "button", disabled: d.running, onclick: findDocuments }, t("docs_again")),
+      h("button", { class: "btn", type: "button", disabled: d.running, onclick: clearDocuments }, t("docs_clear"))));
   box.append(card);
   const kinds = { file: t("docs_kind_file"), link: t("docs_kind_link"), button: t("docs_kind_button") };
   const why = { attr: t("docs_why_attr"), name: t("docs_why_name"), type: t("docs_why_type"), address: t("docs_why_address"), words: t("docs_why_words") };
   for (const it of items) {
-    const item = it.f.items.find((x) => x.n === it.n);
-    const check = h("input", { type: "checkbox", checked: item.on, "aria-label": String(it.n) });
-    check.addEventListener("change", () => { item.on = check.checked; highlight(); });
+    const check = h("input", { type: "checkbox", checked: it.on, disabled: d.running, "aria-label": String(it.n) });
+    check.addEventListener("change", () => { it.on = check.checked; highlight(); render(); });
     const where = it.url ? (() => { try { const u = new URL(it.url); return u.host + u.pathname; } catch { return it.url; } })() : "";
-    box.append(h("div", { class: "card doc" }, h("div", { class: "row" }, check, h("span", { class: "badge" }, String(it.n)),
-      h("a", { href: "#", onclick: (e) => { e.preventDefault(); api.scripting.executeScript({ target: { tabId: d.tabId, frameIds: [it.f.frameId] }, func: show, args: [it.i] }).catch(() => {}); } }, it.label || "—")),
-      h("div", { class: "small muted" }, `${kinds[it.kind]} · ${why[it.reason]}${where ? ` · ${where}` : ""}`)));
+    const st = it.status;
+    box.append(h("div", { class: `card doc${st && st.ok === false ? " failed" : ""}`, "data-doc": String(it.n) }, h("div", { class: "row" }, check, h("span", { class: "badge" }, String(it.n)),
+      h("a", { href: "#", onclick: (e) => { e.preventDefault(); api.scripting.executeScript({ target: { tabId: d.tabId, frameIds: [it.frameId] }, func: show, args: [it.i] }).catch(() => {}); } }, it.label || "—")),
+      h("div", { class: "small muted" }, `${kinds[it.kind]} · ${why[it.reason]}${where ? ` · ${where}` : ""}`),
+      h("div", { class: "small status" }, docLine(it))));
   }
+  if (items.some((i) => i.done) && !d.running) box.append(h("button", { class: "btn wide", type: "button", onclick: async () => { await remembered.forget(d.scope); for (const i of items) { i.done = null; i.on = true; } await highlight(); render(); } }, t("docs_forget")));
   return box;
 }
 
