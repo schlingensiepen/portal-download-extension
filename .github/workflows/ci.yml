@@ -66,6 +66,9 @@ jobs:
             firefox="Firefox 140 or newer – install it from addons.mozilla.org, or download the .xpi, then about:addons, gear menu, Install Add-on From File."
           fi
           [ "$AMO" = success ] || echo "::warning::the submission to addons.mozilla.org failed; see the step above"
+          # Checksums beside the files, to compare a download with what the CI built.
+          # shellcheck disable=SC2086
+          (cd dist && sha256sum $(for f in $files; do basename "$f"; done) > SHA256SUMS); files="$files dist/SHA256SUMS"; cat dist/SHA256SUMS
           # shellcheck disable=SC2086
           gh release create "$GITHUB_REF_NAME" $files --title "$GITHUB_REF_NAME" \
             --notes "$firefox Chrome and Edge 121 or newer – unpack the ZIP into a folder that stays and load it under Extensions, Developer mode, Load unpacked. Details in the README."
