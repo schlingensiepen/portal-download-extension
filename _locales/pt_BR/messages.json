@@ -576,10 +576,10 @@
     "message": "São observados esta aba, seus quadros, as páginas que ela carrega e uma aba aberta a partir dela logo após um clique. Termina no primeiro download, após dois minutos ou quando você para, fecha a aba ou sai desta tela."
   },
   "watch_what_click": {
-    "message": "Anotado para cada clique: o elemento com seu id e sua classe, suas palavras, título e rótulo, seu endereço e um eventual script onclick, os ícones dentro dele, os elementos ao redor e o que a busca fez com ele. Nunca o que você digitou ou escolheu num campo."
+    "message": "Anotado para cada clique: o tipo de elemento, suas palavras, algumas marcas de sim ou não como \"abre uma nova aba\" e o que a busca fez com ele; depois uma nova página ou aba, e o download com tipo e tamanho. Nenhum endereço, nome de arquivo, id ou script, e nunca o que você digitou ou escolheu num campo."
   },
   "watch_what_private": {
-    "message": "Os dígitos viram #, os endereços de e-mail [e-mail]; os valores nos endereços, tokens longos e texto entre aspas nos scripts são removidos, mas as palavras comuns ficam, inclusive nomes. Nada é enviado: você vê o texto, pode alterá-lo e decide se o copia."
+    "message": "Nas palavras, os dígitos viram # e os endereços de e-mail [e-mail]; um nome não pode ser reconhecido. Nada é enviado: você vê o texto, pode alterá-lo e decide se o copia."
   },
   "watch_start": {
     "message": "Começar a observar"
@@ -609,7 +609,7 @@
     "message": "A aba foi fechada; a observação terminou."
   },
   "watch_check": {
-    "message": "Leia o texto; ele contém os cinco últimos cliques, e você pode alterá-lo na caixa. Nomes não podem ser reconhecidos: ajuste primeiro a caixa de seleção abaixo, pois ela refaz o texto, e depois apague tudo o que for pessoal das palavras, títulos, rótulos, endereços e primeiras linhas."
+    "message": "Leia o texto; ele contém os cinco últimos cliques, e você pode alterá-lo na caixa. Ajuste primeiro a caixa de seleção abaixo, pois ela refaz o texto; depois apague tudo o que for pessoal das palavras entre aspas."
   },
   "watch_name_portal": {
     "message": "Nomear o portal ($1)"

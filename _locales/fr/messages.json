@@ -576,10 +576,10 @@
     "message": "Sont observés cet onglet, ses cadres, les pages qu'il charge et un onglet ouvert depuis lui juste après un clic. Cela s'arrête au premier téléchargement, après deux minutes, ou quand vous l'arrêtez, fermez l'onglet ou quittez cette vue."
   },
   "watch_what_click": {
-    "message": "Noté pour chaque clic : l'élément avec son id et sa classe, ses mots, son titre et son libellé, son adresse et un éventuel script onclick, les icônes qu'il contient, les éléments autour et ce que la recherche en a fait. Jamais ce que vous avez saisi ou choisi dans un champ."
+    "message": "Noté pour chaque clic : le type d'élément, ses mots, quelques marques oui/non comme « ouvre un nouvel onglet » et ce que la recherche en a fait ; puis une nouvelle page ou un onglet, et le téléchargement avec son type et sa taille. Aucune adresse, aucun nom de fichier, id ou script, et jamais ce que vous avez saisi ou choisi dans un champ."
   },
   "watch_what_private": {
-    "message": "Les chiffres deviennent #, les adresses e-mail [e-mail] ; les valeurs dans les adresses, les longs jetons et le texte entre guillemets dans les scripts sont supprimés, mais les mots ordinaires restent, noms compris. Rien n'est envoyé : vous voyez le texte, pouvez le modifier et décidez de le copier ou non."
+    "message": "Dans les mots, les chiffres deviennent # et les adresses e-mail [e-mail] ; un nom ne peut pas être reconnu. Rien n'est envoyé : vous voyez le texte, pouvez le modifier et décidez de le copier ou non."
   },
   "watch_start": {
     "message": "Commencer l'observation"
@@ -609,7 +609,7 @@
     "message": "L'onglet a été fermé ; l'observation est terminée."
   },
   "watch_check": {
-    "message": "Lisez le texte ; il contient les cinq derniers clics, et vous pouvez le modifier dans la zone. Les noms ne peuvent pas être reconnus : réglez d'abord la case ci-dessous, car elle refait le texte, puis supprimez tout ce qui est personnel dans les mots, titres, libellés, adresses et premières lignes."
+    "message": "Lisez le texte ; il contient les cinq derniers clics, et vous pouvez le modifier dans la zone. Réglez d'abord la case ci-dessous, car elle refait le texte ; puis supprimez tout ce qui est personnel dans les mots entre guillemets."
   },
   "watch_name_portal": {
     "message": "Nommer le portail ($1)"

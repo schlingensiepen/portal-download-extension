@@ -583,7 +583,7 @@ async function startWatching() {
         if (!w.tabs.has(tabId) || !(info.status === "complete" || (info.status === "loading" && info.url))) return;
         // A page loaded anew needs the observer again; only a new address is worth telling.
         const url = info.url || (tab && tab.url) || "", bare = url.split("#")[0];
-        if (url && w.seen.get(tabId) !== bare) w.events.push({ at: Date.now(), kind: "page", url });
+        if (url && w.seen.get(tabId) !== bare) w.events.push({ at: Date.now(), kind: "page" });
         w.seen.set(tabId, bare);
         // Downloads count from the sites of the portal's own tab only: Chrome names the active tab as
         // the opener of a tab the user opens themselves, so a new tab's site is no proof.
@@ -600,7 +600,7 @@ async function startWatching() {
         setTimeout(() => {
           if (w.phase !== "watching" || Math.abs(at - w.lastClick) > 5000) return;
           w.tabs.add(tab.id);
-          w.events.push({ at: Math.max(at, w.lastClick), kind: "tab", url: tab.pendingUrl || tab.url || "" });
+          w.events.push({ at: Math.max(at, w.lastClick), kind: "tab" });
           inject(tab.id);
         }, 400);
       },

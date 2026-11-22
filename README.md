@@ -241,33 +241,20 @@ The extension can write the details for you. It watches you download one documen
 1. **Open the portal page with the document.** In the panel, click *Something missing or wrong? Show me how you download*. The button is below *Find documents on this page* (in an open job, in the list of jobs and on the welcome card) and at the end of a list of found documents, also when the search found nothing.
 2. **Read the card *Feedback on this portal*, then click *Start watching*.** The browser asks for access to the site and for the downloads permission, unless it has them already. Both are needed. The downloads permission stays afterwards; you can remove it in the browser's extension settings.
 3. **Download one document in the page, the way you normally do.** If the button you use is the one the extension missed, click it anyway: that click is what we need to see. The panel counts along: *Clicks noted: 3*. Watching ends at the first download, after two minutes, when you click *Stop and show the text*, or when the tab is closed. If you leave the view or close the panel, it ends too and the notes are gone.
-4. **Read the text.** It is in English, whatever the panel's language, and holds only the last five clicks. Untick *Name the portal* if you want the site's name left out; the page's path is still shown. Do that first, because it makes the text anew. Then edit the text in its box and delete anything personal: look at the words in quotes of each click (also after *title*, *label* and *alt*, which are noted for fields too), at ids, classes and the *inside* line, at every address (also after *then the page loaded*), and at the lines *Portal* and *Page*.
+4. **Read the text.** It is in English, whatever the panel's language, and holds only the last five clicks. Untick *Name the portal* if you want the site's name left out; do that first, because it makes the text anew. Then read the words in quotes of each click: they are what the link or button says, and may name you or your contract. Delete in the box what is personal.
 5. **Click *Copy the text*, then *Open the feedback form*.** The form opens on GitHub. Paste the text into the field *The text from the panel (optional)*, not into *What the panel said*. Choose *What happened* (here: *A document was not found*), write "see below" under *The element*, and give the version from the bottom of the panel and your browser. The form's own *Portal* field (the site's name only, such as `www.example.com`) is separate from the tick in the panel; leave it empty if you do not want to name the portal. Nothing is sent before you post it.
 
 **What is watched:** the tab that was active when you started, every frame in it, and the pages it loads. Also a tab opened from it within five seconds after a click; in Chrome that includes a tab you open yourself in that moment. Only your own clicks are noted, nothing you type. If the browser does not let the extension into the page, the panel says so.
 
-**What is noted for each click:**
+**What the text says about each click:**
 
-- The element: tag, type, role, id and class, and whether the cursor is a pointer over it.
-- Its words: the text of a link or button, or the label of an input button; of another clickable element (a row or card that reacts to clicks) only a text of at most 60 characters. For any other element, its text only if it is at most 40 characters and has nothing nested in it. Also *title*, *aria-label* and *alt*. Never the content of a text field, password field or text area, nor an entry chosen from a list, nor the words of an element that holds such a field.
-- Where it leads: the address, *target*, the *download* attribute, the `onclick` attribute, and for a submit button the form's address and method.
-- Its surroundings: up to six icons inside it (class, title, label, alt, address), up to three elements around it (tag and class), and whether it is in a frame (with the frame's address) or in shadow DOM.
+- What kind of element it was: a link with an address, a link that runs a script, a button, a submit button, or another element by its tag (such as `<span>`).
+- Its words: the text of a link or button, or the label of an input button; of another clickable element (a row or card that reacts to clicks) only a text of at most 60 characters; of any other element only a text of at most 40 characters with nothing nested in it. Without text, its *aria-label*, *title* or *alt*. Never the content of a text field, password field or text area, nor an entry chosen from a list, nor the words of an element that holds such a field.
+- Yes or no: whether it has a *download* attribute, opens a new tab, has a script in its markup (`onclick`), holds an icon, is in a frame or in shadow DOM.
 - What the search made of it: found, left out (and why), or not found.
-- What followed: pages loaded (also of other sites, such as a login page), tabs opened, and that a download from the portal's own sites started. Of the download the text says only what kind of file and how large, such as *a PDF of 240 KB*; not its name or address. Of a *download* attribute only the ending. A name may still stand in the address or in the link's words.
+- What followed: that a new page loaded or a new tab opened, and that a download from the portal's own sites started, as its kind and size only, such as *a PDF of 240 KB*.
 
-**What is changed before you see the text:**
-
-- Every run of digits becomes `#`, every e-mail address `[e-mail]`; only the portal's name after *Portal:* stays as it is, if you leave it named.
-- In addresses, the values of parameters, the `#…` part and `;…` parameters are removed. The names of parameters stay.
-- Keys and tokens are removed from address paths, parameter names, ids and classes: parts of 8 or more characters in which letters and digits, or small and capital letters, change often, and longer strings that are not plain words.
-- In scripts, everything in quotes is removed. Function names and other unquoted names stay.
-- Long texts are cut, the words of a click to 80 characters.
-- With *Name the portal* unticked, the portal's host is left out and other sites become `[another site]`.
-- Everything the page wrote stands in code marks, so that it cannot become a link, an image or a mention in the issue.
-
-**What stays:** plain words, also in an address path such as `/customer/max-muster/`, and names in the words of a link or button. The extension cannot recognise a name; that is why you read the text. The notes are passed from the page to the panel inside the extension and kept in the panel's memory only. Nothing is sent anywhere.
-
-Scripts a page attaches with `addEventListener` are invisible to an extension. The text shows only an `onclick` in the markup, and what happened after the click.
+No address, file name, id, class name or script text is in it. In the words, every run of digits becomes `#` and every e-mail address `[e-mail]`; they are cut to 80 characters and stand in code marks, so that they cannot become a link, an image or a mention in the issue. A name in the words cannot be recognised; that is why you read the text. The notes are passed from the page to the panel inside the extension and kept in the panel's memory only. Nothing is sent anywhere.
 
 **Close the run** afterwards as before, with *Succeeded* or *Failed*; downloading does not close it.
 

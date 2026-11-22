@@ -1,143 +1,80 @@
-// The feedback text of the observer: nothing that may name a person gets into it, and it says
-// what the search made of each click. REPORT_SRC may point at another copy (for red proofs).
+// The feedback text of the observer: per click only the kind of element, its words (digits and
+// e-mail addresses replaced), yes/no marks and the search's verdict; the download as kind and size.
+// Nothing a page wrote can become Markdown. REPORT_SRC may point at another copy (for red proofs).
 import assert from "node:assert/strict";
 import { pathToFileURL } from "node:url";
 const src = process.env.REPORT_SRC ? pathToFileURL(process.env.REPORT_SRC).href : "../src/report.js";
-const { redactText, redactCode, redactUrl, buildReport, verdictText } = await import(src);
+const { redactText, buildReport, verdictText } = await import(src);
 
 const tests = [];
 const test = (name, fn) => tests.push([name, fn]);
 const P = "https://www.portal.example";
+const click = (over) => ({ at: 1, tag: "a", role: "", type: "", words: "Rechnung 03/2026", link: "address", download: false, newTab: false, onclick: false, submits: false, icon: false, pointer: true, frame: false, shadow: false, verdict: { finder: "found", kind: "link", reason: "address", sure: true }, ...over });
 
-test("words lose digits and e-mail addresses, and stay short", () => {
+test("words lose digits, e-mail addresses and format characters, and stay short", () => {
   assert.equal(redactText("Rechnung 2026-0471 für max.muster@example.org"), "Rechnung #-# für [e-mail]");
   assert.equal(redactText("Kundennr. ４７１１"), "Kundennr. #");
+  assert.equal(redactText("abc‮def​"), "abcdef");
   assert.equal([...redactText("x".repeat(200))].length, 81);
   assert.ok(!redactText("a `b` c").includes("`"));
 });
 
-test("scripts keep their function names, not what is quoted", () => {
-  assert.equal(redactCode("__doPostBack('ctl00$Main$Grid','Select$12')"), "__doPostBack('…','…')");
-  assert.equal(redactCode('openDoc("Max Muster", 4711)'), 'openDoc("…", #)');
-  assert.equal(redactCode("load(`/kunde/mustermann`)"), "load('…')");
-});
-
-test("addresses keep their form only", () => {
-  assert.equal(redactUrl(`${P}/kunde/4711/rechnung.pdf?id=8&sid=abc#p=2`, P), "/kunde/#/rechnung.pdf?id=…&sid=…#…");
-  assert.equal(redactUrl(`${P}/dl/eyJhbGciOiJIUzI1NiJ9abcdefgh/file`, P), "/dl/…/file");
-  assert.equal(redactUrl(`${P}/u/max.muster@example.org/doc`, P), "/u/…/doc");
-  assert.equal(redactUrl(`${P}/docs/rechnung-2026-01.pdf`, P), "/docs/rechnung-#-#.pdf");
-  assert.equal(redactUrl(`${P}/f/a8Kd93LmQz71xPw2.pdf`, P), "/f/….pdf");
-  assert.equal(redactUrl(`${P}/f/550e8400-e29b-41d4-a716-446655440000`, P), "/f/…");
-  assert.equal(redactUrl(`${P}/doc;jsessionid=0A1B2C3D4E5F6A7B8C9D`, P), "/doc;…");
-  assert.equal(redactUrl(`${P}/download/dGhpcyBpcyBh_c2VjcmV0LXRva2Vu`, P), "/download/…");
-  assert.equal(redactUrl(`${P}/t/AbCdEfGhIjKlMnOpQrStUvWx/`, P), "/t/…/");
-  assert.equal(redactUrl(`${P}/x/eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXgifQ.c2lnbmF0dXJl`, P), "/x/…");
-  assert.equal(redactUrl(`${P}/dl.php?eyJhbGciOiJIUzI1NiJ9abcdef`, P), "/dl.php?…=…");
-  assert.equal(redactUrl(`${P}/api/downloadInvoiceDocument/Jahresabrechnung`, P), "/api/downloadInvoiceDocument/Jahresabrechnung");
-  assert.equal(redactUrl("https://files.cdn.example/a/b.pdf?t=1", P), "https://files.cdn.example/a/b.pdf?t=…");
-  assert.equal(redactUrl("https://files.cdn.example/a/b.pdf", P, false), "[another site]/a/b.pdf");
-  assert.equal(redactUrl("data:application/pdf;base64,JVBERi0xLjQK", P), "data:application/pdf");
-  assert.equal(redactUrl("blob:https://www.portal.example/1-2-3", P), "blob: (made in the page)");
-  assert.equal(redactUrl("javascript:show('Max', 12)", P), "javascript:show('…', #)");
-});
-
-test("the search's verdict in words", () => {
+test("the search's verdict in words, only from known values", () => {
   assert.match(verdictText({ finder: "found", kind: "button", reason: "words", sure: false }), /found as a button \(its words\), offered unticked/);
   assert.match(verdictText({ finder: "hidden", why: "words" }), /left out: its words name a destroying action/);
   assert.match(verdictText({ finder: "none", clickable: false }), /no link or button in the markup/);
+  assert.match(verdictText({ finder: "none", clickable: false }, "input"), /a form field/);
+  assert.match(verdictText({ finder: "found", kind: "[x](http://e)", reason: "@me" }), /found as a candidate \(other reason\)/);
 });
 
-const click = (over) => ({ at: 1000, tag: "a", type: "", role: "", id: "row-4711", cls: "btn btn-pdf", text: "Rechnung 03/2026", title: "", aria: "", alt: "", download: null, href: `${P}/api/doc?id=4711&token=s3cr3t`, target: "_blank", onclick: "track('Max Muster')", form: null, pointer: true, icons: [{ cls: "fa fa-file-pdf" }], chain: [{ tag: "table", cls: "grid" }, { tag: "tr", cls: "" }, { tag: "td", cls: "" }], shadow: false, frame: "", page: `${P}/rechnungen`, verdict: { finder: "found", kind: "link", reason: "address", sure: true }, ...over });
-
-test("the report names the portal only when asked, and leaks no number, token or e-mail", () => {
-  const w = { url: `${P}/kunde/4711/rechnungen?sid=abc`, ended: "download",
-    clicks: [click({ at: 1 }), click({ at: 2, tag: "div", cls: "", text: "⤓", href: "", onclick: "", verdict: { finder: "none", clickable: false } })],
-    events: [{ at: 1.5, kind: "tab", url: `${P}/view?doc=4711` }],
-    download: { mime: "application/pdf", filename: "/home/u/Downloads/Rechnung_4711.PDF", bytes: 245760 } };
-  const named = buildReport(w, { version: "1.1.0", browser: "Firefox 147", namePortal: true });
-  const anon = buildReport(w, { version: "1.1.0", browser: "Firefox 147", namePortal: false });
-  assert.match(named, /Portal: `www\.portal\.example`/);
-  assert.match(named, /Portal-Download 1\.1\.0, Firefox 147/);
-  assert.match(anon, /Portal: \(not named\)/);
-  assert.ok(!anon.includes("portal.example") && !anon.includes("cdn.example"));
-  for (const r of [named, anon]) {
-    for (const bad of ["4711", "s3cr3t", "Max Muster", "abc", "2026"]) assert.ok(!r.includes(bad), `${bad} in the report`);
-    assert.match(r, /search: found as a link \(its address looks like a download\), ticked/);
-    assert.match(r, /no link or button in the markup/);
-    assert.match(r, /then a new tab opened: `\/view\?doc=…`/);
-    assert.match(r, /\*\*Download:\*\* a PDF of 240 KB was downloaded\./);
-    assert.ok(!r.includes("cdn.example") && !r.includes("Rechnung_"));
-  }
+test("a click is its kind, its words and yes/no marks; no address, id, class or script", () => {
+  const r = buildReport({ url: `${P}/kunde/4711/rechnungen?sid=abc`, ended: "download",
+    clicks: [click({ at: 1, newTab: true, onclick: true, href: `${P}/api/doc?id=4711&token=s3cr3t`, id: "row-4711", cls: "secret-class" }),
+      click({ at: 3, tag: "span", link: "", words: "", icon: true, verdict: { finder: "none", clickable: false } }),
+      click({ at: 5, tag: "button", link: "", submits: true, words: "Speichern", verdict: { finder: "none", clickable: true } })],
+    events: [{ at: 2, kind: "tab" }, { at: 4, kind: "page" }],
+    download: { mime: "application/pdf", filename: "/home/u/Downloads/Rechnung_4711.PDF", bytes: 245760 } }, { version: "1.1.0", browser: "Firefox 147" });
+  assert.match(r, /Portal-Download 1\.1\.0, Firefox 147/);
+  assert.match(r, /Portal: `www\.portal\.example`/);
+  assert.match(r, /1\. a link with an address `"Rechnung #\/#"` · opens a new tab · script in its markup/);
+  assert.match(r, /then a new tab opened/);
+  assert.match(r, /2\. an element <span> without words · has an icon · pointer cursor/);
+  assert.match(r, /then a new page loaded/);
+  assert.match(r, /3\. a submit button `"Speichern"`/);
+  assert.match(r, /\*\*Download:\*\* a PDF of 240 KB was downloaded\./);
+  for (const bad of ["4711", "s3cr3t", "secret-class", "row-", "kunde", "rechnungen", "sid", "Rechnung_", "2026"]) assert.ok(!r.includes(bad), `${bad} in the report`);
 });
 
-test("what a page wrote cannot become a link, an image or a mention in the issue", () => {
-  const r = buildReport({ url: `${P}/`, ended: "stopped", clicks: [click({ text: "[pay here](https://evil.example) @octocat ![x](https://evil.example/t.png)", title: "@someone" })], events: [] });
+test("the portal is named only when asked", () => {
+  const r = buildReport({ url: `${P}/x`, ended: "stopped", clicks: [click()], events: [] }, { namePortal: false });
+  assert.match(r, /Portal: \(not named\)/);
+  assert.ok(!r.includes("portal.example"));
+});
+
+test("what a page wrote cannot become a link, an image or a mention, nor a strange tag or role", () => {
+  const r = buildReport({ url: `${P}/`, ended: "stopped", clicks: [click({ words: "[pay here](https://evil.example) @octocat ![x](https://e/t.png)", tag: "x](http://e)", role: "@me" })], events: [] });
   const line = r.split("\n").find((l) => l.startsWith("1."));
-  // Everything the page wrote stands inside code spans.
-  for (const part of line.split(" · ").slice(1)) assert.match(part, /^(title |label |alt )?`[^`]*`$/, part);
+  assert.match(line, /^1\. an element <element> `"[^`]*"`$/);
+  assert.ok(!line.includes("@me"));
 });
 
-test("icons, ids and classes lose their keys; icon addresses their parameters", () => {
-  const r = buildReport({ url: `${P}/`, ended: "stopped", clicks: [click({ id: "dl-a8Kd93LmQz71xPw2Zq", cls: "btn sess-AbCdEfGhIjKlMnOpQr", icons: [{ cls: "fa fa-file-pdf", url: "https://cdn.portal.example/avatars/max.mustermann.png?token=abcdefgh" }] })], events: [] }, { namePortal: false });
-  assert.ok(!r.includes("a8Kd93") && !r.includes("AbCdEf") && !r.includes("abcdefgh") && !r.includes("cdn.portal"), r);
-  assert.match(r, /icons `fa fa-file-pdf \[another site\]\/avatars\/max\.mustermann\.png\?token=…`/);
+test("a name in the words of an element is not recognised: the user must read the text (the panel says so)", () => {
+  assert.ok(buildReport({ url: `${P}/`, ended: "stopped", clicks: [click({ words: "Rechnung für Max Muster" })], events: [] }).includes("Max Muster"));
 });
 
-test("fields of an odd type do not break the text", () => {
-  const r = buildReport({ url: `${P}/`, ended: "stopped", clicks: [click({ form: { action: {}, method: 5 }, id: {}, chain: "x", icons: null })], events: [] });
-  assert.match(r, /sends a form/);
-});
-
-test("short share keys, base64 and runs of capitals go; words with a number and camelCase stay", () => {
-  assert.equal(redactUrl("https://cloud.example/s/aBcDe4GhIjK7mNo", P), "https://cloud.example/s/…");
-  assert.equal(redactUrl(`${P}/share/Xk9fQ2LmPz7Rt`, P), "/share/…");
-  assert.equal(redactUrl(`${P}/doc/SGVsbG8gV29ybGQ.pdf`, P), "/doc/….pdf");
-  assert.equal(redactUrl(`${P}/d/QWERTZUIOPASDFGHJKLYXCVB`, P), "/d/…");
-  assert.equal(redactUrl(`${P}/files/rechnung2024.pdf`, P), "/files/rechnung#.pdf");
-  assert.equal(redactUrl(`${P}/api/getDocumentById`, P), "/api/getDocumentById");
-  assert.equal(redactUrl("moz-extension://1b2c3d4e-aaaa-bbbb/icon.png", P), "[extension]");
-});
-
-test("a file name shows only its ending, and only a short one of letters", () => {
-  const r = buildReport({ url: `${P}/`, ended: "download", clicks: [click({ download: "Rechnung_Max_Mustermann_2024.pdf" })], events: [],
-    download: { mime: "application/octet-stream", filename: "/home/u/Downloads/invoice.20240115" } });
-  assert.ok(!r.includes("Mustermann"), r);
-  assert.match(r, /download attribute `set, \.pdf`/);
-  assert.match(r, /\*\*Download:\*\* a file \(size unknown\) was downloaded\./);
-});
-
-test("scripts lose an unpaired quote to the end; invisible format characters go", () => {
-  assert.equal(redactCode("x='unterminated secret"), "x='…");
-  assert.equal(redactText("abc\u202Edef\u200B"), "abcdef");
-});
-
-test("a new tab without an address yet is still told; the verdict takes only known words", () => {
-  const r = buildReport({ url: `${P}/`, ended: "stopped", clicks: [click({ at: 1, verdict: { finder: "found", kind: "[x](http://e)", reason: "@me", sure: true } })], events: [{ at: 2, kind: "tab", url: "about:blank" }] });
-  assert.match(r, /then a new tab opened: `\(no address yet\)`/);
-  assert.match(r, /found as a candidate \(other reason\)/);
-  assert.ok(!r.includes("@me") && !r.includes("http://e"));
-});
-
-test("odd addresses: an ending of digits beside a key, other schemes, unreadable ones, encoded quotes, comments", () => {
-  assert.equal(redactUrl(`${P}/doc/aBcDe4GhIjK7mNo.20481234`, P), "/doc/…");
-  assert.equal(redactUrl("view-source:https://kunde.portal.example/x", P, false), "view-source: (…)");
-  assert.equal(redactUrl("http://[bad", P), "(unreadable address)");
-  assert.equal(redactUrl("javascript:open(%27max.muster%27)", P), "javascript:open('…')");
-  assert.equal(redactCode("show(); // Kunde Mueller"), "show(); /…");
+test("the kind of a download from its type, else a short ending of letters; size from the browser", () => {
+  const kind = (d) => buildReport({ url: `${P}/`, ended: "download", clicks: [], events: [], download: d }).split("**Download:** ")[1];
+  assert.equal(kind({ mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", bytes: 3 * 1024 * 1024 }), "an Excel file of 3.0 MB was downloaded.");
+  assert.equal(kind({ mime: "application/octet-stream", filename: "/d/Max_Muster.xml" }), "a XML file (size unknown) was downloaded.");
+  assert.equal(kind({ mime: "application/octet-stream", filename: "/d/invoice.20240115" }), "a file (size unknown) was downloaded.");
 });
 
 test("only the last five clicks are told", () => {
-  const w = { url: `${P}/`, ended: "timeout", clicks: [1, 2, 3, 4, 5, 6, 7].map((k) => click({ at: k, text: `Knopf ${"abcdefg"[k - 1]}` })), events: [] };
+  const w = { url: `${P}/`, ended: "timeout", clicks: [1, 2, 3, 4, 5, 6, 7].map((k) => click({ at: k, words: `Knopf ${"abcdefg"[k - 1]}` })), events: [] };
   const r = buildReport(w);
   assert.match(r, /the last five/);
   assert.ok(!r.includes('"Knopf a"') && !r.includes('"Knopf b"') && r.includes('"Knopf c"') && r.includes('"Knopf g"'));
   assert.match(r, /no download within two minutes/);
-});
-
-test("a name in the words of an element is not recognised: the user must read the text (the panel says so)", () => {
-  const r = buildReport({ url: `${P}/`, ended: "stopped", clicks: [click({ text: "Rechnung für Max Muster" })], events: [] });
-  assert.ok(r.includes("Max Muster"));
 });
 
 let failed = 0;

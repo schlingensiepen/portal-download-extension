@@ -576,10 +576,10 @@
     "message": "Watched are this tab, its frames, the pages it loads, and a tab opened from it right after a click. It ends at the first download, after two minutes, or when you stop it, close the tab or leave this view."
   },
   "watch_what_click": {
-    "message": "Noted for each click: the element with its id and class, its words, title and label, its address and any onclick script, icons inside it, elements around it, and what the search made of it. Never what you typed or chose in a field."
+    "message": "Noted for each click: what kind of element it was, its words, a few yes-or-no marks such as \"opens a new tab\", and what the search made of it; then a new page or tab, and the download as kind and size. No addresses, file names, ids or scripts, and never what you typed or chose in a field."
   },
   "watch_what_private": {
-    "message": "Digits become #, e-mail addresses [e-mail]; values in addresses, long tokens and quoted text in scripts are removed, but plain words stay, also names. Nothing is sent: you see the text, can change it, and decide whether to copy it."
+    "message": "In the words, digits become # and e-mail addresses [e-mail]; a name cannot be recognised. Nothing is sent: you see the text, can change it, and decide whether to copy it."
   },
   "watch_start": {
     "message": "Start watching"
@@ -609,7 +609,7 @@
     "message": "The tab was closed; watching has ended."
   },
   "watch_check": {
-    "message": "Read the text; it holds the last five clicks, and you can change it in the box. Names cannot be recognised: set the tick below first, as it makes the text anew, then delete anything personal from the words, titles, labels, addresses and first lines."
+    "message": "Read the text; it holds the last five clicks, and you can change it in the box. Set the tick below first, as it makes the text anew; then delete anything personal from the words in quotes."
   },
   "watch_name_portal": {
     "message": "Name the portal ($1)"

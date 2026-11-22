@@ -576,10 +576,10 @@
     "message": "Beobachtet werden dieser Tab, seine Frames, die Seiten, die er lädt, und ein Tab, der gleich nach einem Klick aus ihm geöffnet wird. Es endet beim ersten Download, nach zwei Minuten oder wenn du es beendest, den Tab schließt oder diese Ansicht verlässt."
   },
   "watch_what_click": {
-    "message": "Zu jedem Klick notiert: das Element mit id und Klasse, seine Worte, Titel und Label, seine Adresse und ein onclick-Skript, Icons darin, Elemente darum und was die Suche daraus gemacht hat. Nie, was du in ein Feld getippt oder dort gewählt hast."
+    "message": "Zu jedem Klick notiert: welche Art Element es war, seine Worte, einige Ja-Nein-Merkmale wie „öffnet einen neuen Tab“ und was die Suche daraus gemacht hat; danach eine neue Seite oder ein Tab und der Download mit Art und Größe. Keine Adressen, Dateinamen, ids oder Skripte, und nie, was du in ein Feld getippt oder dort gewählt hast."
   },
   "watch_what_private": {
-    "message": "Ziffern werden zu #, E-Mail-Adressen zu [e-mail]; Werte in Adressen, lange Tokens und Text in Anführungszeichen in Skripten werden entfernt, einfache Wörter aber bleiben, auch Namen. Nichts wird gesendet: Du siehst den Text, kannst ihn ändern und entscheidest, ob du ihn kopierst."
+    "message": "In den Worten werden Ziffern zu # und E-Mail-Adressen zu [e-mail]; einen Namen kann die Erweiterung nicht erkennen. Nichts wird gesendet: Du siehst den Text, kannst ihn ändern und entscheidest, ob du ihn kopierst."
   },
   "watch_start": {
     "message": "Zuschauen beginnen"
@@ -609,7 +609,7 @@
     "message": "Der Tab wurde geschlossen; das Zuschauen ist beendet."
   },
   "watch_check": {
-    "message": "Lies den Text; er enthält die letzten fünf Klicks, und du kannst ihn im Feld ändern. Namen lassen sich nicht erkennen: Setz zuerst das Häkchen unten, denn es erzeugt den Text neu, und lösche dann alles Persönliche aus Worten, Titeln, Labels, Adressen und den ersten Zeilen."
+    "message": "Lies den Text; er enthält die letzten fünf Klicks, und du kannst ihn im Feld ändern. Setze zuerst den Haken unten, denn er erzeugt den Text neu; lösche dann alles Persönliche aus den Worten in Anführungszeichen."
   },
   "watch_name_portal": {
     "message": "Das Portal nennen ($1)"

@@ -2,19 +2,20 @@
 // inside the page (scripting.executeScript), one call per frame, each self-contained. scan() of
 // finder.js runs first in the same frame and leaves what it made of the elements behind.
 //
-// observe() notes every click of the user as plain data and sends it to the panel at once, so
-// that a click that leaves the page is not lost. It never reads what was typed: no value of a
-// field, no text of a large area. Nothing is sent anywhere but to the panel; the panel blacks out
-// numbers and the like before it shows the text (report.js).
+// observe() notes, for every click of the user, only what kind of element it was, the words on
+// it, a few yes/no marks and what the search made of it, and sends that to the panel at once, so
+// that a click that leaves the page is not lost. No address, id, class or script is noted, and
+// never what was typed: no value of a field, no text of a large area.
 
 /** Runs in the page: notes the clicks of this frame for the panel that sent the token. */
 export function observe(token) {
   globalThis.__portalDownloadObserve?.off();
   const api = globalThis.browser ?? globalThis.chrome;
   const CLICKABLE = "a, button, input[type=button], input[type=submit], input[type=reset], input[type=image], [role=button], [role=link], [role=menuitem], [onclick]";
+  // Anything one types into or chooses from: its words are never read.
+  const FIELD = "input:not([type=button]):not([type=submit]):not([type=reset]):not([type=image]), textarea, select, option, optgroup, datalist, [contenteditable]:not([contenteditable=false]), [role=textbox], [role=listbox], [role=option], [role=combobox], [role=searchbox]";
   // getAttribute, not properties: a form with a field named "action" or "id" hides the property.
   const attr = (el, n) => { try { const v = el.getAttribute(n); return typeof v === "string" ? v : ""; } catch { return ""; } };
-  const cls = (el) => attr(el, "class").trim().split(/\s+/).filter(Boolean).slice(0, 4).join(" ");
   const tagOf = (el) => String(el.tagName || "").toLowerCase();
   // What the search made of it: a candidate (the element or one around it), one left out, or nothing.
   const verdict = (el) => {
@@ -31,52 +32,35 @@ export function observe(token) {
     if (s) return { finder: "hidden", why: s.why };
     return { finder: "none", clickable: el.matches(CLICKABLE) };
   };
-  // The words a person reads on it, never what was typed: buttons and links only; a plain element
-  // only when it holds nothing but a short text of its own (not a whole row or panel).
-  // Anything one types into or chooses from: its words are never read.
-  const FIELD = "input:not([type=button]):not([type=submit]):not([type=reset]):not([type=image]), textarea, select, option, optgroup, datalist, [contenteditable]:not([contenteditable=false]), [role=textbox], [role=listbox], [role=option], [role=combobox], [role=searchbox]";
+  // The words a person reads on it: of a link or button its text; of another clickable element
+  // (a row, a card) only a short text; of a plain element only a short text of its own. Without
+  // text, its label (aria-label, title, alt). Nothing of a field, of what holds one, or of the page.
   const words = (el, clickable, target) => {
     if (el.matches("input[type=button], input[type=submit], input[type=reset]")) return attr(el, "value");
-    // The click landed in a field, the element is one, or it holds one (a wrapper around a form):
-    // no words. Neither for the page itself.
     if ((target && target.closest(FIELD)) || el.closest(FIELD) || el.querySelector(FIELD) || el === document.body || el === document.documentElement) return "";
     const t = (el.innerText || "").replace(/\s+/g, " ").trim();
-    // A link or button says what it does; another clickable element (a row with onclick, a card)
-    // may hold a whole line of someone's data, so only a short text of it.
-    if (clickable && el.matches("a, button")) return t.slice(0, 200);
-    if (clickable) return t.length <= 60 ? t : "";
-    return el.children.length === 0 && t.length <= 40 ? t : "";
+    const own = clickable && el.matches("a, button") ? t.slice(0, 200) : clickable ? (t.length <= 60 ? t : "") : (el.children.length === 0 && t.length <= 40 ? t : "");
+    return own || attr(el, "aria-label") || attr(el, "title") || attr(el, "alt") || "";
   };
   const describe = (path) => {
     const els = path.filter((x) => x && x.nodeType === 1);
     const hit = els.find((x) => x.matches(CLICKABLE));
     const el = hit || els[0];
-    const icons = [];
-    for (const c of [...el.querySelectorAll("i, svg, img, span, use")].slice(0, 6)) {
-      let url = attr(c, "href") || attr(c, "xlink:href") || attr(c, "src");
-      // Resolved, so that the panel can take it apart as an address (a relative one would stay whole).
-      if (url && !url.startsWith("#")) { try { url = new URL(url, document.baseURI).href; } catch { /* as written */ } }
-      const d = { cls: cls(c), title: attr(c, "title"), aria: attr(c, "aria-label"), alt: attr(c, "alt"), url };
-      if (d.cls || d.title || d.aria || d.alt || d.url) icons.push(d);
-    }
-    const chain = [];
-    for (let p = el.parentElement, k = 0; p && k < 3; p = p.parentElement, k++) chain.push({ tag: tagOf(p), cls: cls(p).split(" ").slice(0, 2).join(" ") });
-    chain.reverse();
-    const raw = tagOf(el) === "a" ? attr(el, "href").trim() : "";
-    let href = raw;
-    if (raw && !raw.startsWith("#") && !/^javascript:/i.test(raw)) { try { href = new URL(raw, document.baseURI).href; } catch { /* as written */ } }
+    const tag = tagOf(el);
+    const href = tag === "a" ? attr(el, "href").trim() : "";
     const form = el.closest("form");
-    const submits = el.matches("input[type=submit], input[type=image], button[type=submit]") || (tagOf(el) === "button" && !attr(el, "type") && !!form);
-    let action = "";
-    if (submits && form) { try { action = new URL(attr(form, "action") || "", document.baseURI).href; } catch { action = attr(form, "action"); } }
     return {
-      at: Date.now(), tag: tagOf(el), type: attr(el, "type"), role: attr(el, "role"), id: attr(el, "id"), cls: cls(el),
-      text: words(el, !!hit, els[0]), title: attr(el, "title"), aria: attr(el, "aria-label"), alt: attr(el, "alt"),
-      download: el.hasAttribute("download") ? attr(el, "download") || "(empty)" : null,
-      href, target: attr(el, "target"), onclick: attr(el, "onclick"),
-      form: submits && form ? { action, method: (attr(form, "method") || "get").toLowerCase() } : null,
-      pointer: getComputedStyle(el).cursor === "pointer", icons, chain,
-      shadow: el.getRootNode() !== document, frame: window === top ? "" : location.href,
+      at: Date.now(), tag, role: attr(el, "role"), type: attr(el, "type"),
+      words: words(el, !!hit, els[0]),
+      // Yes/no marks only: none of them carries what the page wrote.
+      link: !href ? "" : href.startsWith("#") || /^javascript:/i.test(href) ? "script" : "address",
+      download: el.hasAttribute("download"),
+      newTab: attr(el, "target").toLowerCase() === "_blank",
+      onclick: el.hasAttribute("onclick"),
+      submits: el.matches("input[type=submit], input[type=image], button[type=submit]") || (tag === "button" && !attr(el, "type") && !!form),
+      icon: !!el.querySelector("i, svg, img"),
+      pointer: getComputedStyle(el).cursor === "pointer",
+      frame: window !== top, shadow: el.getRootNode() !== document,
       verdict: verdict(el),
     };
   };
