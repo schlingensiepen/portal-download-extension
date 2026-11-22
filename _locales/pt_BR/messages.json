@@ -430,5 +430,8 @@
   },
   "welcome_title": {
     "message": "Nenhum backend ainda"
+  },
+  "err_damaged": {
+    "message": "A frase secreta está correta, mas o armazenamento não pode ser lido; ele está danificado. Restaure-o a partir de uma exportação: exclua-o em “Esqueceu a frase secreta?” e importe o arquivo."
   }
 }

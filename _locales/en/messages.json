@@ -430,5 +430,8 @@
   },
   "welcome_title": {
     "message": "No backend yet"
+  },
+  "err_damaged": {
+    "message": "The passphrase fits, but the store cannot be read; it is damaged. Restore it from an export: delete it under “Forgot the passphrase?” and import the file."
   }
 }

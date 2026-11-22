@@ -58,8 +58,9 @@ const VAULT_LOCK = "portal-download-vault";
 export const withVaultLock = (fn) => (globalThis.navigator?.locks ? navigator.locks.request(VAULT_LOCK, fn) : fn());
 
 export class Vault {
-  // The revision each content object was read at; a write of an older one is refused.
+  // The store (kid) and revision each content object was read at; a write of another is refused.
   #revs = new WeakMap();
+  #at = (vault) => (vault ? `${vault.kid}:${vault.rev}` : "plain");
 
   /** "plain" (no local backend), "locked" or "open". */
   async state() {
@@ -71,36 +72,42 @@ export class Vault {
   /** Everything kept: { services: [...], local: data or null }. */
   async read() {
     const { vault, services } = await api.storage.local.get(["vault", "services"]);
-    if (!vault) { const c = { services: services || [], local: null }; this.#revs.set(c, 0); return c; }
+    if (!vault) { const c = { services: services || [], local: null }; this.#revs.set(c, this.#at(null)); return c; }
+    // Left by a creation cut short between its writes: with a store, no service lies in plain.
+    if (services) await api.storage.local.remove("services");
     // A store of an older version, or a key of another store (one deleted and made anew in
     // another window), counts as locked: the passphrase opens it.
     const key = vault.v === 2 ? await sessionKey(vault) : null;
     if (!key) throw failure("locked");
-    const c = await open(key, vault.sealed);
-    this.#revs.set(c, vault.rev);
+    // A key that fits but does not open the content: the store is damaged. Counted as locked, so
+    // that the panel shows the unlock card, where a forgotten (or damaged) store can be deleted.
+    let c;
+    try { c = await open(key, vault.sealed); } catch { throw failure("locked"); }
+    this.#revs.set(c, this.#at(vault));
     return c;
   }
 
   /** Writes content got from read(); refused if the store changed since that read. */
   async write(content) {
     const { vault } = await api.storage.local.get("vault");
-    const rev = this.#revs.get(content);
-    if (rev !== (vault ? vault.rev : 0)) throw failure("busy");
+    if (this.#revs.get(content) !== this.#at(vault)) throw failure("busy");
     if (!vault) { await api.storage.local.set({ services: content.services }); return; }
     const key = await sessionKey(vault);
     if (!key) throw failure("locked");
     await api.storage.local.set({ vault: { ...vault, rev: vault.rev + 1, sealed: await seal(key, content) } });
-    this.#revs.set(content, vault.rev + 1);
+    this.#revs.set(content, `${vault.kid}:${vault.rev + 1}`);
   }
 
-  async unlock(passphrase) {
+  async unlock(passphrase, tries = 2) {
     const { vault } = await api.storage.local.get("vault");
     if (!vault) return true;
     // The slow derivation outside the lock; what it opens is checked under the lock.
     const kek = await deriveKey(passphrase, unb64(vault.salt), vault.iterations || ITERATIONS);
-    return withVaultLock(async () => {
+    const result = await withVaultLock(async () => {
       const { vault: now } = await api.storage.local.get("vault");
-      if (!now || now.salt !== vault.salt) return false;
+      if (!now) return true;
+      // The passphrase was changed in another window meanwhile: derive anew with the new salt.
+      if (now.salt !== vault.salt) return "again";
       if (now.v === 2) {
         const raw = await unwrap(kek, now);
         if (!raw) return false;
@@ -112,10 +119,13 @@ export class Vault {
       let content;
       try { content = await open(kek, now.sealed); } catch { return false; }
       const { record, raw } = await newRecord(kek, now.salt, now.iterations || ITERATIONS, content);
-      await api.storage.local.set({ vault: record });
+      // The key first, so that other panels never see the new store without a key that fits.
       await remember(record.kid, raw);
+      await api.storage.local.set({ vault: record });
       return true;
     });
+    if (result !== "again") return result;
+    return tries > 1 ? this.unlock(passphrase, tries - 1) : false;
   }
 
   /** Locks; waits for a change under way, so that it cannot reopen the store afterwards. */
@@ -135,13 +145,19 @@ export class Vault {
       // Another panel may have created it meanwhile; never write over a store.
       if (vault) throw failure("vault_exists");
       const { record, raw } = await newRecord(kek, b64(salt), ITERATIONS, { services: services || [], local: emptyData() });
+      // The key first, so that other panels never see the new store without a key that fits; a
+      // services list left by a cut short creation is removed by the next read().
+      await remember(record.kid, raw);
       await api.storage.local.set({ vault: record });
       await api.storage.local.remove("services");
-      await remember(record.kid, raw);
     });
   }
 
-  /** Wraps the data key under a new passphrase: one write; content and unlocked key stay. */
+  /**
+   * Wraps the data key under a new passphrase: one write; content and unlocked key stay. As in
+   * password managers, the data key itself is not replaced: whoever kept an older copy of the
+   * profile and knows the old passphrase can still read what it encrypts later.
+   */
   async changePassphrase(passphrase) {
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const kek = await deriveKey(passphrase, salt);

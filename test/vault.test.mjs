@@ -139,6 +139,59 @@ test("removing the local store gives the services back in plain", async () => {
   assert.deepEqual((await v.read()).services, [{ id: "s1" }]);
 });
 
+test("content read from a store deleted and made anew is not written into the new one", async () => {
+  const a = new Vault(), b = new Vault();
+  await a.createLocal("correct horse battery");
+  const old = await a.read();
+  await b.forget();
+  await b.createLocal("another passphrase!");
+  old.services.push({ id: "stale" });
+  assert.equal(await kind(a.write(old)), "busy");
+  assert.deepEqual((await b.read()).services, []);
+});
+
+test("a creation cut short leaves no services in plain", async () => {
+  const v = new Vault();
+  await v.update((c) => { c.services.push({ id: "s1", token: "secret" }); });
+  await v.createLocal("correct horse battery");
+  await local.set({ services: [{ id: "s1", token: "secret" }] });
+  assert.deepEqual((await v.read()).services, [{ id: "s1", token: "secret" }]);
+  assert.equal(local.m.has("services"), false);
+});
+
+test("a second store is not created over the first; forget deletes all", async () => {
+  const a = new Vault(), b = new Vault();
+  await a.createLocal("correct horse battery");
+  assert.equal(await kind(b.createLocal("another passphrase!")), "vault_exists");
+  await a.forget();
+  assert.equal(await a.state(), "plain");
+  assert.equal(session.m.has("vaultKey"), false);
+  assert.deepEqual((await a.read()).services, []);
+});
+
+test("unlock while another window changes the passphrase uses the new salt", async () => {
+  const a = new Vault(), b = new Vault();
+  await a.createLocal("correct horse battery");
+  // The test holds the lock, so that the order is fixed: the change waits first, then the unlock
+  // (which read the old salt before the change was written).
+  let release; const held = navigator.locks.request("x", () => new Promise((r) => { release = r; }));
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const change = a.changePassphrase("a new passphrase here");
+  await sleep(1000);
+  const pending = b.unlock("a new passphrase here");
+  await sleep(1000);
+  release(); await held; await change;
+  assert.equal(await pending, true);
+});
+
+test("a damaged store counts as locked", async () => {
+  const v = new Vault();
+  await v.createLocal("correct horse battery");
+  const rec = local.m.get("vault");
+  rec.sealed.data = Buffer.from("broken content here").toString("base64");
+  assert.equal(await kind(v.read()), "locked");
+});
+
 let failed = 0;
 for (const [name, fn] of tests) {
   reset();

@@ -36,9 +36,15 @@ export class ServiceBackend {
 
 /** The local store; reads and writes the encrypted content of the vault. */
 export function localBackend(vault) {
+  let last = null;
   const b = new LocalBackend({
-    load: async () => (await vault.read()).local,
-    save: async (data) => { const c = await vault.read(); c.local = data; await vault.write(c); },
+    // save writes the content load read, so that the vault refuses it if the store changed between.
+    load: async () => {
+      last = await vault.read();
+      if (!last.local) throw Object.assign(new Error("locked"), { kind: "locked" });
+      return last.local;
+    },
+    save: async (data) => { last.local = data; await vault.write(last); },
     byName: "Extension",
   });
   b.id = "local";

@@ -430,5 +430,8 @@
   },
   "welcome_title": {
     "message": "Noch kein Backend"
+  },
+  "err_damaged": {
+    "message": "Die Passphrase passt, aber der Speicher lässt sich nicht lesen; er ist beschädigt. Stelle ihn aus einem Export wieder her: unter „Passphrase vergessen?“ löschen und die Datei importieren."
   }
 }

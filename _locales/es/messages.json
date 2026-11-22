@@ -430,5 +430,8 @@
   },
   "welcome_title": {
     "message": "Aún no hay backend"
+  },
+  "err_damaged": {
+    "message": "La frase de contraseña es correcta, pero el almacén no se puede leer; está dañado. Restáuralo desde una exportación: elimínalo en «¿Olvidaste la frase de contraseña?» e importa el archivo."
   }
 }

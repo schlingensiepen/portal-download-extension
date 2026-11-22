@@ -97,10 +97,14 @@ async function loadBackends() {
   const backends = [];
   let content = null;
   if (vaultState !== "locked") {
-    content = await vault.read();
+    try { content = await vault.read(); }
+    catch (e) { if (e.kind !== "locked") throw e; return finish(mine, "locked", [], null); }
     for (const s of content.services) backends.push(new ServiceBackend(s));
     if (content.local) { const b = localBackend(vault); b.name = t("local_name"); backends.push(b); }
   }
+  finish(mine, vaultState, backends, content);
+}
+function finish(mine, vaultState, backends, content) {
   if (mine !== loads) return;
   Object.assign(state, { vaultState, backends, content });
   if (state.choice !== "all" && !current()) state.choice = "all";
@@ -158,7 +162,13 @@ function viewUnlock() {
       })));
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    if (await vault.unlock(pw.value)) { await loadBackends(); go("list"); } else toast(t("passphrase_wrong"), true);
+    try {
+      if (!(await vault.unlock(pw.value))) return toast(t("passphrase_wrong"), true);
+      await loadBackends();
+      // The passphrase fit, but the content does not open: a damaged store.
+      if (state.vaultState === "locked") return toast(t("err_damaged"), true);
+      go("list");
+    } catch (err) { fail(err); }
   });
   setTimeout(() => pw.focus(), 0);
   return form;

@@ -430,5 +430,8 @@
   },
   "welcome_title": {
     "message": "Nenhum backend ainda"
+  },
+  "err_damaged": {
+    "message": "A frase-passe está correta, mas o armazenamento não pode ser lido; está danificado. Restaure-o a partir de uma exportação: elimine-o em “Esqueceu-se da frase-passe?” e importe o ficheiro."
   }
 }
