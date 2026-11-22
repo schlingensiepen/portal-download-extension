@@ -8,54 +8,182 @@
 
 ![The extension's side panel beside a portal (made up for the picture)](store/screenshot-1-de.png)
 
-The due portal downloads of every [Portal-Download](https://github.com/schlingensiepen/portal-download) service you belong to, and of a store in this browser, in one list in the browser's side panel. The portal opens in a normal tab beside it; the login is copied with one click; a run is closed as succeeded or failed.
+The extension shows your due portal downloads in one list in the browser's side panel. The portal opens in a normal tab beside it. You copy the login with one click and close the run as succeeded or failed.
 
-For Chrome and Edge 121 or newer, and Firefox 140 or newer. A **backend** below is one source of jobs: a Portal-Download service, or the local store in this browser.
+It works in two ways, also both at once:
+
+- **Without any server:** the jobs are kept in this browser only, in an encrypted **local store**.
+- **With a [Portal-Download](https://github.com/schlingensiepen/portal-download) service:** a small circle of people shares one list of jobs. Somebody in the circle runs the service.
+
+A **backend** is one source of jobs: a service, or the local store. A **job** is one portal with its login and its schedule. The [glossary](https://github.com/schlingensiepen/portal-download/blob/main/docs/glossary.md) explains the other words.
+
+The extension is for Chrome and Edge 121 or newer, and Firefox 140 or newer.
 
 ## Installing
 
-The [releases](https://github.com/schlingensiepen/portal-download-extension/releases) offer two files per version:
+**Firefox:** install it from [addons.mozilla.org](https://addons.mozilla.org/); search for *Portal-Download* there. Mozilla reviewed and signed it.
 
-- **`portal-download-<version>.xpi`, for Firefox:** download it, open `about:addons`, the gear menu, *Install Add-on From File…*, and choose it. Mozilla signed it.
-- **`portal-download-<version>.zip`, for Chrome and Edge:** unpack it into a folder that stays, open `chrome://extensions` (Edge: `edge://extensions`), switch on *Developer mode*, *Load unpacked*, and choose the folder. The browser reminds you now and then that a developer extension is active, and may list two manifest keys it does not know (they are for Firefox); both are harmless.
+A [release](https://github.com/schlingensiepen/portal-download-extension/releases) may also carry the same signed file as `portal-download-<version>.xpi`. To install that file:
 
-Pin the toolbar button (the puzzle piece in Chrome and Edge, then the pin); it opens the side panel (Firefox: the sidebar).
+1. Download it.
+2. Open `about:addons`.
+3. In the gear menu, choose *Install Add-on From File…* and pick the file.
 
-**Permissions** the browser names when installing: *read your browsing history* comes from reading the address and title of the active tab, which the extension does only when you click **+** or *Add the current page as a job*; nothing else of your browsing is read or kept. Access to a service is asked for when you add it, for that service only.
+**Chrome and Edge:** load it from the ZIP file of a [release](https://github.com/schlingensiepen/portal-download-extension/releases).
 
-**Updating:** these files do not update themselves. For a new version, download the new file: in Firefox install it the same way; in Chrome and Edge replace the folder's content and click the reload arrow on the extension's card. A service tells the extension when they speak different versions of the interface (a newer 0.9 service and a 0.8 extension, for example); the extension then reads the jobs but closes no runs until both match.
+1. Download `portal-download-<version>.zip`.
+2. Unpack it into a folder that stays. The browser loads the extension from that folder at every start.
+3. Open `chrome://extensions` (Edge: `edge://extensions`).
+4. Switch on *Developer mode*.
+5. Click *Load unpacked* and choose the folder.
 
-**Removing:** remove the extension in the browser's extension page. That deletes everything it kept in this browser. First remove each service under ⚙ (which also revokes the extension's access there), or revoke the device in the service's web application under **My devices**.
+The browser reminds you now and then that a developer extension is active. It may also list two manifest keys it does not know; they are for Firefox. Both are harmless.
+
+**The toolbar button** opens the side panel (Firefox: the sidebar). In Chrome and Edge, pin it first: click the puzzle piece in the toolbar, then the pin beside *Portal-Download*.
+
+**Permissions.** The browser may name the permission to *read your browsing history*. It stands for one thing: the extension reads the address and title of the tab you are looking at. It needs them for **+** and for *Add the current page as a job*. It keeps them in memory only, and neither stores nor sends them. Access to a service is asked for when you add that service, and for that service only.
+
+## The panel
+
+| Where | What |
+|---|---|
+| Top, left | **The backend menu.** *All* shows the jobs of every backend in one list. Choosing one backend shows its jobs only. |
+| Top, **+** | Add a service or a local store. |
+| Top, **⚙** | Manage the chosen backend: exchange jobs as a file, and more. Choose one backend first; under *All* the button is greyed out. |
+| Middle | The list of jobs, the most urgent first. Under *All*, each job names its backend. |
+| Foot | *Project page*, *Feedback*, the version, and **the language menu**. |
+
+Some things concern one backend and are greyed out under *All*: *Add the current page as a job* and **⚙**.
+
+## Start without a server
+
+You need no service to use the extension.
+
+1. Click the toolbar button. The panel says *No backend yet*.
+2. Click *Add a service or a local store*, or **+** at the top.
+3. Under *Keep jobs in this browser*, enter a passphrase of at least ten characters, twice.
+4. Click *Create the local store*. The backend menu now shows *This browser*.
+
+**A forgotten passphrase cannot be recovered.** Export the jobs now and then; see [Exchanging jobs](#exchanging-jobs).
+
+## Your first job
+
+1. **Choose a backend** in the backend menu, for example *This browser*.
+2. **Open the portal's login page** in a tab.
+3. **Click *Add the current page as a job*.** The form *New job* opens. The title and the address come from the tab.
+4. **Fill in the form** and click *Create*:
+
+   | Field | Meaning |
+   |---|---|
+   | *Title* | The name in the list. |
+   | *Entry page (URL)* | The portal's address. |
+   | *Every how many weeks?* | How often the download is due. Four weeks unless you change it. |
+   | *After a failure, days* | When to try again after a failed run. Two days unless you change it. |
+   | *Username*, *Password* | The portal login. |
+   | *Instructions* | A note for yourself: what to file where. |
+
+   The job is due today and appears in the list.
+5. **Click the job** in the list.
+6. **Click *Open the portal in a new tab*.** The panel stays beside the portal.
+7. **Copy the login.** Click *Copy* beside the username, paste it into the portal, and do the same for the password. *Show* reveals the password.
+8. **Download** what you came for.
+9. **Close the run.** Click *Succeeded* or *Failed*. The button asks *Really?*; click it again within four seconds. You can write a note first.
+
+The panel then says *Closed – due again on …*. After *Succeeded* that is today plus the weeks; after *Failed*, today plus the retry days. *Next job* returns to the list.
+
+*Edit* and *Delete* under a job change or remove it.
 
 ## Adding a service
 
-1. Open an invitation link of the service in a tab, or, in the service's web application, *Add to the browser extension* under **My devices**, which opens such a link for you. It serves once, within the hour.
-2. Click **+** in the panel and *Take the invitation from the current tab*.
-3. Allow the extension to reach that service.
+Somebody who runs a Portal-Download service gives you an invitation link.
 
-The extension gets a device access of its own, named after the browser and the system, which shows up among your devices in the service and can be revoked there.
+1. **Make your computer trust the service's certificate first.** Follow the [certificate instructions](https://github.com/schlingensiepen/portal-download/blob/main/docs/install.md#certificates) of the service. Chrome and Edge do not count a certificate that was only accepted on a warning page.
+2. Open the invitation link in a tab.
+3. Click **+** in the panel, then *Take the invitation from the current tab*.
+4. Allow the extension to reach that service.
 
-**The computer must trust the service's certificate, before step 2.** Chrome and Edge do not count a certificate that was only accepted on a warning page. A service in the Portal-Download container image offers its certificate authority on its overview page and at `/ca.crt`: compare its fingerprint, then import it once as a trusted root certificate authority (on Windows: double-click the file, *Install certificate*; *Current user* needs no administrator, *Local machine* does; store *Trusted Root Certification Authorities*). Firefox takes the system's roots on Windows and macOS, otherwise import it under *Settings → Privacy & Security → Certificates → View Certificates → Authorities*.
+The backend menu now shows the service, and the list shows its jobs.
 
-## The list
+- If you already use the service's web application, open **My devices** there and click **Add to the browser extension** instead of step 2. That link serves once, within the hour.
+- The extension gets an access of its own, named after the browser and the system. It shows up among your devices in the service and can be revoked there.
+- On a service, the logins are kept in plain text and are visible to everybody who uses it.
+- If the panel says the service cannot be reached, check step 1.
 
-**All** at the top shows the jobs of every backend in one list, most urgent first, each with the name of its backend. Choosing one backend shows its jobs only and enables what concerns that backend: *Add the current page as a job*, editing and deleting a job, and under ⚙ the exchange of jobs as a file and the backend's management (for a service: open its web application, remove it; for the local store: passphrase, lock, delete). Under **All** these are greyed out.
+Under **⚙** of a service you find *Open the web application*. People, devices, agents and the full backup of a service are managed there.
 
 ## The local store
 
-Under **+**, *Keep jobs in this browser* creates a store of jobs in this browser only, encrypted with a **passphrase** of at least ten characters (the passphrase protects the store; a **password** below protects an exported file). From then on the tokens of the services lie under the passphrase as well, and the extension asks for it once after every start of the browser; *Lock now* under ⚙ locks it at once. Everything lies in the browser's storage for this extension, encrypted with the passphrase. Without a local store, the tokens of the services lie there unencrypted, as a browser keeps its cookies. **A forgotten passphrase cannot be recovered**: the unlock card then offers only to delete the store with its jobs and the services kept with it. Export the jobs now and then.
+The local store keeps its jobs in this browser only, encrypted with the passphrase.
+
+- The **passphrase** protects the store. A **password** protects an exported file. They are two different things.
+- Once the local store exists, the tokens of your services lie under the passphrase too.
+- The extension asks for the passphrase once after every start of the browser.
+- Without a local store, the tokens of your services lie unencrypted in the browser's storage, as a browser keeps its cookies.
+
+Under **⚙** of *This browser*:
+
+| Action | What it does |
+|---|---|
+| *Change the passphrase* | Sets a new passphrase. |
+| *Lock now* | Locks the store at once. |
+| *Delete the local store* | Deletes the store with its jobs. The services stay, and their tokens lie unencrypted again. Export the jobs first. |
+
+**If you forgot the passphrase,** the unlock card offers *Forgot the passphrase?* and there *Delete the store and the services*. This deletes the local store with its jobs, and the services' tokens in this browser. Your accesses stay valid on the services, though. Revoke them in each service's web application under **My devices**, then add the services again with new links.
 
 ## Exchanging jobs
 
-Under ⚙ of a backend, *Export the jobs* writes a ZIP file with every job, its login, its history and the deleted jobs, encrypted with AES-256 when you give a password (8 to 200 characters, no umlauts, no space at either end); without one the logins are in plain text and the extension asks first. *Read a file in* takes such a file from any Portal-Download service or from this extension: it first shows what would be taken over as new, what is the same, and where you decide, field by field, which side to keep (the newer side is chosen; for a due date the nearer one). No run is lost. Reading in copies: to move jobs, read them in on the other backend and then delete them where they were; a deleted job then stays deleted on both sides when files travel again.
+Jobs travel as a ZIP file between backends: from the local store to a service, between two services, or to another browser. Choose a backend, then click **⚙**.
+
+**Export the jobs:**
+
+1. Enter a password for the file and click *Download encrypted*. The file is encrypted with AES-256.
+2. Or click *Download without password*, and again when it asks *Logins in plain text – really?*.
+
+The file is named `portal-download-jobs-<date>.zip`. The browser saves it where it saves downloads. It holds every job with its login, its history and the deleted jobs. **Without a password, the logins in it are in plain text.**
+
+The password has 8 to 200 characters: letters A to Z and a to z, digits, punctuation and spaces. Umlauts and other non-ASCII characters are not allowed, nor a space at either end.
+
+**Read a file in:**
+
+1. Under *Read a file in*, choose a file from this extension or from any Portal-Download service. Enter its password, if it has one.
+2. Click *Show what would change*. Nothing is changed yet.
+3. The preview shows three groups: *Taken over, because new*, *Taken over, because the same*, and *Please decide*.
+4. For the jobs of the third group, choose per field between *Here* and *In the file*. The newer side is chosen for you; for a due date, the nearer one.
+5. Click *Read in*.
+
+No run is lost. Reading in copies. To move jobs, read them in on the other backend and then delete them where they were. A deleted job stays deleted on both sides when files travel again.
+
+## Updating
+
+- **Firefox, installed from addons.mozilla.org:** Firefox updates the extension by itself.
+- **Firefox, installed from the `.xpi` file:** if Firefox does not update it, install the newer file the same way.
+- **Chrome and Edge:** download the new ZIP file. Replace the content of the folder with it. Then click the reload arrow on the extension's card under `chrome://extensions`.
+
+Your backends and jobs stay.
+
+**Versions of the interface.** The extension and a service must speak the same version of the interface. This extension speaks version 0.8, as services of version 0.8 and 0.9 do. So extensions 0.8 and 0.9 work with both.
+
+A later version may change the interface. Suppose a service then speaks a version 1.0 and your extension still speaks 0.8. The panel says so and names both versions. You still see the jobs of that service, but you cannot change them, close runs or read files in. Update the side that is older.
+
+## Removing
+
+1. For each service: choose it in the backend menu, click **⚙**, then *Remove the service*. This also revokes the extension's access on that service.
+2. Export the jobs of the local store, if you want to keep them.
+3. Remove the extension on the browser's extension page.
+
+Removing the extension deletes everything it kept in this browser. If you skipped step 1, revoke the device in the service's web application under **My devices**.
 
 ## Languages
 
-English, German, French, Spanish, Portuguese (Brazil and Portugal) and Chinese (simplified and traditional). The panel follows the browser's language; the menu at its foot chooses another. The translations other than English and German were made by machine: corrections are welcome in the issue of each language and in the [discussions](https://github.com/schlingensiepen/portal-download-extension/discussions). Messages that come from a service are in English.
+English, German, French, Spanish, Portuguese (Brazil and Portugal) and Chinese (simplified and traditional).
+
+- The panel follows the browser's language. The language menu at the panel's foot chooses another one.
+- The translations other than English and German were made by machine. Corrections are welcome: see the issue of each language among the [issues](https://github.com/schlingensiepen/portal-download-extension/issues), or write in the [discussions](https://github.com/schlingensiepen/portal-download-extension/discussions).
+- Messages that come from a service are in English. So are some messages of the local store about input it refuses.
 
 ## Privacy
 
-The extension collects no data. Everything stays in the browser, or goes to a Portal-Download service you run yourself. Details in [PRIVACY.md](PRIVACY.md).
+The extension collects no data. Everything stays in the browser, or goes to a Portal-Download service that you or your circle run yourselves. The author receives nothing. Details are in [PRIVACY.md](PRIVACY.md).
 
 ## Safari
 
