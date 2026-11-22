@@ -227,7 +227,7 @@ function viewJob() {
   if (state.mismatch[b.id]) box.append(h("p", { class: "card alert small" }, t("contract_blocks")));
   else if (!state.done) {
     const note = h("textarea", { placeholder: t("note_placeholder") });
-    if (state.keptNote) { note.value = state.keptNote; state.keptNote = ""; }
+    if (state.keptNote) { note.value = note.defaultValue = state.keptNote; state.keptNote = ""; }
     const finish = async (outcome) => {
       try {
         const r = await b.call("job.complete", { job_id: j.job_id, outcome, note: note.value, expected_next_due: j.next_due });
@@ -264,6 +264,8 @@ async function viewNew() {
     const u = new URL(state.tabUrl); if (/invite=/.test(u.hash)) u.hash = "";
     f.url.value = u.href; f.title.value = state.tabTitle || u.host;
   }
+  // What is filled in here counts as the starting point, not as typed (see typed()).
+  for (const el of Object.values(f)) el.defaultValue = el.value;
   const form = h("form", { class: "card" }, h("h1", {}, editing ? t("edit_job") : t("new_job")), h("label", {}, t("title")), f.title, h("label", {}, t("entry_url")), f.url,
     editing ? h("p", { class: "small muted" }, t("url_hint")) : null,
     h("label", {}, t("every_weeks")), f.weeks, h("label", {}, t("retry_days")), f.retry, editing ? h("label", {}, t("next_due")) : null, editing ? f.due : null,
@@ -332,7 +334,7 @@ async function addFromTab() {
     const r = await probe.call("invitation.redeem", { token: inv.token, label, kind: "extension" });
     const id = `s${Date.now().toString(36)}`;
     // Read anew: another window may have changed the store while the service answered.
-    await vault.update((latest) => { latest.services.push({ id, name: `${new URL(inv.base).host} (${r.name})`, base: inv.base, token: r.device_token }); });
+    await vault.update((latest) => { if (latest.services.some((s) => s.base === inv.base)) return; latest.services.push({ id, name: `${new URL(inv.base).host} (${r.name})`, base: inv.base, token: r.device_token }); });
     await loadBackends();
     state.choice = id;
     toast(t("service_added", r.name));

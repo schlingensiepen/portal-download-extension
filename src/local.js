@@ -37,7 +37,7 @@ export function newGuid() {
 // ------------------------------------------------------------------ checks, as the service makes them
 const chars = (s) => [...s].length;
 function text(field, s, min, max) {
-  const t = String(s).trim();
+  const t = trim(s);
   if (chars(t) < min || chars(t) > max) throw bad("field_length", `\`${field}\` must have between ${min} and ${max} characters; it has ${chars(t)}. Shorten or fill it and send again.`);
   return t;
 }
@@ -55,10 +55,13 @@ function checkLogin(field, s) {
   // Control characters as Rust's char::is_control: C0, DEL and C1.
   if (/[\u0000-\u001f\u007f-\u009f]/.test(s)) throw bad("login_invalid", `\`${field}\` contains a line break or another control character. Enter the login in one line and send again.`);
 }
-// White space as Rust's char::is_whitespace sees it (with U+0085, without U+FEFF).
-const RUST_SPACE = /[\t\n\v\f\r \u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]/;
+// White space as Rust's char::is_whitespace sees it (with U+0085, without U+FEFF), and trim as Rust's.
+const SPACE = "\\t\\n\\v\\f\\r \\u0085\\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000";
+const RUST_SPACE = new RegExp(`[${SPACE}]`);
+const RUST_TRIM = new RegExp(`^[${SPACE}]+|[${SPACE}]+$`, "g");
+const trim = (s) => String(s).replace(RUST_TRIM, "");
 function checkUrl(u) {
-  const t = String(u).trim();
+  const t = trim(u);
   // Bytes of UTF-8, as the service counts them.
   if (!(t.startsWith("https://") || t.startsWith("http://")) || new TextEncoder().encode(t).length > 2000 || RUST_SPACE.test(t)) {
     throw bad("entry_url_invalid", "`entry_url` must be a web address starting with https:// (or http://), without spaces. Copy it from the browser's address bar.");
@@ -134,7 +137,7 @@ const METHODS = {
     const ts = nowIso();
     const id = data.next_id++;
     data.jobs[id] = {
-      id, guid: newGuid(), replaces: null, title: String(p.title).trim(), entry_url: checkUrl(p.entry_url),
+      id, guid: newGuid(), replaces: null, title: trim(p.title), entry_url: checkUrl(p.entry_url),
       interval_weeks: p.interval_weeks, retry_days: p.retry_days ?? 2, next_due: p.next_due ?? todayIso(),
       username: p.username ?? "", password: p.password ?? "", instructions_md: p.instructions_md ?? "", created_at: ts,
       changed: Object.fromEntries(FIELDS.map((f) => [f, ts])),
@@ -148,7 +151,7 @@ const METHODS = {
     validateJob(input, false);
     const j = stored(data, job_id);
     const ts = nowIso();
-    if (input.title !== undefined) input.title = String(input.title).trim();
+    if (input.title !== undefined) input.title = trim(input.title);
     const oldTitle = j.title;
     for (const f of FIELDS) if (input[f] !== undefined && input[f] !== j[f]) { j[f] = input[f]; j.changed[f] = ts; }
     if (input.entry_url !== undefined) {
@@ -275,7 +278,7 @@ export function parseFile(content) {
       if (v.replaces != null) { if (replaced.has(v.replaces)) throw lineError(n, "another job of the file replaces the same job"); replaced.add(v.replaces); }
       if (typeof v.title !== "string" || v.retry_days === undefined || v.next_due === undefined) throw lineError(n, "a job lacks its title, its retry days or its due date");
       try { checkUrl(str(v, "entry_url")); validateJob(jobInput(v), true); } catch (e) { throw lineError(n, e.message); }
-      v.title = String(v.title).trim();
+      v.title = trim(v.title);
       for (const fld of FIELDS) if (!(v.changed && typeof v.changed === "object" && normField(v.changed, fld))) throw lineError(n, `a job lacks the time its field ${fld} changed`);
       f.jobs.push(v);
     } else if (v.type === "run") {
@@ -391,7 +394,7 @@ function insertJob(data, rec) {
   const id = data.next_id++;
   const i = jobInput(rec);
   data.jobs[id] = {
-    id, guid: rec.guid, replaces: rec.replaces ?? null, title: String(i.title).trim(), entry_url: checkUrl(rec.entry_url),
+    id, guid: rec.guid, replaces: rec.replaces ?? null, title: trim(i.title), entry_url: checkUrl(rec.entry_url),
     interval_weeks: i.interval_weeks, retry_days: i.retry_days ?? 2, next_due: i.next_due ?? todayIso(),
     username: i.username, password: i.password, instructions_md: i.instructions_md, created_at: rec.created_at,
     changed: Object.fromEntries(FIELDS.map((f) => [f, rec.changed[f]])),
