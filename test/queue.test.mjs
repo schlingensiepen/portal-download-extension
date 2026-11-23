@@ -14,6 +14,8 @@ function reset() {
 }
 const dl = { onCreated: event(), onDeterminingFilename: event(),
   async download(opts) {
+    // As Firefox without the "cookies" permission: naming a cookie store is refused.
+    if (opts.cookieStoreId) throw new Error(`No permission for cookieStoreId: ${opts.cookieStoreId}`);
     world.requested.push(opts.url);
     return start({ url: opts.url, byExtensionId: "ours", referrer: "", mime: opts.url.endsWith(".html") ? "text/html" : "application/pdf" });
   },
@@ -55,6 +57,15 @@ test("a link is downloaded into the job's folder", async () => {
   const s = await run([{ n: 1, url: "https://portal.example/doc/a.pdf" }]);
   assert.equal(s[1].ok, true);
   assert.equal(world.placed[1], "Portal-Download/Strom/a.pdf");
+});
+
+test("in Firefox a link is downloaded from a normal tab and from a container tab", async () => {
+  world.tabs.get(1).cookieStoreId = "firefox-default";
+  const s = await run([{ n: 1, url: "https://portal.example/doc/a.pdf" }]);
+  assert.equal(s[1].ok, true, s[1].error);
+  world.tabs.get(1).cookieStoreId = "firefox-container-2";
+  const c = await run([{ n: 2, url: "https://portal.example/doc/b.pdf" }]);
+  assert.equal(c[2].ok, true, c[2].error);
 });
 
 test("a button takes the portal's download, not one of another extension or site meanwhile", async () => {

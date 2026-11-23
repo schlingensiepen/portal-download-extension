@@ -111,9 +111,10 @@ export async function runQueue({ items, tabId, pageUrl, folder, click, alive = n
   const self = api.runtime && api.runtime.id;
   // A download the page started, from the portal: neither by an extension nor from elsewhere.
   const fromSite = (d, o = origin) => !d.byExtensionId && (sameSite(d.referrer, o) || sameSite(d.url, o) || sameSite(d.finalUrl, o));
-  // In Firefox the tab's container: its cookies are the ones logged in to the portal.
+  // In Firefox a container tab: its cookies are the ones logged in to the portal. The normal store
+  // is not named: Firefox takes it anyway, and naming any store needs the "cookies" permission.
   let jar = {};
-  try { const tab = await api.tabs.get(tabId); if (tab && tab.cookieStoreId) jar = { cookieStoreId: tab.cookieStoreId }; } catch { /* no tab */ }
+  try { const tab = await api.tabs.get(tabId); if (tab && tab.cookieStoreId && tab.cookieStoreId !== "firefox-default") jar = { cookieStoreId: tab.cookieStoreId }; } catch { /* no tab */ }
 
   // In Chrome our own downloads, and the one download a click is waiting for, go into the job's
   // folder; every other download of the browser is left alone. Firefox has no such hook.
@@ -133,7 +134,13 @@ export async function runQueue({ items, tabId, pageUrl, folder, click, alive = n
     // Without the hook the folder can only be given with the name; a name is known only from the address.
     const name = canPlace ? "" : nameFromUrl(url);
     if (name) opts.filename = `${folder}/${name}`;
-    return api.downloads.download(opts);
+    // A container the browser refuses (without the "cookies" permission): with the normal store; if
+    // that is not logged in, a web page comes back and is reported as such.
+    return api.downloads.download(opts).catch((e) => {
+      if (!opts.cookieStoreId || !/cookieStoreId/i.test(String((e && e.message) || e))) throw e;
+      delete opts.cookieStoreId;
+      return api.downloads.download(opts);
+    });
   };
 
   try {
