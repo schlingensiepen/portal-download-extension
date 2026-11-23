@@ -441,7 +441,7 @@
     "message": "Documentos desta página"
   },
   "docs_count": {
-    "message": "$1 encontrados, destacados em amarelo e numerados na página. Desmarque o que não for documento; clique em um nome para ir até ele. Documentos já baixados aparecem desmarcados."
+    "message": "$1 encontrados; os marcados estão destacados em amarelo e numerados na página. Desmarque o que não for documento; clique em um nome para ir até ele. Documentos já baixados ficam desmarcados."
   },
   "docs_none": {
     "message": "Nada encontrado que pareça um documento."
@@ -582,10 +582,10 @@
     "message": "São observados esta aba, seus quadros, as páginas que ela carrega e uma aba aberta a partir dela logo após um clique. Termina no primeiro download, após dois minutos ou quando você para, fecha a aba ou sai desta tela."
   },
   "watch_what_click": {
-    "message": "Anotado para cada clique: o tipo de elemento, suas palavras, algumas marcas de sim ou não como \"abre uma nova aba\" e o que a busca fez com ele; depois uma nova página ou aba, e o download com tipo e tamanho. Nenhum endereço, nome de arquivo, id ou script, e nunca o que você digitou ou escolheu num campo."
+    "message": "Anotado para cada clique: que tipo de elemento era, suas palavras, algumas marcas de sim ou não como “abre uma nova aba” e o que a busca fez com ele; depois, uma nova página ou aba e o download com tipo e tamanho. Nada mais do elemento ou do download: nem o endereço, nem o nome do arquivo, id ou script. Nunca o que você digitou ou escolheu em um campo."
   },
   "watch_what_private": {
-    "message": "Nas palavras, os dígitos viram # e os endereços de e-mail [e-mail]; um nome não pode ser reconhecido. Nada é enviado: você vê o texto, pode alterá-lo e decide se o copia."
+    "message": "As palavras são o que o link ou botão diz; ali pode haver um nome de arquivo ou um nome. Nelas, os números viram #, os e-mails [e-mail], os endereços [address] e códigos longos de letras e números [long]; um nome não pode ser reconhecido. Nada é enviado: você vê o texto, pode alterá-lo e decide se o copia."
   },
   "watch_start": {
     "message": "Começar a observar"

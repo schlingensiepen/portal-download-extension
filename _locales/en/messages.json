@@ -441,7 +441,7 @@
     "message": "Documents on this page"
   },
   "docs_count": {
-    "message": "$1 found, highlighted in yellow and numbered in the page. Untick what is no document; click a name to scroll to it. Documents downloaded before are unticked."
+    "message": "$1 found; the ticked ones are highlighted in yellow and numbered in the page. Untick what is no document; click a name to scroll to it. Documents downloaded before are unticked."
   },
   "docs_none": {
     "message": "Nothing found that looks like a document."
@@ -582,10 +582,10 @@
     "message": "Watched are this tab, its frames, the pages it loads, and a tab opened from it right after a click. It ends at the first download, after two minutes, or when you stop it, close the tab or leave this view."
   },
   "watch_what_click": {
-    "message": "Noted for each click: what kind of element it was, its words, a few yes-or-no marks such as \"opens a new tab\", and what the search made of it; then a new page or tab, and the download as kind and size. No addresses, file names, ids or scripts, and never what you typed or chose in a field."
+    "message": "Noted for each click: what kind of element it was, its words, a few yes-or-no marks such as \"opens a new tab\", and what the search made of it; then a new page or tab, and the download as kind and size. Nothing else of the element or the download: not its address, file name, id or script. Never what you typed or chose in a field."
   },
   "watch_what_private": {
-    "message": "In the words, digits become # and e-mail addresses [e-mail]; a name cannot be recognised. Nothing is sent: you see the text, can change it, and decide whether to copy it."
+    "message": "The words are what the link or button says; a file name or a name may stand there. In them, digits become #, e-mail addresses [e-mail], addresses [address], and long codes of letters and digits [long]; a name cannot be recognised. Nothing is sent: you see the text, can change it, and decide whether to copy it."
   },
   "watch_start": {
     "message": "Start watching"

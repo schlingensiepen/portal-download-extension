@@ -441,7 +441,7 @@
     "message": "Documentos desta página"
   },
   "docs_count": {
-    "message": "$1 encontrados, realçados a amarelo e numerados na página. Desmarque o que não for documento; clique num nome para ir até ele. Os documentos já transferidos aparecem desmarcados."
+    "message": "$1 encontrados; os assinalados estão realçados a amarelo e numerados na página. Desmarque o que não for documento; clique num nome para ir até ele. Os documentos já transferidos estão desmarcados."
   },
   "docs_none": {
     "message": "Nada encontrado que pareça um documento."
@@ -582,10 +582,10 @@
     "message": "São observados este separador, os seus quadros, as páginas que carrega e um separador aberto a partir dele logo após um clique. Termina na primeira transferência, após dois minutos ou quando parar, fechar o separador ou sair desta vista."
   },
   "watch_what_click": {
-    "message": "Registado para cada clique: o tipo de elemento, as suas palavras, algumas marcas de sim ou não como «abre um novo separador» e o que a pesquisa fez com ele; depois uma nova página ou separador, e a transferência com tipo e tamanho. Nenhum endereço, nome de ficheiro, id ou script, e nunca o que escreveu ou escolheu num campo."
+    "message": "Anotado em cada clique: que tipo de elemento era, as suas palavras, algumas marcas de sim ou não como “abre um novo separador” e o que a pesquisa fez com ele; depois, uma nova página ou separador e a transferência com tipo e tamanho. Nada mais do elemento ou da transferência: nem o endereço, nem o nome do ficheiro, id ou script. Nunca o que escreveu ou escolheu num campo."
   },
   "watch_what_private": {
-    "message": "Nas palavras, os algarismos passam a # e os endereços de e-mail a [e-mail]; um nome não pode ser reconhecido. Nada é enviado: vê o texto, pode alterá-lo e decide se o copia."
+    "message": "As palavras são o que a ligação ou o botão diz; aí pode estar um nome de ficheiro ou um nome. Nelas, os algarismos passam a #, os endereços de e-mail a [e-mail], os endereços a [address] e os códigos longos de letras e algarismos a [long]; um nome não pode ser reconhecido. Nada é enviado: vê o texto, pode alterá-lo e decide se o copia."
   },
   "watch_start": {
     "message": "Começar a observar"

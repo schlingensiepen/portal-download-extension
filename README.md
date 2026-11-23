@@ -45,6 +45,12 @@ After Mozilla's review, a release may also carry the same signed file as `portal
 
 The browser reminds you now and then that a developer extension is active. It may also list two manifest keys it does not know; they are for Firefox. Both are harmless.
 
+**From the source:** the browser can load the source folder as it is. Nothing has to be built first.
+
+1. Get the source from the [project page](https://github.com/schlingensiepen/portal-download-extension): click *Code*, then *Download ZIP*, and unpack it; or clone the repository with git.
+2. **Firefox:** open `about:debugging#/runtime/this-firefox`, click *Load Temporary Add-on…* and choose the file `manifest.json` in the folder. As with the ZIP file, Firefox removes it again when it restarts.
+3. **Chrome and Edge:** open `chrome://extensions` (Edge: `edge://extensions`), switch on *Developer mode*, click *Load unpacked* and choose the folder. The folder must stay where it is.
+
 **The toolbar button** opens the side panel (Firefox: the sidebar). In Chrome and Edge, pin it first: click the puzzle piece in the toolbar, then the pin beside *Portal-Download*.
 
 **Permissions.** The extension asks for these:
@@ -182,9 +188,15 @@ No run is lost. Reading in copies. To move jobs, read them in on the other backe
 
 Your backends and jobs stay.
 
-**Versions of the interface.** The extension and a service must speak the same version of the interface. This extension speaks version 0.8, as services of version 0.8 and 0.9 do. So extensions 0.8, 0.9 and 1.0 work with both.
+**Versions of the interface.** The extension and a service must speak the same version of the interface. The interface has a version number of its own; it is not the version of the extension. This extension speaks interface version 0.8, as services of version 0.8 and 0.9 do.
 
-A later version may change the interface. Suppose a service then speaks a version 1.1 and your extension still speaks 0.8. The panel says so and names both versions. You still see the jobs of that service, but you cannot change them, close runs or read files in. Update the side that is older.
+| Extension | Interface it speaks | Works with services |
+|---|---|---|
+| 0.8, 0.9 | 0.8 | 0.8 and 0.9 |
+| 1.0 | 0.8 | 0.8 and 0.9 |
+| 1.1 | 0.8 | 0.8 and 0.9 |
+
+A later version may change the interface. Suppose a service then speaks a newer interface version and your extension still speaks 0.8. The panel says so and names both versions. You still see the jobs of that service, but you cannot change them, close runs or read files in. Update the side that is older.
 
 ## Removing
 
@@ -202,39 +214,99 @@ Once you are logged in to the portal, the extension can find the documents in th
 
 1. **Log in to the portal** and open the page with the documents, for example the list of invoices.
 2. **Click *Find documents on this page*.** The button is in an open job, below *Open the portal in a new tab*; from there the files go into the job's folder. It is also in the list of jobs, for a page that belongs to no job. The first time for a portal, the browser asks whether the extension may access that site. If you decline, nothing is searched.
-3. **Look at the page.** Everything that looks like a document is highlighted in yellow and numbered: links to files such as PDF, Word, Excel, TIFF, ZIP or XML, and buttons and icons that say *download*. The panel lists them with the same numbers. Click a name to scroll to it.
-4. **Choose.** Ticked are the documents that are new and surely downloads. Untick what is no document, or use *Tick all* (which leaves the doubtful ones alone, but ticks documents downloaded before again) and *Tick none*. Not ticked, with a note, are: documents downloaded from this job before (with their date), buttons that only say *PDF* or *Export* or send a form, and an address found twice.
-5. **Click *Start downloading*,** or *Only this one* beside a single document. The first time, the browser asks for the permission to download. The extension then works through the list one document at a time, slowly, and shows beside each what happened. *Stop* ends it at once; a download already under way may still finish. Leaving this view stops it too.
+3. **Look at the list.** The panel lists everything that looks like a document, with a number. What is ticked is highlighted in yellow in the page and carries the same number there. Click a name to scroll to it. See [What is found](#what-is-found) below.
+4. **Choose.** Ticked are the documents that are new and surely downloads. Untick what is no document, and tick what you want as well. *Tick all* ticks every sure one, also those downloaded before, and leaves the doubtful ones alone. *Tick none* takes every tick away.
+5. **Click *Start downloading*,** or *Only this one* beside a single document. The first time, the browser asks for the permission to download. The extension then works through the list one document at a time, with a pause of one and a half seconds after each, and shows beside each what happened. *Stop* ends it at once; a download already under way may still finish. Leaving this view stops it too.
 6. **More pages:** if the portal spreads its documents over several pages, open the next page and search again.
 
-**Where the files go:** into the folder `Portal-Download/<job title>` inside the folder your browser saves downloads to (usually *Downloads*); for a page without a job, into `Portal-Download/<site>`. Documents downloaded before are remembered per job, or per site for pages without a job.
+**Only https pages are searched.** On a page with an `http://` address the panel says *This page is not on https. The extension searches only https pages, and http pages on this computer.* Pages on this computer are those at `localhost` and `127.0.0.1`. The same holds for watching a download (see [A portal where it goes wrong](#a-portal-where-it-goes-wrong)). On a page that is no web page, such as a page of the browser itself, it says *Open the portal page in the active tab first.*
+
+### What is found
+
+The panel names the kind of each entry and the reason, such as *Link, probably a file · address*.
+
+| Kind in the panel | What it is | Ticked? |
+|---|---|---|
+| *File* | A link the page marks for download or gives a document type, or a link whose address ends in a file name: PDF, Word, Excel, OpenDocument, RTF, CSV, TXT, XML, ZIP, TIFF, JPEG, PNG, EML, MSG, P7M or XPS. | Yes. |
+| *Link, probably a file*, reason *address* | A link without a file ending whose address looks like a download. It holds `download`, `attachment`, `getdoc`, `getfile`, `showdoc`, `viewdoc`, `filename=`, `format=pdf`, `mime=`, `/file/` or `/files/`, or `/documents/` followed by a number. So a link to `…/documentDownload?documentId=…` is found. A link that ends in `/downloads` is taken as a menu and is not found. | Yes. |
+| *Link, probably a file* or *Button*, reason *words or icon* | A link, button or icon whose words or icon say *download*, in any of the panel's languages. | Yes. |
+| the same | One that only says *PDF*, *DOC*, *XLS*, *ZIP* or *Export*. | No. |
+
+**Sure** means: the entry is one of the rows above that say *Yes*, and nothing speaks against it. These things take the tick away:
+
+- The button sends a form.
+- Its words also name an action, such as *Save as PDF*, *Send* or *Order confirmation*.
+- Its address path holds the word `archive`, `share`, `send`, `pay` or `sign`.
+- It shows an icon of an action, such as a bin, a pencil or a disk.
+
+A *File* is always sure. An entry that is not sure reads *Not ticked: it may not be a download. Tick it if it is.* Also not ticked are documents downloaded from this job before, and an address found twice in the page.
+
+### Where the files go
+
+Into the folder `Portal-Download/<job title>` inside the folder your browser saves downloads to (usually *Downloads*); for a page without a job, into `Portal-Download/<site>`. The panel names the folder above the list.
+
+- **`<job title>`** is the job's title, made fit for a folder name. The characters `< > : " / \ | ? *` become a space, several spaces become one, dots and spaces at either end go, and the name is cut to 60 characters. If nothing is left, the folder is named `Portal`.
+- **Two jobs with the same title** share one folder. What was downloaded is still remembered for each job by itself.
+- **`<site>`** is the site's name as it stands in the address, with `www.` if the address has it, and without a port: `Portal-Download/www.example.com`.
+- **The file name** comes from the portal: the name it gives the file, else the end of the address. A name without an ending gets one from the file's type, such as `.pdf`, where the type is a known document type.
+- **Equal names:** nothing is overwritten. If a file of that name is there already, the browser adds a number to the name of the new one.
+- **Documents downloaded before** are remembered per job, or per site for pages without a job.
+
+How the documents are fetched:
 
 - **Links** are downloaded with the browser's download function and your login cookies of the portal.
 - **Buttons** are clicked in the page, as you would. The first download from the portal that follows counts as that document. If the button opens a new tab, a download from that tab counts; else the extension downloads the tab's address and closes the tab.
-- **In Firefox,** documents from buttons land in the download folder itself, not in the *Portal-Download* subfolder: Firefox lets an extension choose the subfolder only when the file name is known before the download starts. A link of the portal's own site whose address names no document file (such as `…/documentDownload?id=…` or `download.php?id=…`) is fetched by the extension itself and saved under the name the portal gives, in the subfolder; if that does not work (the portal refuses it, or it leads to another site), the browser downloads it into the download folder, named after the end of its address. In a container tab Firefox lets the extension download links only with the normal cookies, so links fail there with a note; open the portal in a normal tab. In a private window Firefox saves links privately, named after the end of their address; Chrome would download them with the cookies of the normal window, so there links fail with a note.
 
-**What the panel says beside a document:**
+In Chrome and Edge, all of them land in the folder above, under the name the browser gives the file.
+
+### Firefox
+
+Firefox lets an extension choose the folder and the name only for a download the extension starts itself, and then takes the name from the address only. So Firefox differs:
+
+- **Buttons:** the document lands in the download folder itself, not in the *Portal-Download* subfolder, under the name Firefox gives it.
+- **Links whose address ends in a file name,** such as `…/invoice-march.pdf`: into the subfolder, under that name. Odd characters in it are cleaned as in a folder name.
+- **Links without a file name in the address,** such as `…/documentDownload?documentId=…` or `download.php?id=…`, on the portal's own site: the extension fetches the document itself, with your normal login cookies of the portal, and saves it into the subfolder under the name the portal gives. That name is cleaned as a folder name is; if it has no ending, it gets one from the file's type. If the portal gives no name, the end of the address serves.
+- **If that does not work,** Firefox downloads the link. That happens when the portal refuses the extension's request, the address leads to another site, or the file is larger than 200 MB. It also happens for a link to another site. The file is then named after the end of its address. Without a file ending there, it lands in the download folder itself, under a name such as `documentDownload`, without an ending. Give it the ending yourself: if it is a PDF, rename it to `documentDownload.pdf`.
+- **In a container tab,** links are not downloaded, neither by Firefox nor by the extension itself. The panel says why (see the table below). Buttons are clicked in the page and work as usual; only a button that opens the document in a new tab without downloading it fails with the same message. Open the portal in a normal tab.
+- **In a private window,** Firefox saves links privately, named after the end of their address as described under *If that does not work*. The extension does not fetch them itself there. Buttons work as usual.
+
+**Chrome and Edge in a private window** (incognito, InPrivate): links are not downloaded, and the panel says why. Buttons are clicked in the page and work as usual; only a button that opens the document in a new tab without downloading it fails with the same message. Open the portal in a normal window.
+
+### What the panel says beside a document
 
 | Message | Meaning | What to do |
 |---|---|---|
+| *Waiting.* | It is ticked and its turn has not come yet. | Nothing. |
+| *Downloading…* | It is being downloaded now. | Nothing. |
 | *Saved as …* | Downloaded; the file name in the folder. | Nothing. |
 | *Downloaded on …* | Downloaded from this job before; not ticked. | Tick it to download it again. |
-| *Not ticked: it may not be a download* | A button that only says *PDF* or *Export*, one that sends a form, or one whose words or icon also name an action (such as *Save as PDF* or *Order confirmation*). | Tick it if you are sure. |
-| *Found twice; ticked only once* | The same address stands twice in the page. | Nothing. |
-| *it opened a tab without a document* | The button opened a tab, but no document came from it. The tab stays open. | Look at the tab; download by hand. |
+| *Not ticked: it may not be a download. Tick it if it is.* | The entry is not sure; see [What is found](#what-is-found). | Tick it if you are sure. |
+| *Found twice; ticked only once.* | The same address stands twice in the page. | Nothing. |
+
+A download that failed reads *Not downloaded:* and then one of these reasons:
+
+| Reason after *Not downloaded:* | Meaning | What to do |
+|---|---|---|
 | *the click started no download* | The button did nothing the browser counted as a download within 20 seconds. Some portals block automatic clicks, or open a pop-up the browser blocks; Chrome may also ask once whether the site may download several files. | Download it by hand. |
-| *a web page came back instead of a document* | Usually the login expired. The page was deleted again. | Log in again, search again. |
-| *the page went to another address* | The click left the page or loaded it anew; the rest is stopped. | Go back to the list and search again. |
-| *the element is no longer in the page* | The page changed since the search. | Search again. |
-| *stopped* | You clicked *Stop*, or left this view. The browser may still finish this one download. | Start again for the rest. |
+| *it opened a tab without a document* | The button opened a tab, but no document came from it. The tab stays open. | Look at the tab; download by hand. |
+| *a web page came back instead of a document, perhaps because the login expired; it was deleted* | The portal sent a page, not a file. Usually the login expired. | Log in again, search again. |
+| *the page went to another address; the rest is stopped* | The click left the page or loaded it anew. | Go back to the page with the documents and search again. |
+| *the element is no longer in the page; search again* | The page changed since the search. | Search again. |
+| *the tab is a container tab: Firefox lets the extension download links only with the normal cookies; open the portal in a normal tab* | Firefox only. In a container tab the portal knows you by other cookies than the extension may use. | Open the portal in a normal tab, log in there, search again. |
+| *this is a private window: Chrome would download links with the cookies of your normal window; open the portal in a normal window* | Chrome and Edge only. The download would not carry the login of the private window. | Open the portal in a normal window, log in there, search again. |
+| *stopped; the browser may still finish this download* | You clicked *Stop*, or left this view. | Start again for the rest. |
 | *still not finished after five minutes* | A very large or stuck download. | Look at the browser's downloads. |
-| other words, such as *NETWORK_FAILED* | The browser's own reason. | Try again later, or by hand. |
+| other words, such as *NETWORK_FAILED* or *interrupted* | The browser's own reason. | Try again later, or by hand. |
 
 A document that failed stays ticked, so that *Start downloading* tries it again.
 
 **What it never does:** log in or fill in a form. Elements whose words name a destroying action (delete, remove, log out, cancel, revoke, unsubscribe and the like), and links whose address path names one (delete, cancel, logout, upload, submit and the like), are never offered; the panel says how many it left out. Words that may name an action or a document alike (save, send, order, pay, archive, sign, share) only take the tick away: such an element is offered unticked, for you to decide. A link straight to a file is downloaded whatever its address says. A button that sends a form, or says *download* and an action at once, is only offered unticked, for you to decide. It works only when you click. It remembers which documents were downloaded, per job, in this browser only, as checksums that name no address and no document; *Forget which documents were downloaded* at the end of the list clears that for the job. Closing the panel takes the highlighting off the page and ends the downloads.
 
-**A portal where it goes wrong:** if it misses a document, ticks something that is no document, or a download fails, please tell us with the form [Feedback on a portal](https://github.com/schlingensiepen/portal-download-extension/issues/new?template=portal-feedback.yml). Posting needs a GitHub account, and what you post is public. The rules for what counts as a document can only get better with real portals. Everything else goes to the [discussions](https://github.com/schlingensiepen/portal-download-extension/discussions). Do not include your name, customer numbers, addresses with session parameters, or screenshots with personal data.
+### A portal where it goes wrong
+
+If the extension misses a document, ticks something that is no document, or a download fails, please tell us with the form [Feedback on a portal](https://github.com/schlingensiepen/portal-download-extension/issues/new?template=portal-feedback.yml). The rules for what counts as a document can only get better with real portals. Everything else goes to the [discussions](https://github.com/schlingensiepen/portal-download-extension/discussions).
+
+**What you post is public,** and posting needs a GitHub account. Do not include your name, customer numbers, addresses with session parameters, or screenshots with personal data.
 
 The extension can write the details for you. It watches you download one document and makes a text of what it saw.
 
@@ -242,7 +314,38 @@ The extension can write the details for you. It watches you download one documen
 2. **Read the card *Feedback on this portal*, then click *Start watching*.** The browser asks for access to the site and for the downloads permission, unless it has them already. Both are needed. The downloads permission stays afterwards; you can remove it in the browser's extension settings.
 3. **Download one document in the page, the way you normally do.** If the button you use is the one the extension missed, click it anyway: that click is what we need to see. Click only what you need on the way, because the text keeps only the last five clicks. The panel counts along: *Clicks noted: 3*. Watching ends at the first download, after two minutes, when you click *Stop and show the text*, or when the tab is closed. If you leave the view or close the panel, it ends too and the notes are gone. If the portal only shows the document in a tab and nothing is downloaded, click *Stop and show the text* once it is shown: that text is worth sending too.
 4. **Read the text.** It is in English, whatever the panel's language, and holds only the last five clicks. Untick *Name the portal* if you want the site's name left out; do that first, because it makes the text anew. Then read the words in quotes of each click: they are what the link or button says, and may name you or your contract. Delete in the box what is personal: a button reading `"Invoice for Anna Meier"` becomes `"Invoice for"`.
-5. **Click *Copy the text*, then *Open the feedback form*.** The form opens on GitHub. Paste the text into the field *The text from the panel (optional)*, not into *What the panel said*. Choose *What happened* (here: *A document was not found*), write "see below" under *The element*, and under *Extension version and browser* give what the first line of the text says after *Observed with Portal-Download*, such as `1.1.0, Firefox 147`. The form's own *Portal* field (the site's name only, such as `www.example.com`) is separate from the tick in the panel. To keep the portal private, untick *Name the portal* and leave that field empty. Nothing is sent before you post it.
+5. **Click *Copy the text*, then *Open the feedback form*.** The form opens on GitHub. Paste the text into the field *The text from the panel (optional)*, not into *What the panel said*. Fill in the other fields as the table below says. Nothing is sent before you post it.
+
+**The fields of the form:**
+
+| Field | What to enter |
+|---|---|
+| *Portal* | The site's name only, such as `www.example.com`. It is separate from the tick *Name the portal* in the panel: to keep the portal private, untick that and leave this field empty. |
+| *What happened* | One or more of the entries below. This field must be filled in. |
+| *The element* | What the link or button says, or what icon it shows; whether it is a link, a button or something in a menu; whether it opened a new tab. Plain words are enough. Write "see below" if you pasted the text from the panel. |
+| *The text from the panel (optional)* | The text the extension made. Leave it empty if you have none. |
+| *What the panel said* | The message beside the document, such as *Not downloaded: the click started no download*, or the line that says how many were left out. |
+| *Extension version and browser* | Such as `1.1.0, Firefox 147`. This field must be filled in. The first line of the text from the panel says both, after *Observed with Portal-Download*. |
+
+The entries of *What happened*:
+
+| Entry | Choose it when |
+|---|---|
+| *A document was not found* | The list in the panel lacks a document that is in the page. |
+| *Something was offered that is no document* | The list holds a link or button that downloads nothing. |
+| *A document was offered unticked or hidden, but is a document* | A document read *Not ticked: it may not be a download. Tick it if it is.*, or was among those left out. |
+| *The download failed or brought a web page* | The panel said *Not downloaded:* beside it. |
+| *The file landed in the wrong folder* | The file was saved, but not where this page says. |
+| *Something else* | None of the others fits. |
+
+**Where the versions are.** The extension's version is at the foot of the panel. The browser's version: in Firefox, open the menu, then *Help*, then *About Firefox*. In Chrome, open `chrome://version`, or the menu, then *Help*, then *About Google Chrome*.
+
+**Without the text from the panel.** Sometimes the extension cannot write the text:
+
+- **The page cannot be watched.** The panel then says *This page cannot be watched: the extension cannot get into it (a page of the browser itself, or a site it has no access to).*
+- **Nothing can be downloaded by hand either,** so there is no download to watch. If you can still click the thing that should download, start watching, click it, and then click *Stop and show the text*: that text is worth sending.
+
+In both cases, or if you prefer not to be watched, open the [form](https://github.com/schlingensiepen/portal-download-extension/issues/new?template=portal-feedback.yml) yourself and fill it in by hand. Under *The element*, describe in your own words what you click and what happens then: for example "a grey button with a PDF icon in each row; a click opens a small window with the invoice, and nothing is saved". Leave *The text from the panel (optional)* empty. If nothing fits under *What happened*, choose *Something else*.
 
 **What is watched:** the tab that was active when you started, every frame in it, and the pages it loads. Also a tab opened from it within five seconds after a click; in Chrome that includes a tab you open yourself in that moment. Only your own clicks are noted, nothing you type. If the browser does not let the extension into the page, the panel says so.
 
@@ -254,7 +357,20 @@ The extension can write the details for you. It watches you download one documen
 - What the search made of it: found, left out (and why), or not found.
 - What followed: that a new page loaded, that the page's script only changed the address without loading a new page, or that a new tab opened, and that a download from the portal's own sites started, as its kind and size only, such as *a PDF of 240 KB*.
 
-No address, file name, id, class name or script text is taken from the element or the download. In the words, every run of digits becomes `#`, every e-mail address `[e-mail]`, an address written as words `[address]`, and a long mix of letters and digits (20 characters or more) `[long]`; a file name written as a link's words stays as words; they are cut to 80 characters and stand in code marks, so that they cannot become a link, an image or a mention in the issue. A name in the words cannot be recognised; that is why you read the text. The notes are passed from the page to the panel inside the extension and kept in the panel's memory only. Nothing is sent anywhere.
+**What the text leaves out.** Apart from its words, nothing is taken from the element or the download: not its address, file name, id, class name or script text.
+
+**What happens to the words.** The words are what the link or button says. A file name or a name may stand there, if the portal writes one on the link. In the words:
+
+| What stands there | What the text shows |
+|---|---|
+| any run of digits | `#` |
+| an e-mail address | `[e-mail]` |
+| an address, such as `https://…` or `www.…` | `[address]` |
+| a long code of letters and digits mixed, 20 characters or more | `[long]` |
+| a file name, such as `invoice_2024.pdf` | it stays, with its digits as `#`: `invoice_#.pdf` |
+| a name, such as *Anna Meier* | it stays: it cannot be recognised, so read the text and delete it |
+
+The words are cut to 80 characters and stand in code marks, so that they cannot become a link, an image or a mention in the issue. The notes are passed from the page to the panel inside the extension and kept in the panel's memory only. Nothing is sent anywhere.
 
 **Close the run** afterwards as before, with *Succeeded* or *Failed*; downloading does not close it.
 

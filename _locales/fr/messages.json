@@ -441,7 +441,7 @@
     "message": "Documents de cette page"
   },
   "docs_count": {
-    "message": "$1 trouvés, surlignés en jaune et numérotés dans la page. Décochez ce qui n'est pas un document ; cliquez sur un nom pour y aller. Les documents déjà téléchargés sont décochés."
+    "message": "$1 trouvés ; ceux qui sont cochés sont surlignés en jaune et numérotés dans la page. Décochez ce qui n'est pas un document ; cliquez sur un nom pour y aller. Les documents déjà téléchargés sont décochés."
   },
   "docs_none": {
     "message": "Rien trouvé qui ressemble à un document."
@@ -582,10 +582,10 @@
     "message": "Sont observés cet onglet, ses cadres, les pages qu'il charge et un onglet ouvert depuis lui juste après un clic. Cela s'arrête au premier téléchargement, après deux minutes, ou quand vous l'arrêtez, fermez l'onglet ou quittez cette vue."
   },
   "watch_what_click": {
-    "message": "Noté pour chaque clic : le type d'élément, ses mots, quelques marques oui/non comme « ouvre un nouvel onglet » et ce que la recherche en a fait ; puis une nouvelle page ou un onglet, et le téléchargement avec son type et sa taille. Aucune adresse, aucun nom de fichier, id ou script, et jamais ce que vous avez saisi ou choisi dans un champ."
+    "message": "Noté pour chaque clic : le type d'élément, ses mots, quelques marques oui/non comme « ouvre un nouvel onglet » et ce que la recherche en a fait ; puis une nouvelle page ou un nouvel onglet, et le téléchargement avec son type et sa taille. Rien d'autre de l'élément ou du téléchargement : ni son adresse, ni son nom de fichier, son id ou son script. Jamais ce que vous avez saisi ou choisi dans un champ."
   },
   "watch_what_private": {
-    "message": "Dans les mots, les chiffres deviennent # et les adresses e-mail [e-mail] ; un nom ne peut pas être reconnu. Rien n'est envoyé : vous voyez le texte, pouvez le modifier et décidez de le copier ou non."
+    "message": "Les mots sont ce qu'indique le lien ou le bouton ; un nom de fichier ou un nom peut s'y trouver. Les chiffres y deviennent #, les adresses e-mail [e-mail], les adresses [address] et les longs codes de lettres et de chiffres [long] ; un nom ne peut pas être reconnu. Rien n'est envoyé : vous voyez le texte, pouvez le modifier et décidez de le copier ou non."
   },
   "watch_start": {
     "message": "Commencer l'observation"

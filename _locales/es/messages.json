@@ -441,7 +441,7 @@
     "message": "Documentos de esta página"
   },
   "docs_count": {
-    "message": "$1 encontrados, resaltados en amarillo y numerados en la página. Desmarca lo que no sea un documento; haz clic en un nombre para ir a él. Los documentos ya descargados aparecen sin marcar."
+    "message": "$1 encontrados; los marcados están resaltados en amarillo y numerados en la página. Desmarca lo que no sea un documento; haz clic en un nombre para ir a él. Los documentos ya descargados están desmarcados."
   },
   "docs_none": {
     "message": "No se encontró nada que parezca un documento."
@@ -582,10 +582,10 @@
     "message": "Se observan esta pestaña, sus marcos, las páginas que carga y una pestaña abierta desde ella justo después de un clic. Termina con la primera descarga, tras dos minutos o cuando lo detienes, cierras la pestaña o sales de esta vista."
   },
   "watch_what_click": {
-    "message": "Por cada clic se anota: el tipo de elemento, sus palabras, algunas marcas de sí o no como «abre una pestaña nueva» y lo que la búsqueda hizo con él; luego una página o pestaña nueva, y la descarga con su tipo y tamaño. Ninguna dirección, nombre de archivo, id ni script, y nunca lo que escribiste o elegiste en un campo."
+    "message": "Se anota por cada clic: qué tipo de elemento era, sus palabras, algunas marcas de sí o no como «abre una pestaña nueva» y qué hizo la búsqueda con él; después, una página o pestaña nueva y la descarga con su tipo y tamaño. Nada más del elemento ni de la descarga: ni su dirección, ni su nombre de archivo, id o script. Nunca lo que escribiste o elegiste en un campo."
   },
   "watch_what_private": {
-    "message": "En las palabras, las cifras pasan a # y las direcciones de correo a [e-mail]; un nombre no se puede reconocer. No se envía nada: ves el texto, puedes cambiarlo y decides si lo copias."
+    "message": "Las palabras son lo que dice el enlace o el botón; ahí puede haber un nombre de archivo o un nombre. En ellas, las cifras pasan a ser #, las direcciones de correo [e-mail], las direcciones [address] y los códigos largos de letras y cifras [long]; un nombre no se puede reconocer. No se envía nada: ves el texto, puedes cambiarlo y decides si lo copias."
   },
   "watch_start": {
     "message": "Empezar a observar"

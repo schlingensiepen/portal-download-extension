@@ -441,7 +441,7 @@
     "message": "Dokumente auf dieser Seite"
   },
   "docs_count": {
-    "message": "$1 gefunden, in der Seite gelb markiert und nummeriert. Nimm den Haken weg, wo es kein Dokument ist; ein Klick auf den Namen scrollt dorthin. Schon früher geladene Dokumente sind nicht angehakt."
+    "message": "$1 gefunden; die angehakten sind in der Seite gelb markiert und nummeriert. Nimm den Haken weg, wo es kein Dokument ist; ein Klick auf den Namen scrollt dorthin. Schon früher geladene Dokumente sind nicht angehakt."
   },
   "docs_none": {
     "message": "Nichts gefunden, das nach einem Dokument aussieht."
@@ -582,10 +582,10 @@
     "message": "Beobachtet werden dieser Tab, seine Frames, die Seiten, die er lädt, und ein Tab, der gleich nach einem Klick aus ihm geöffnet wird. Es endet beim ersten Download, nach zwei Minuten oder wenn du es beendest, den Tab schließt oder diese Ansicht verlässt."
   },
   "watch_what_click": {
-    "message": "Zu jedem Klick notiert: welche Art Element es war, seine Worte, einige Ja-Nein-Merkmale wie „öffnet einen neuen Tab“ und was die Suche daraus gemacht hat; danach eine neue Seite oder ein Tab und der Download mit Art und Größe. Keine Adressen, Dateinamen, ids oder Skripte, und nie, was du in ein Feld getippt oder dort gewählt hast."
+    "message": "Zu jedem Klick notiert: welche Art Element es war, seine Worte, einige Ja-Nein-Merkmale wie „öffnet einen neuen Tab“ und was die Suche daraus gemacht hat; danach eine neue Seite oder ein Tab und der Download mit Art und Größe. Sonst nichts vom Element oder vom Download: nicht seine Adresse, sein Dateiname, seine id oder sein Skript. Nie, was du in ein Feld getippt oder dort gewählt hast."
   },
   "watch_what_private": {
-    "message": "In den Worten werden Ziffern zu # und E-Mail-Adressen zu [e-mail]; einen Namen kann die Erweiterung nicht erkennen. Nichts wird gesendet: Du siehst den Text, kannst ihn ändern und entscheidest, ob du ihn kopierst."
+    "message": "Die Worte sind das, was auf dem Link oder Knopf steht; dort kann ein Dateiname oder ein Name stehen. In ihnen werden Ziffern zu #, E-Mail-Adressen zu [e-mail], Adressen zu [address] und lange Codes aus Buchstaben und Ziffern zu [long]; einen Namen kann die Erweiterung nicht erkennen. Nichts wird gesendet: Du siehst den Text, kannst ihn ändern und entscheidest, ob du ihn kopierst."
   },
   "watch_start": {
     "message": "Zuschauen beginnen"
