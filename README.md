@@ -6,6 +6,10 @@
 > [!NOTE]
 > **Why this exists.** Invoices, notices and statements from many companies no longer come by post or e-mail; they sit in a portal, and I have to fetch them myself. That is an utter bad habit. Every company has its own portal, there is no common procedure, and the only reason I can think of is the belief that this proves delivery. It annoys me enormously. portal-download does not solve the problem; it only makes it bearable for me, and I am not happy with it. The [GitHub discussions](https://github.com/schlingensiepen/portal-download-extension/discussions) are open and read: please post your experience, wishes, suggestions and bugs there.
 
+![Portal-Download in five slides: motivation, what it does, how to use it, helping with portals that do not work yet, conclusion](store/deck-en.gif)
+
+*Auf Deutsch: [die Folien als GIF](store/deck-de.gif). The full manual is in the [wiki](https://github.com/schlingensiepen/portal-download-extension/wiki).*
+
 ![The extension's side panel beside a portal (made up for the picture)](store/screenshot-1-en.png)
 
 The extension shows your due portal downloads in one list in the browser's side panel. The portal opens in a normal tab beside it. You copy the login with one click, let the extension find the documents in the portal page and download them one after the other, and close the run as succeeded or failed.
