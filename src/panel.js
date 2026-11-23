@@ -478,7 +478,7 @@ async function downloadDocuments(only) {
 }
 /** The state of one found document: waiting, downloading, saved, failed, or downloaded before. */
 function docLine(it) {
-  const errors = { nothing: t("docs_err_nothing"), navigated: t("docs_err_navigated"), tab_open: t("docs_err_tab"), timeout: t("docs_err_timeout"), html: t("docs_err_html"), gone: t("docs_err_gone"), stopped: t("docs_err_stopped") };
+  const errors = { nothing: t("docs_err_nothing"), navigated: t("docs_err_navigated"), tab_open: t("docs_err_tab"), timeout: t("docs_err_timeout"), html: t("docs_err_html"), gone: t("docs_err_gone"), stopped: t("docs_err_stopped"), container: t("docs_err_container") };
   const st = it.status;
   return st === "waiting" ? t("docs_waiting") : st === "running" ? t("docs_running")
     : st && st.ok ? t("docs_saved", (st.file || "").split(/[\\/]/).pop() || "?")
@@ -531,7 +531,7 @@ const FEEDBACK_FORM = "https://github.com/schlingensiepen/portal-download-extens
 const WATCH_FOR = 2 * 60000;
 const watchOffer = () => h("button", { class: "btn wide small", type: "button", style: "margin-top:6px", onclick: () => {
   if (!/^https?:/i.test(state.tabUrl) || state.tabId == null) return toast(t("docs_no_page"), true);
-  // Back where it was offered: an open job, the found documents (still highlighted), or the list.
+  // Back where it was offered: an open job, the found documents (while not started), or the list.
   const back = state.view === "job" ? { view: "job", job: state.job } : state.view === "docs" && state.docs ? { view: "docs" } : { view: "list" };
   go("watch", { watch: { phase: "ask", tabId: state.tabId, url: state.tabUrl, back } });
 } }, t("watch_offer"));
@@ -550,7 +550,12 @@ async function startWatching() {
     // Left meanwhile (back, another tab's lock): nothing is registered.
     if (state.watch !== w) return;
     if (!granted) { w.phase = "ask"; return toast(t("watch_refused"), true); }
-    if (state.docs) { const d = state.docs; d.stop = true; state.docs = null; await unhighlight(d); }
+    if (state.docs) {
+      const d = state.docs; d.stop = true; state.docs = null;
+      // The found documents go now: back to their job, else to the list.
+      if (w.back && w.back.view === "docs") w.back = d.job ? { view: "job", job: d.job } : { view: "list" };
+      await unhighlight(d);
+    }
     if (state.watch !== w) return;
     Object.assign(w, { phase: "watching", token: crypto.randomUUID(), origin: site.origin, clicks: [], events: [], tabs: new Set([w.tabId]), seen: new Map([[w.tabId, w.url.split("#")[0]]]), origins: new Set([site.origin]), docs: new Map(), pending: new Map(), download: null, ended: "", blind: false, lastClick: 0, again: null });
     // The observer in every frame of a tab; true when it runs in the tab's page itself.
@@ -587,16 +592,18 @@ async function startWatching() {
       updated: (tabId, info, tab) => {
         // At "loading" with a new address too: the observer goes in once the document can take it,
         // without waiting for slow pictures; at "complete" once more.
-        if (!w.tabs.has(tabId) || !(info.status === "complete" || (info.status === "loading" && info.url))) return;
+        // Firefox tells an address changed by the page's script as a new address without a status.
+        if (!w.tabs.has(tabId) || !(info.status === "complete" || info.url)) return;
         // A page loaded anew needs the observer again; only a new address is worth telling.
         const url = info.url || (tab && tab.url) || "", bare = url.split("#")[0];
         // The first page of a new tab is part of "a new tab opened"; afterwards a new address is a new page.
         // Whether a page loaded or the page's script only changed the address is decided once the
-        // tab is complete: the same document as before is no new page.
+        // tab is complete (or at once for a change without a status): the same document as before
+        // is no new page. Several changes may wait (pushState, then replaceState).
         if (url && w.seen.has(tabId) && w.seen.get(tabId) !== bare) {
           const e = { at: Date.now(), kind: "page", before: w.docs.get(tabId) || "" };
           w.events.push(e);
-          w.pending.set(tabId, e);
+          w.pending.set(tabId, [...(w.pending.get(tabId) || []), e]);
         }
         w.seen.set(tabId, bare);
         // Downloads count from the sites of the portal's own tab only: Chrome names the active tab as
@@ -605,8 +612,11 @@ async function startWatching() {
         // Only the latest injection tells whether the page can be watched.
         const n = tabId === w.tabId ? (w.injections = (w.injections || 0) + 1) : 0;
         inject(tabId).then((doc) => {
-          const e = w.pending.get(tabId);
-          if (doc && e && info.status === "complete") { if (doc === e.before) e.kind = "address"; w.pending.delete(tabId); }
+          const waiting = w.pending.get(tabId);
+          if (doc && waiting && (info.status === "complete" || !info.status)) {
+            for (const e of waiting) if (doc === e.before) e.kind = "address";
+            w.pending.delete(tabId);
+          }
           const ok = !!doc;
           if (tabId === w.tabId && n === w.injections && w.blind !== !ok) { w.blind = !ok; if (state.view === "watch" && w.phase === "watching") render(); }
         });
@@ -658,7 +668,10 @@ async function startWatching() {
     api.tabs.onRemoved.addListener(w.listeners.removed);
     api.downloads.onCreated.addListener(w.listeners.download);
     w.timer = setTimeout(() => endWatching(w, "timeout"), WATCH_FOR);
-    w.blind = !(await inject(w.tabId));
+    // Counted like every later injection: a late answer does not cover a newer one.
+    const n = w.injections = (w.injections || 0) + 1;
+    const doc = await inject(w.tabId);
+    if (n === w.injections) w.blind = !doc;
     if (state.view === "watch" && state.watch === w) render();
   } catch (e) { if (w.phase === "starting") w.phase = "ask"; endWatching(w, "stopped"); fail(e); }
 }

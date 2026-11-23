@@ -36,12 +36,12 @@ export function observe(token) {
   // (a row, a card) only a short text; of a plain element only a short text of its own. Without
   // text, its label (aria-label, title, alt). Nothing of a field, of what holds one, or of the page.
   const words = (el, clickable, path) => {
-    if (el.matches("input[type=button], input[type=submit], input[type=reset]")) return attr(el, "value");
+    if (el.matches("input[type=button], input[type=submit], input[type=reset]")) return attr(el, "value").slice(0, 200);
     // Along the whole path of the click, also across shadow roots (a list built as a web component).
     if (path.some((x) => x.matches(FIELD)) || el.closest(FIELD) || el.querySelector(FIELD) || el === document.body || el === document.documentElement) return "";
     const t = (el.innerText || "").replace(/\s+/g, " ").trim();
     const own = clickable && el.matches("a, button") ? t.slice(0, 200) : clickable ? (t.length <= 60 ? t : "") : (el.children.length === 0 && t.length <= 40 ? t : "");
-    return own || attr(el, "aria-label") || attr(el, "title") || attr(el, "alt") || "";
+    return (own || attr(el, "aria-label") || attr(el, "title") || attr(el, "alt") || "").slice(0, 200);
   };
   const describe = (path) => {
     const els = path.filter((x) => x && x.nodeType === 1);

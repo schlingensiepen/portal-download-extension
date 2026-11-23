@@ -20,6 +20,14 @@ test("words lose digits, e-mail addresses and format characters, and stay short"
   assert.equal(redactText("https://portal.example/share/abcdefghijk"), "[address]");
   assert.equal(redactText("Link: www.portal.example/u/johnsmith holen"), "Link: [address] holen");
   assert.equal(redactText("get.php?user=johnsmith"), "[address]");
+  // Without a scheme too; ordinary words with a slash stay.
+  for (const x of ["portal.example/kunde/mueller/rechnung.pdf", "//cdn.example/u/anna", "/kunden/anna-meier/rechnung", "C:\\Users\\Anna Meier\\Rechnung.pdf"]) assert.equal(redactText(x), "[address]", x);
+  assert.equal(redactText("Siehe portal.example/u/johnsmith"), "Siehe [address]");
+  assert.equal(redactText("PDF / Download und/oder Rechnung.pdf"), "PDF / Download und/oder Rechnung.pdf");
+  // A page's endless label does not hold the panel up.
+  const t0 = Date.now();
+  redactText("?".repeat(100000)); redactText("a/".repeat(50000)); redactText(`${"x".repeat(5000)}?`.repeat(20));
+  assert.ok(Date.now() - t0 < 200, `${Date.now() - t0} ms`);
   assert.equal([...redactText("x".repeat(200))].length, 81);
   assert.ok(!redactText("a `b` c").includes("`"));
 });

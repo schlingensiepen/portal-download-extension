@@ -11,10 +11,14 @@ const cut = (s, max) => { const c = [...s]; return c.length > max ? `${c.slice(0
 
 /** Words a person reads: no e-mail addresses, no digits, no invisible format characters, short. */
 export function redactText(s, max = 80) {
-  let r = String(s ?? "").replace(/\p{Cf}/gu, "").replace(/\s+/g, " ").trim();
+  // Cut first: the rules below must not take long on a page's endless label.
+  let r = [...String(s ?? "")].slice(0, 400).join("").replace(/\p{Cf}/gu, "").replace(/\s+/g, " ").trim();
   r = r.replace(/[\p{L}\p{N}._%+-]+@[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)+/gu, "[e-mail]");
   // An address written as the words of a link goes whole: it may hold a key or a name.
-  r = r.replace(/[a-z][a-z0-9+.-]*:\/\/\S+|\bwww\.\S+|\S*\?\S*=\S*/giu, "[address]");
+  // Also without a scheme: a host with a path, "//host/…", a path of two parts or more, a Windows
+  // path (to the end, it may hold spaces), and anything with "?…=". Each \S run is matched once.
+  r = r.replace(/[a-z]:\\.*$/giu, "[address]");
+  r = r.replace(/\S+/gu, (w) => (/^[a-z][a-z0-9+.-]*:\/\/|^www\.|^\/\/|^[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)+\/|^\/[^/\s]+\/[^/\s]|\?[^=]*=/iu.test(w) ? "[address]" : w));
   // A long run of letters and digits mixed (a key or code in a link's text) goes whole.
   r = r.replace(/\S{20,}/gu, (w) => (/\p{L}/u.test(w) && /\p{N}/u.test(w) ? "[long]" : w));
   r = r.replace(/\p{N}+/gu, "#");
