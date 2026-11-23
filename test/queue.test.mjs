@@ -106,6 +106,11 @@ test("in Firefox an address ending in a script name is fetched too; a link of an
   assert.deepEqual(asked, ["https://portal.example/download.php?id=5"]);
   assert.equal(world.asked[0].filename, "Portal-Download/Strom/R.pdf");
   assert.equal(world.asked[1].url, "https://other.example/get?id=6");
+  // Without a name from the server: the address's, with the type's ending instead of the script's.
+  world.asked = [];
+  const s3 = await firefox(() => new Response("%PDF", { headers: { "content-type": "application/pdf" } }), () => run([{ n: 3, url: "https://portal.example/download.php?id=7" }]));
+  assert.equal(s3[3].ok, true, s3[3].error);
+  assert.equal(world.asked[0].filename, "Portal-Download/Strom/download.pdf");
 });
 
 test("in Firefox a fetch that ends on another site, or announces a huge file, falls back to the browser's download", async () => {
@@ -115,6 +120,17 @@ test("in Firefox a fetch that ends on another site, or announces a huge file, fa
   world.requested = [];
   await firefox(() => PDF({ "content-length": String(300 * 1024 * 1024) }), () => run([{ n: 2, url: RE_FD }]));
   assert.deepEqual(world.requested, [RE_FD]);
+});
+
+test("in Firefox an answer without a length that grows too large falls back; a Chrome private window refuses links", async () => {
+  const big = () => new Response(new ReadableStream({ pull(c) { c.enqueue(new Uint8Array(64 * 1024 * 1024)); } }), { headers: { "content-type": "application/pdf" } });
+  await firefox(big, () => run([{ n: 1, url: RE_FD }]));
+  assert.deepEqual(world.requested, [RE_FD]);
+  world.requested = [];
+  world.tabs.get(1).incognito = true;
+  const s = await run([{ n: 2, url: "https://portal.example/doc/a.pdf" }]);
+  assert.equal(s[2].error, "private");
+  assert.deepEqual(world.requested, []);
 });
 
 test("in Firefox stop ends a fetch that does not finish", async () => {
@@ -142,6 +158,8 @@ test("the server's name: quoted, plain, encoded, with a path, or none", async ()
   assert.equal(nameFromHeader('attachment; filename="Rechnung%20M%C3%A4rz.pdf"'), "Rechnung März.pdf");
   assert.equal(nameFromHeader('attachment; filename="Rechnung 23.07.2024"'), "Rechnung 23.07.2024");
   assert.equal(nameFromHeader('attachment; xfilename="a.exe"'), "");
+  assert.equal(nameFromHeader('attachment; filename="invoice.html"'), "invoice");
+  assert.equal(nameFromHeader('attachment; filename="r.pdf.exe"'), "r.pdf");
   const { withEnding } = await import(src);
   assert.equal(withEnding("Rechnung 23.07.2024", "application/pdf"), "Rechnung 23.07.2024.pdf");
 });

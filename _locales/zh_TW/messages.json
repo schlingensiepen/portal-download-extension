@@ -545,6 +545,9 @@
   "docs_err_container": {
     "message": "此分頁是容器分頁：Firefox 只允許擴充功能使用一般 Cookie 下載連結；請在一般分頁中開啟入口網站"
   },
+  "docs_err_private": {
+    "message": "這是無痕視窗：Chrome 會使用一般視窗的 Cookie 下載連結；請在一般視窗中開啟入口網站"
+  },
   "docs_err_stopped": {
     "message": "已停止；瀏覽器可能仍會完成此下載"
   },

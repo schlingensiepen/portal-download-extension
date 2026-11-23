@@ -545,6 +545,9 @@
   "docs_err_container": {
     "message": "la pestaña es de un contenedor: Firefox solo deja a la extensión descargar enlaces con las cookies normales; abre el portal en una pestaña normal"
   },
+  "docs_err_private": {
+    "message": "es una ventana privada: Chrome descargaría los enlaces con las cookies de tu ventana normal; abre el portal en una ventana normal"
+  },
   "docs_err_stopped": {
     "message": "detenido; puede que el navegador aún termine esta descarga"
   },

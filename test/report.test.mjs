@@ -24,6 +24,10 @@ test("words lose digits, e-mail addresses and format characters, and stay short"
   for (const x of ["portal.example/kunde/mueller/rechnung.pdf", "//cdn.example/u/anna", "/kunden/anna-meier/rechnung", "C:\\Users\\Anna Meier\\Rechnung.pdf"]) assert.equal(redactText(x), "[address]", x);
   assert.equal(redactText("Siehe portal.example/u/johnsmith"), "Siehe [address]");
   assert.equal(redactText("PDF / Download und/oder Rechnung.pdf"), "PDF / Download und/oder Rechnung.pdf");
+  assert.equal(redactText("Datei C:/Users/Anna Meier/x.pdf"), "Datei [address]");
+  assert.equal(redactText("\\\\server\\share\\Anna Meier\\x.pdf"), "[address]");
+  assert.equal(redactText("Download:\\ weiter"), "Download:\\ weiter");
+  assert.equal(redactText("Rechnung Nr.12345/2024 laden"), "Rechnung Nr.#/# laden");
   // A page's endless label does not hold the panel up.
   const t0 = Date.now();
   redactText("?".repeat(100000)); redactText("a/".repeat(50000)); redactText(`${"x".repeat(5000)}?`.repeat(20));

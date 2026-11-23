@@ -545,6 +545,9 @@
   "docs_err_container": {
     "message": "该标签页是容器标签页：Firefox 只允许扩展使用普通 Cookie 下载链接；请在普通标签页中打开门户"
   },
+  "docs_err_private": {
+    "message": "这是无痕窗口：Chrome 会使用普通窗口的 Cookie 下载链接；请在普通窗口中打开门户"
+  },
   "docs_err_stopped": {
     "message": "已停止；浏览器可能仍会完成此下载"
   },

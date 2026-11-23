@@ -545,6 +545,9 @@
   "docs_err_container": {
     "message": "der Tab ist ein Container-Tab: Firefox lässt die Erweiterung Links nur mit den normalen Cookies herunterladen; öffne das Portal in einem normalen Tab"
   },
+  "docs_err_private": {
+    "message": "das ist ein privates Fenster: Chrome würde Links mit den Cookies Deines normalen Fensters herunterladen; öffne das Portal in einem normalen Fenster"
+  },
   "docs_err_stopped": {
     "message": "angehalten; der Browser lädt diesen Download vielleicht noch zu Ende"
   },

@@ -545,6 +545,9 @@
   "docs_err_container": {
     "message": "l'onglet est un onglet de conteneur : Firefox ne laisse l'extension télécharger des liens qu'avec les cookies normaux ; ouvrez le portail dans un onglet normal"
   },
+  "docs_err_private": {
+    "message": "c'est une fenêtre privée : Chrome téléchargerait les liens avec les cookies de votre fenêtre normale ; ouvrez le portail dans une fenêtre normale"
+  },
   "docs_err_stopped": {
     "message": "arrêté ; le navigateur peut encore terminer ce téléchargement"
   },

@@ -545,6 +545,9 @@
   "docs_err_container": {
     "message": "the tab is a container tab: Firefox lets the extension download links only with the normal cookies; open the portal in a normal tab"
   },
+  "docs_err_private": {
+    "message": "this is a private window: Chrome would download links with the cookies of your normal window; open the portal in a normal window"
+  },
   "docs_err_stopped": {
     "message": "stopped; the browser may still finish this download"
   },

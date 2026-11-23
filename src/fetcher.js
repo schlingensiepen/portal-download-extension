@@ -5,9 +5,9 @@
 // the portal, into "Portal-Download/<job>/" below the download folder (in a Firefox container
 // tab links fail with a word). In Firefox a link of the portal's site whose address names no
 // document is fetched by the extension and saved under the name the server gives (viaFetch).
-// A button is clicked in the page; the first download from the portal that follows counts as its document, and in Chrome it is put into the same folder. A button that
-// opens a new tab: a download that tab starts counts, else the tab's address is downloaded and
-// the tab closed. A web page that comes back instead of a document (a login page after the
+// A button is clicked in the page; the first download from the portal that follows counts as
+// its document, and in Chrome it is put into the same folder. A button that opens a new tab: a
+// download that tab starts counts, else the tab's address is downloaded and the tab closed. A web page that comes back instead of a document (a login page after the
 // session ended) counts as a failure and is deleted again.
 
 const api = globalThis.browser ?? globalThis.chrome;
@@ -111,7 +111,9 @@ export function nameFromHeader(cd) {
   if (!n) { const m = /(?:^|;)\s*filename\s*=\s*("([^"]*)"|[^;]+)/i.exec(v); if (m) n = decodeName((m[2] ?? m[1]).trim()); }
   n = n.split(/[\\/]/).pop();
   const m = /^(.*?)(\.(?=[a-z0-9]*[a-z])[a-z0-9]{2,5})?$/i.exec(n);
-  return m && m[1] ? `${safeName(m[1], "document")}${(m[2] || "").toLowerCase()}` : "";
+  // An ending a browser would open as a page or a program is dropped; the type gives one instead.
+  const end = (m && m[2] || "").toLowerCase();
+  return m && m[1] ? `${safeName(m[1], "document")}${/^\.(html?|xhtml|svgz?|xml|js|mjs|hta|exe|bat|cmd|com|scr|ps1|vbs|lnk|url|desktop|sh)$/.test(end) ? "" : end}` : "";
 }
 
 /** The file name a link would give, if its address ends in one; safe on every system. */
@@ -141,12 +143,13 @@ export async function runQueue({ items, tabId, pageUrl, folder, click, alive = n
   const fromSite = (d, o = origin) => !d.byExtensionId && (sameSite(d.referrer, o) || sameSite(d.url, o) || sameSite(d.finalUrl, o));
   // Firefox: a container tab has cookies of its own, which an extension may use only with the
   // "cookies" permission; this one does not ask for it. Rather than download with the normal
-  // cookies (perhaps another account) links fail there with a word; buttons work as in the page.
+  // cookies (perhaps another account) links fail there with a word; buttons work as in the page,
+  // but a tab a button opens without a download of its own is not downloaded either.
   // A private window: its downloads are private too, and fetched by the browser only.
-  let store = "";
-  try { const tab = await api.tabs.get(tabId); store = (tab && tab.cookieStoreId) || ""; } catch { /* no tab */ }
-  const container = !!store && store !== "firefox-default" && store !== "firefox-private";
-  const private_ = store === "firefox-private";
+  let store = "", incognito = false;
+  try { const tab = await api.tabs.get(tabId); store = (tab && tab.cookieStoreId) || ""; incognito = !!(tab && tab.incognito); } catch { /* no tab */ }
+  const private_ = incognito || store === "firefox-private";
+  const container = !!store && store !== "firefox-default" && !private_;
 
   // In Chrome our own downloads, and the one download a click is waiting for, go into the job's
   // folder; every other download of the browser is left alone. Firefox has no such hook.
@@ -163,7 +166,8 @@ export async function runQueue({ items, tabId, pageUrl, folder, click, alive = n
 
   const download = (url) => {
     const opts = { url, conflictAction: "uniquify", saveAs: false };
-    if (private_) opts.incognito = true;
+    // Only Firefox knows this option; Chrome's private windows are refused in link() instead.
+    if (private_ && !canPlace) opts.incognito = true;
     // Without the hook the folder can only be given with the name; a name is known only from the address.
     const name = canPlace ? "" : nameFromUrl(url);
     if (name) opts.filename = `${folder}/${name}`;
@@ -190,13 +194,28 @@ export async function runQueue({ items, tabId, pageUrl, folder, click, alive = n
       const mime = r.headers.get("content-type") || "";
       const size = Number(r.headers.get("content-length"));
       if (!r.ok || !sameSite(at) || /^(text\/html|application\/xhtml\+xml)\b/i.test(mime) || size > MAX) { ctl.abort(); return null; }
-      blob = await r.blob();
-      if (blob.size > MAX) return null;
-    } catch { return stop() ? { ok: false, error: "stopped" } : null; }
+      // Read with a count: an answer without a length must not fill the memory.
+      const parts = [];
+      let got = 0;
+      for (const reader = r.body.getReader(); ;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        got += value.byteLength;
+        if (got > MAX) { ctl.abort(); return null; }
+        parts.push(value);
+      }
+      blob = new Blob(parts, { type: mime });
+    } catch {
+      if (stop()) return { ok: false, error: "stopped" };
+      // Waited the longest already: not another wait for the browser's download.
+      return Date.now() - started > longest ? { ok: false, error: "timeout" } : null;
+    }
     finally { clearInterval(watch); }
     if (stop()) return { ok: false, error: "stopped" };
     const mime = r.headers.get("content-type") || blob.type;
-    const base = nameFromHeader(r.headers.get("content-disposition")) || nameFromUrl(at) || safeName(decodeName(new URL(at).pathname.split("/").pop()), "document");
+    // The server's name; else the address's, without a script's ending (download.php gives "download").
+    const fromUrl = nameFromUrl(at);
+    const base = nameFromHeader(r.headers.get("content-disposition")) || (namesDocument(at) ? fromUrl : fromUrl.replace(/\.[^.]+$/, "")) || safeName(decodeName(new URL(at).pathname.split("/").pop()), "document");
     const href = URL.createObjectURL(blob);
     let res;
     try { res = await settle(await api.downloads.download({ url: href, filename: `${folder}/${withEnding(base, mime)}`, conflictAction: "uniquify", saveAs: false })); }
@@ -207,6 +226,8 @@ export async function runQueue({ items, tabId, pageUrl, folder, click, alive = n
   };
   const link = async (url) => {
     if (container) return { ok: false, error: "container" };
+    // Chrome downloads of an extension take the normal profile's cookies, not the private window's.
+    if (private_ && canPlace) return { ok: false, error: "private" };
     if (!canPlace && !private_ && sameSite(url) && !namesDocument(url)) { const r = await viaFetch(url); if (r) return r; }
     return settle(await download(url));
   };

@@ -545,6 +545,9 @@
   "docs_err_container": {
     "message": "o separador é de um contentor: o Firefox só deixa a extensão transferir ligações com os cookies normais; abra o portal num separador normal"
   },
+  "docs_err_private": {
+    "message": "esta é uma janela privada: o Chrome transferiria as ligações com os cookies da sua janela normal; abra o portal numa janela normal"
+  },
   "docs_err_stopped": {
     "message": "interrompido; o navegador ainda pode concluir esta transferência"
   },

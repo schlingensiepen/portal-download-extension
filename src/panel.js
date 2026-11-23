@@ -478,7 +478,7 @@ async function downloadDocuments(only) {
 }
 /** The state of one found document: waiting, downloading, saved, failed, or downloaded before. */
 function docLine(it) {
-  const errors = { nothing: t("docs_err_nothing"), navigated: t("docs_err_navigated"), tab_open: t("docs_err_tab"), timeout: t("docs_err_timeout"), html: t("docs_err_html"), gone: t("docs_err_gone"), stopped: t("docs_err_stopped"), container: t("docs_err_container") };
+  const errors = { nothing: t("docs_err_nothing"), navigated: t("docs_err_navigated"), tab_open: t("docs_err_tab"), timeout: t("docs_err_timeout"), html: t("docs_err_html"), gone: t("docs_err_gone"), stopped: t("docs_err_stopped"), container: t("docs_err_container"), private: t("docs_err_private") };
   const st = it.status;
   return st === "waiting" ? t("docs_waiting") : st === "running" ? t("docs_running")
     : st && st.ok ? t("docs_saved", (st.file || "").split(/[\\/]/).pop() || "?")

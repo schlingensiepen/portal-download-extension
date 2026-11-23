@@ -16,9 +16,10 @@ export function redactText(s, max = 80) {
   r = r.replace(/[\p{L}\p{N}._%+-]+@[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)+/gu, "[e-mail]");
   // An address written as the words of a link goes whole: it may hold a key or a name.
   // Also without a scheme: a host with a path, "//host/…", a path of two parts or more, a Windows
-  // path (to the end, it may hold spaces), and anything with "?…=". Each \S run is matched once.
-  r = r.replace(/[a-z]:\\.*$/giu, "[address]");
-  r = r.replace(/\S+/gu, (w) => (/^[a-z][a-z0-9+.-]*:\/\/|^www\.|^\/\/|^[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)+\/|^\/[^/\s]+\/[^/\s]|\?[^=]*=/iu.test(w) ? "[address]" : w));
+  // or network path (to the end, it may hold spaces), and anything with "?…=". Each \S run is
+  // matched once.
+  r = r.replace(/(?<![\p{L}\p{N}])(?:[a-z]:[\\/]|\\\\).*$/giu, "[address]");
+  r = r.replace(/\S+/gu, (w) => (/^[a-z][a-z0-9+.-]*:\/\/|^www\.|^\/\/|^[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)*\.\p{L}{2,}\/|^\/[^/\s]+\/[^/\s]|\?[^=]*=/iu.test(w) ? "[address]" : w));
   // A long run of letters and digits mixed (a key or code in a link's text) goes whole.
   r = r.replace(/\S{20,}/gu, (w) => (/\p{L}/u.test(w) && /\p{N}/u.test(w) ? "[long]" : w));
   r = r.replace(/\p{N}+/gu, "#");

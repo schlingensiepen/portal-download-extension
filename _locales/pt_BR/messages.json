@@ -545,6 +545,9 @@
   "docs_err_container": {
     "message": "a aba é de um contêiner: o Firefox só deixa a extensão baixar links com os cookies normais; abra o portal em uma aba normal"
   },
+  "docs_err_private": {
+    "message": "esta é uma janela anônima: o Chrome baixaria os links com os cookies da sua janela normal; abra o portal em uma janela normal"
+  },
   "docs_err_stopped": {
     "message": "interrompido; o navegador ainda pode concluir este download"
   },
