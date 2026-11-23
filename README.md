@@ -48,8 +48,8 @@ The browser reminds you now and then that a developer extension is active. It ma
 **From the source:** the browser can load the source folder as it is. Nothing has to be built first.
 
 1. Get the source from the [project page](https://github.com/schlingensiepen/portal-download-extension): click *Code*, then *Download ZIP*, and unpack it; or clone the repository with git.
-2. **Firefox:** open `about:debugging#/runtime/this-firefox`, click *Load Temporary Add-on…* and choose the file `manifest.json` in the folder. As with the ZIP file, Firefox removes it again when it restarts.
-3. **Chrome and Edge:** open `chrome://extensions` (Edge: `edge://extensions`), switch on *Developer mode*, click *Load unpacked* and choose the folder. The folder must stay where it is.
+2. **Firefox:** open `about:debugging#/runtime/this-firefox`, click *Load Temporary Add-on…* and choose the file `manifest.json` in the top folder of the source (where `README.md` lies too). As with the ZIP file, Firefox removes it again when it restarts.
+3. **Chrome and Edge:** open `chrome://extensions` (Edge: `edge://extensions`), switch on *Developer mode*, click *Load unpacked* and choose that top folder. The folder must stay where it is.
 
 **The toolbar button** opens the side panel (Firefox: the sidebar). In Chrome and Edge, pin it first: click the puzzle piece in the toolbar, then the pin beside *Portal-Download*.
 
@@ -265,7 +265,7 @@ Firefox lets an extension choose the folder and the name only for a download the
 
 - **Buttons:** the document lands in the download folder itself, not in the *Portal-Download* subfolder, under the name Firefox gives it.
 - **Links whose address ends in a file name,** such as `…/invoice-march.pdf`: into the subfolder, under that name. Odd characters in it are cleaned as in a folder name.
-- **Links without a file name in the address,** such as `…/documentDownload?documentId=…` or `download.php?id=…`, on the portal's own site: the extension fetches the document itself, with your normal login cookies of the portal, and saves it into the subfolder under the name the portal gives. That name is cleaned as a folder name is; if it has no ending, it gets one from the file's type. If the portal gives no name, the end of the address serves.
+- **Links without a file name in the address,** such as `…/documentDownload?documentId=…` or `download.php?id=…`, on the portal's own site (the same `https://` and host name as the page): the extension fetches the document itself, with your normal login cookies of the portal, and saves it into the subfolder under the name the portal gives. That name is cleaned as a folder name is; if it has no ending, it gets one from the file's type. If the portal gives no name, the end of the address serves.
 - **If that does not work,** Firefox downloads the link. That happens when the portal refuses the extension's request, the address leads to another site, or the file is larger than 200 MB. It also happens for a link to another site. The file is then named after the end of its address. Without a file ending there, it lands in the download folder itself, under a name such as `documentDownload`, without an ending. Give it the ending yourself: if it is a PDF, rename it to `documentDownload.pdf`.
 - **In a container tab,** links are not downloaded, neither by Firefox nor by the extension itself. The panel says why (see the table below). Buttons are clicked in the page and work as usual; only a button that opens the document in a new tab without downloading it fails with the same message. Open the portal in a normal tab.
 - **In a private window,** Firefox saves links privately, named after the end of their address as described under *If that does not work*. The extension does not fetch them itself there. Buttons work as usual.
@@ -320,7 +320,7 @@ The extension can write the details for you. It watches you download one documen
 
 | Field | What to enter |
 |---|---|
-| *Portal* | The site's name only, such as `www.example.com`. It is separate from the tick *Name the portal* in the panel: to keep the portal private, untick that and leave this field empty. |
+| *Portal* | The site's address without `https://` and without the path, such as `www.example.com`; never an address with parameters. It is separate from the tick *Name the portal* in the panel: to keep the portal private, untick that and leave this field empty. |
 | *What happened* | One or more of the entries below. This field must be filled in. |
 | *The element* | What the link or button says, or what icon it shows; whether it is a link, a button or something in a menu; whether it opened a new tab. Plain words are enough. Write "see below" if you pasted the text from the panel. |
 | *The text from the panel (optional)* | The text the extension made. Leave it empty if you have none. |
