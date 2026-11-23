@@ -207,7 +207,7 @@ Once you are logged in to the portal, the extension can find the documents in th
 5. **Click *Start downloading*,** or *Only this one* beside a single document. The first time, the browser asks for the permission to download. The extension then works through the list one document at a time, slowly, and shows beside each what happened. *Stop* ends it at once; a download already under way may still finish. Leaving this view stops it too.
 6. **More pages:** if the portal spreads its documents over several pages, open the next page and search again.
 
-**Where the files go:** into the folder *Portal-Download/<job title>* inside the folder your browser saves downloads to (usually *Downloads*); for a page without a job, into *Portal-Download/<site>*. Documents downloaded before are remembered per job, or per site for pages without a job.
+**Where the files go:** into the folder `Portal-Download/<job title>` inside the folder your browser saves downloads to (usually *Downloads*); for a page without a job, into `Portal-Download/<site>`. Documents downloaded before are remembered per job, or per site for pages without a job.
 
 - **Links** are downloaded with the browser's download function and your login cookies of the portal.
 - **Buttons** are clicked in the page, as you would. The first download from the portal that follows counts as that document. If the button opens a new tab, a download from that tab counts; else the extension downloads the tab's address and closes the tab.
