@@ -60,13 +60,14 @@ test("a link is downloaded into the job's folder", async () => {
   assert.equal(world.placed[1], "Portal-Download/Strom/a.pdf");
 });
 
-test("in Firefox a link is downloaded from a normal tab and from a container tab", async () => {
+test("in Firefox a link is downloaded from a normal tab; in a container tab it fails with a word, not with other cookies", async () => {
   world.tabs.get(1).cookieStoreId = "firefox-default";
   const s = await run([{ n: 1, url: "https://portal.example/doc/a.pdf" }]);
   assert.equal(s[1].ok, true, s[1].error);
   world.tabs.get(1).cookieStoreId = "firefox-container-2";
   const c = await run([{ n: 2, url: "https://portal.example/doc/b.pdf" }]);
-  assert.equal(c[2].ok, true, c[2].error);
+  assert.equal(c[2].error, "container");
+  assert.deepEqual(world.requested, ["https://portal.example/doc/a.pdf"]);
 });
 
 // Firefox: no hook for the name; the server names the file only in its header.
@@ -93,6 +94,42 @@ test("in Firefox a fetch that gives no document falls back to the browser's down
   assert.deepEqual(world.requested, [RE_FD]);
 });
 
+const PDF = (extra = {}) => new Response("%PDF-1.4", { headers: { "content-type": "application/pdf", "content-disposition": "attachment; filename=\"R.pdf\"", ...extra } });
+
+test("in Firefox an address ending in a script name is fetched too; a link of another site is not", async () => {
+  let asked = [];
+  const s = await firefox(() => PDF(), async () => {
+    const f = globalThis.fetch; globalThis.fetch = async (u, o) => { asked.push(u); return f(u, o); };
+    return run([{ n: 1, url: "https://portal.example/download.php?id=5" }, { n: 2, url: "https://other.example/get?id=6" }]);
+  });
+  assert.equal(s[1].ok, true, s[1].error);
+  assert.deepEqual(asked, ["https://portal.example/download.php?id=5"]);
+  assert.equal(world.asked[0].filename, "Portal-Download/Strom/R.pdf");
+  assert.equal(world.asked[1].url, "https://other.example/get?id=6");
+});
+
+test("in Firefox a fetch that ends on another site, or announces a huge file, falls back to the browser's download", async () => {
+  const away = PDF(); Object.defineProperty(away, "url", { value: "https://evil.example/x" });
+  await firefox(() => away, () => run([{ n: 1, url: RE_FD }]));
+  assert.deepEqual(world.requested, [RE_FD]);
+  world.requested = [];
+  await firefox(() => PDF({ "content-length": String(300 * 1024 * 1024) }), () => run([{ n: 2, url: RE_FD }]));
+  assert.deepEqual(world.requested, [RE_FD]);
+});
+
+test("in Firefox stop ends a fetch that does not finish", async () => {
+  let stopped = false;
+  setTimeout(() => { stopped = true; }, 60);
+  const t0 = Date.now();
+  const s = await firefox(() => null, async () => {
+    globalThis.fetch = (u, o) => new Promise((_, no) => o.signal.addEventListener("abort", () => no(new Error("aborted"))));
+    return run([{ n: 1, url: RE_FD }], undefined, { stop: () => stopped });
+  });
+  assert.equal(s[1].error, "stopped");
+  assert.equal(world.asked.length, 0);
+  assert.ok(Date.now() - t0 < 500);
+});
+
 test("the server's name: quoted, plain, encoded, with a path, or none", async () => {
   const { nameFromHeader } = await import(src);
   assert.equal(nameFromHeader('attachment; filename="a b.PDF"'), "a b.pdf");
@@ -100,6 +137,13 @@ test("the server's name: quoted, plain, encoded, with a path, or none", async ()
   assert.equal(nameFromHeader("attachment; filename=\"x.pdf\"; filename*=UTF-8''Rechnung%20M%C3%BCller.pdf"), "Rechnung Müller.pdf");
   assert.equal(nameFromHeader('attachment; filename="../../etc/passwd"'), "passwd");
   assert.equal(nameFromHeader("inline"), "");
+  // Raw UTF-8 as the header reader gives it (Latin-1), %-encoded, and a date without an ending.
+  assert.equal(nameFromHeader('attachment; filename="Rechnung M\u00c3\u00bcller.pdf"'), "Rechnung Müller.pdf");
+  assert.equal(nameFromHeader('attachment; filename="Rechnung%20M%C3%A4rz.pdf"'), "Rechnung März.pdf");
+  assert.equal(nameFromHeader('attachment; filename="Rechnung 23.07.2024"'), "Rechnung 23.07.2024");
+  assert.equal(nameFromHeader('attachment; xfilename="a.exe"'), "");
+  const { withEnding } = await import(src);
+  assert.equal(withEnding("Rechnung 23.07.2024", "application/pdf"), "Rechnung 23.07.2024.pdf");
 });
 
 test("a button takes the portal's download, not one of another extension or site meanwhile", async () => {

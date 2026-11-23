@@ -534,13 +534,16 @@
     "message": "此頁面未使用 https。擴充功能只搜尋 https 頁面以及本機上的 http 頁面。"
   },
   "docs_folder_firefox": {
-    "message": "連結會儲存到下載資料夾中的 $1；按鈕下載的文件直接儲存到下載資料夾。"
+    "message": "連結通常會儲存到下載資料夾中的 $1；按鈕下載的文件直接儲存到下載資料夾。"
   },
   "docs_err_html": {
     "message": "傳回的是網頁而不是文件，可能是登入已過期；已將其刪除"
   },
   "docs_err_gone": {
     "message": "該元素已不在頁面中；請重新尋找"
+  },
+  "docs_err_container": {
+    "message": "此分頁是容器分頁：Firefox 只允許擴充功能使用一般 Cookie 下載連結；請在一般分頁中開啟入口網站"
   },
   "docs_err_stopped": {
     "message": "已停止；瀏覽器可能仍會完成此下載"

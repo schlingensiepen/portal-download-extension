@@ -534,13 +534,16 @@
     "message": "Esta página não usa https. A extensão só pesquisa páginas https e páginas http deste computador."
   },
   "docs_folder_firefox": {
-    "message": "Links são salvos em $1 na sua pasta de downloads; documentos de botões, diretamente na sua pasta de downloads."
+    "message": "Links normalmente são salvos em $1 na sua pasta de downloads; documentos de botões, diretamente na sua pasta de downloads."
   },
   "docs_err_html": {
     "message": "voltou uma página web em vez de um documento, talvez porque o login expirou; ela foi excluída"
   },
   "docs_err_gone": {
     "message": "o elemento não está mais na página; pesquise novamente"
+  },
+  "docs_err_container": {
+    "message": "a aba é de um contêiner: o Firefox só deixa a extensão baixar links com os cookies normais; abra o portal em uma aba normal"
   },
   "docs_err_stopped": {
     "message": "interrompido; o navegador ainda pode concluir este download"

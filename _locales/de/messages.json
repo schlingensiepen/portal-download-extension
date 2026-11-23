@@ -534,13 +534,16 @@
     "message": "Diese Seite ist nicht über https erreichbar. Die Erweiterung durchsucht nur https-Seiten und http-Seiten auf diesem Computer."
   },
   "docs_folder_firefox": {
-    "message": "Links landen in $1 in Deinem Download-Ordner, Dokumente von Knöpfen direkt in Deinem Download-Ordner."
+    "message": "Links landen in der Regel in $1 in Deinem Download-Ordner, Dokumente von Knöpfen direkt in Deinem Download-Ordner."
   },
   "docs_err_html": {
     "message": "statt eines Dokuments kam eine Webseite zurück, vielleicht weil die Anmeldung abgelaufen ist; sie wurde gelöscht"
   },
   "docs_err_gone": {
     "message": "das Element ist nicht mehr in der Seite; neu suchen"
+  },
+  "docs_err_container": {
+    "message": "der Tab ist ein Container-Tab: Firefox lässt die Erweiterung Links nur mit den normalen Cookies herunterladen; öffne das Portal in einem normalen Tab"
   },
   "docs_err_stopped": {
     "message": "angehalten; der Browser lädt diesen Download vielleicht noch zu Ende"

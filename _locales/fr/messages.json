@@ -534,13 +534,16 @@
     "message": "Cette page n'est pas en https. L'extension ne parcourt que les pages https, et les pages http de cet ordinateur."
   },
   "docs_folder_firefox": {
-    "message": "Les liens sont enregistrés dans $1 de votre dossier de téléchargement ; les documents des boutons directement dans votre dossier de téléchargement."
+    "message": "Les liens sont normalement enregistrés dans $1 de votre dossier de téléchargement ; les documents des boutons directement dans votre dossier de téléchargement."
   },
   "docs_err_html": {
     "message": "une page web est revenue au lieu d'un document, peut-être parce que la connexion a expiré ; elle a été supprimée"
   },
   "docs_err_gone": {
     "message": "l'élément n'est plus dans la page ; cherchez à nouveau"
+  },
+  "docs_err_container": {
+    "message": "l'onglet est un onglet de conteneur : Firefox ne laisse l'extension télécharger des liens qu'avec les cookies normaux ; ouvrez le portail dans un onglet normal"
   },
   "docs_err_stopped": {
     "message": "arrêté ; le navigateur peut encore terminer ce téléchargement"

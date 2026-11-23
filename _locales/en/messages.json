@@ -534,13 +534,16 @@
     "message": "This page is not on https. The extension searches only https pages, and http pages on this computer."
   },
   "docs_folder_firefox": {
-    "message": "Links are saved into $1 in your download folder; documents from buttons straight into your download folder."
+    "message": "Links are normally saved into $1 in your download folder; documents from buttons straight into your download folder."
   },
   "docs_err_html": {
     "message": "a web page came back instead of a document, perhaps because the login expired; it was deleted"
   },
   "docs_err_gone": {
     "message": "the element is no longer in the page; search again"
+  },
+  "docs_err_container": {
+    "message": "the tab is a container tab: Firefox lets the extension download links only with the normal cookies; open the portal in a normal tab"
   },
   "docs_err_stopped": {
     "message": "stopped; the browser may still finish this download"

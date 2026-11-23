@@ -534,13 +534,16 @@
     "message": "Esta página no usa https. La extensión solo busca en páginas https y en páginas http de este ordenador."
   },
   "docs_folder_firefox": {
-    "message": "Los enlaces se guardan en $1 dentro de tu carpeta de descargas; los documentos de botones, directamente en tu carpeta de descargas."
+    "message": "Los enlaces se guardan normalmente en $1 dentro de tu carpeta de descargas; los documentos de botones, directamente en tu carpeta de descargas."
   },
   "docs_err_html": {
     "message": "volvió una página web en lugar de un documento, quizá porque la sesión caducó; se eliminó"
   },
   "docs_err_gone": {
     "message": "el elemento ya no está en la página; busca de nuevo"
+  },
+  "docs_err_container": {
+    "message": "la pestaña es de un contenedor: Firefox solo deja a la extensión descargar enlaces con las cookies normales; abre el portal en una pestaña normal"
   },
   "docs_err_stopped": {
     "message": "detenido; puede que el navegador aún termine esta descarga"

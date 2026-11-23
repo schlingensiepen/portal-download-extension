@@ -2,10 +2,10 @@
 // job which were downloaded already. Runs in the panel; the queue ends when the panel closes.
 //
 // A link is downloaded with the browser's download interface, with the browser's cookies for
-// the portal (in Firefox those of the tab's container), into "Portal-Download/<job>/" below the
-// download folder. In Firefox a link without a file name in its address is fetched by the
-// extension and saved under the name the server gives (see viaFetch). A button is clicked in the page; the first download from the portal that
-// follows counts as its document, and in Chrome it is put into the same folder. A button that
+// the portal, into "Portal-Download/<job>/" below the download folder (in a Firefox container
+// tab links fail with a word). In Firefox a link of the portal's site whose address names no
+// document is fetched by the extension and saved under the name the server gives (viaFetch).
+// A button is clicked in the page; the first download from the portal that follows counts as its document, and in Chrome it is put into the same folder. A button that
 // opens a new tab: a download that tab starts counts, else the tab's address is downloaded and
 // the tab closed. A web page that comes back instead of a document (a login page after the
 // session ended) counts as a failure and is deleted again.
@@ -86,7 +86,20 @@ export const remembered = {
 const ENDINGS = { "application/pdf": "pdf", "application/msword": "doc", "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx", "application/vnd.ms-excel": "xls", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx", "application/vnd.oasis.opendocument.text": "odt", "application/vnd.oasis.opendocument.spreadsheet": "ods", "application/zip": "zip", "application/xml": "xml", "text/xml": "xml", "text/csv": "csv", "text/plain": "txt", "image/tiff": "tif", "image/jpeg": "jpg", "image/png": "png", "message/rfc822": "eml" };
 export function withEnding(name, mime) {
   const ending = ENDINGS[String(mime || "").split(";")[0].trim().toLowerCase()];
-  return ending && !/\.[a-z0-9]{2,5}$/i.test(name) ? `${name}.${ending}` : name;
+  return ending && !ENDS.test(name) ? `${name}.${ending}` : name;
+}
+// A file ending: two to five letters or digits, at least one a letter ("Rechnung 23.07.2024" has none).
+const ENDS = /\.(?=[a-z0-9]*[a-z])[a-z0-9]{2,5}$/i;
+// Endings of documents; any other ending (download.php, Document.aspx) names a script, not the file.
+const DOC_ENDINGS = new Set([...Object.values(ENDINGS), "jpeg", "tiff", "docx", "xlsx", "rtf", "msg", "p7m", "p7s", "gz", "7z"]);
+
+/** A name as the server sent it: a raw UTF-8 name read as Latin-1 is decoded, a %-encoded one too. */
+function decodeName(n) {
+  if (/^[\x00-\xff]*$/.test(n) && /[\x80-\xff]/.test(n)) {
+    try { n = new TextDecoder("utf-8", { fatal: true }).decode(Uint8Array.from(n, (c) => c.charCodeAt(0))); } catch { /* stays as it is */ }
+  }
+  if (/%[0-9a-f]{2}/i.test(n)) { try { n = decodeURIComponent(n); } catch { /* stays as it is */ } }
+  return n;
 }
 
 /** The file name the server gives in its Content-Disposition header, if any; safe on every system. */
@@ -95,9 +108,9 @@ export function nameFromHeader(cd) {
   let n = "";
   const star = /filename\*\s*=\s*([^']*)'[^']*'([^;]+)/i.exec(v);
   if (star) { try { n = decodeURIComponent(star[2].trim().replace(/^"|"$/g, "")); } catch { n = ""; } }
-  if (!n) { const m = /filename\s*=\s*("([^"]*)"|[^;]+)/i.exec(v); if (m) n = (m[2] ?? m[1]).trim(); }
+  if (!n) { const m = /(?:^|;)\s*filename\s*=\s*("([^"]*)"|[^;]+)/i.exec(v); if (m) n = decodeName((m[2] ?? m[1]).trim()); }
   n = n.split(/[\\/]/).pop();
-  const m = /^(.*?)(\.[a-z0-9]{2,5})?$/i.exec(n);
+  const m = /^(.*?)(\.(?=[a-z0-9]*[a-z])[a-z0-9]{2,5})?$/i.exec(n);
   return m && m[1] ? `${safeName(m[1], "document")}${(m[2] || "").toLowerCase()}` : "";
 }
 
@@ -106,10 +119,12 @@ function nameFromUrl(url) {
   try {
     const p = new URL(url).pathname;
     const n = decodeURIComponent(p.slice(p.lastIndexOf("/") + 1));
-    const m = /^(.*?)(\.[a-z0-9]{2,5})$/i.exec(n);
+    const m = /^(.*?)(\.(?=[a-z0-9]*[a-z])[a-z0-9]{2,5})$/i.exec(n);
     return m ? `${safeName(m[1], "document")}${m[2].toLowerCase()}` : "";
   } catch { return ""; }
 }
+/** Whether the address ends in the name of a document (not of a script such as download.php). */
+const namesDocument = (url) => DOC_ENDINGS.has(nameFromUrl(url).split(".").pop());
 
 /**
  * Downloads the items one after the other. items: [{n, kind, url, label, frameId, i}];
@@ -124,10 +139,14 @@ export async function runQueue({ items, tabId, pageUrl, folder, click, alive = n
   const self = api.runtime && api.runtime.id;
   // A download the page started, from the portal: neither by an extension nor from elsewhere.
   const fromSite = (d, o = origin) => !d.byExtensionId && (sameSite(d.referrer, o) || sameSite(d.url, o) || sameSite(d.finalUrl, o));
-  // In Firefox a container tab: its cookies are the ones logged in to the portal. The normal store
-  // is not named: Firefox takes it anyway, and naming any store needs the "cookies" permission.
-  let jar = {};
-  try { const tab = await api.tabs.get(tabId); if (tab && tab.cookieStoreId && tab.cookieStoreId !== "firefox-default") jar = { cookieStoreId: tab.cookieStoreId }; } catch { /* no tab */ }
+  // Firefox: a container tab has cookies of its own, which an extension may use only with the
+  // "cookies" permission; this one does not ask for it. Rather than download with the normal
+  // cookies (perhaps another account) links fail there with a word; buttons work as in the page.
+  // A private window: its downloads are private too, and fetched by the browser only.
+  let store = "";
+  try { const tab = await api.tabs.get(tabId); store = (tab && tab.cookieStoreId) || ""; } catch { /* no tab */ }
+  const container = !!store && store !== "firefox-default" && store !== "firefox-private";
+  const private_ = store === "firefox-private";
 
   // In Chrome our own downloads, and the one download a click is waiting for, go into the job's
   // folder; every other download of the browser is left alone. Firefox has no such hook.
@@ -143,38 +162,52 @@ export async function runQueue({ items, tabId, pageUrl, folder, click, alive = n
   if (canPlace) api.downloads.onDeterminingFilename.addListener(place);
 
   const download = (url) => {
-    const opts = { url, conflictAction: "uniquify", saveAs: false, ...jar };
+    const opts = { url, conflictAction: "uniquify", saveAs: false };
+    if (private_) opts.incognito = true;
     // Without the hook the folder can only be given with the name; a name is known only from the address.
     const name = canPlace ? "" : nameFromUrl(url);
     if (name) opts.filename = `${folder}/${name}`;
-    // A container the browser refuses (without the "cookies" permission): with the normal store; if
-    // that is not logged in, a web page comes back and is reported as such.
-    return api.downloads.download(opts).catch((e) => {
-      if (!opts.cookieStoreId || !/cookieStoreId/i.test(String((e && e.message) || e))) throw e;
-      delete opts.cookieStoreId;
-      return api.downloads.download(opts);
-    });
+    return api.downloads.download(opts);
   };
 
   // Firefox takes the name of a download an extension starts from the address only, not from the
-  // server's header: a link without a file name in its address would be saved as "documentDownload".
-  // There the extension fetches the document itself, with the browser's cookies for the portal,
-  // and saves it under the server's name into the job's folder. When that does not give a
-  // document (not logged in for the extension's request, an error), the browser's download as before.
+  // server's header: a link to "documentDownload?id=…" would be saved as "documentDownload". There
+  // the extension fetches a document of the portal's own site itself, with the browser's cookies
+  // for the portal, and saves it under the server's name into the job's folder. When that gives no
+  // document (not logged in for the extension's request, an error, another site after a redirect,
+  // too large), the browser's download as before; that asks the portal a second time.
+  const MAX = 200 * 1024 * 1024;
   const viaFetch = async (url) => {
-    let r;
-    try { r = await fetch(url, { credentials: "include", cache: "no-store" }); } catch { return null; }
-    const mime = r.headers.get("content-type") || "";
-    if (!r.ok || /^(text\/html|application\/xhtml\+xml)\b/i.test(mime)) return null;
-    let blob;
-    try { blob = await r.blob(); } catch { return null; }
-    const base = nameFromHeader(r.headers.get("content-disposition")) || nameFromUrl(r.url) || safeName(new URL(url).pathname.split("/").pop(), "document");
+    const ctl = new AbortController();
+    const started = Date.now();
+    // Stop, and a server that never ends, end the fetch too.
+    const watch = setInterval(() => { if (stop() || Date.now() - started > longest) ctl.abort(); }, poll);
+    let blob, r, at = url;
+    try {
+      r = await fetch(url, { credentials: "include", cache: "no-store", signal: ctl.signal });
+      // The address it ended at, after redirects (a stand-in may give none).
+      at = r.url || url;
+      const mime = r.headers.get("content-type") || "";
+      const size = Number(r.headers.get("content-length"));
+      if (!r.ok || !sameSite(at) || /^(text\/html|application\/xhtml\+xml)\b/i.test(mime) || size > MAX) { ctl.abort(); return null; }
+      blob = await r.blob();
+      if (blob.size > MAX) return null;
+    } catch { return stop() ? { ok: false, error: "stopped" } : null; }
+    finally { clearInterval(watch); }
+    if (stop()) return { ok: false, error: "stopped" };
+    const mime = r.headers.get("content-type") || blob.type;
+    const base = nameFromHeader(r.headers.get("content-disposition")) || nameFromUrl(at) || safeName(decodeName(new URL(at).pathname.split("/").pop()), "document");
     const href = URL.createObjectURL(blob);
-    try { return await settle(await api.downloads.download({ url: href, filename: `${folder}/${withEnding(base, mime)}`, conflictAction: "uniquify", saveAs: false })); }
+    let res;
+    try { res = await settle(await api.downloads.download({ url: href, filename: `${folder}/${withEnding(base, mime)}`, conflictAction: "uniquify", saveAs: false })); }
+    catch { res = null; }
     finally { URL.revokeObjectURL(href); }
+    // Saving the fetched file failed: the browser's download, unless stopped.
+    return res && (res.ok || res.error === "stopped") ? res : null;
   };
   const link = async (url) => {
-    if (!canPlace && !jar.cookieStoreId && !nameFromUrl(url)) { const r = await viaFetch(url); if (r) return r; }
+    if (container) return { ok: false, error: "container" };
+    if (!canPlace && !private_ && sameSite(url) && !namesDocument(url)) { const r = await viaFetch(url); if (r) return r; }
     return settle(await download(url));
   };
 
@@ -303,7 +336,7 @@ export async function runQueue({ items, tabId, pageUrl, folder, click, alive = n
         if (seen.others.length === 1) { claimed.add(seen.others[0].id); r = await settle(seen.others[0].id); if (r.ok && !gone) api.tabs.remove(id).catch(() => {}); return r; }
         return { ok: false, error: gone ? "nothing" : "tab_open" };
       }
-      r = await settle(await download(url));
+      r = await link(url);
     }
     else if (seen.others.length === 1) { claimed.add(seen.others[0].id); return await settle(seen.others[0].id); }
     else return { ok: false, error: gone ? "nothing" : "tab_open" };
