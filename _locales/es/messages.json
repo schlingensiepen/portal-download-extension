@@ -534,7 +534,7 @@
     "message": "Esta página no usa https. La extensión solo busca en páginas https y en páginas http de este ordenador."
   },
   "docs_folder_firefox": {
-    "message": "Los enlaces con un nombre de archivo en la dirección se guardan en $1 dentro de tu carpeta de descargas; todo lo demás, directamente en tu carpeta de descargas."
+    "message": "Los enlaces se guardan en $1 dentro de tu carpeta de descargas; los documentos de botones, directamente en tu carpeta de descargas."
   },
   "docs_err_html": {
     "message": "volvió una página web en lugar de un documento, quizá porque la sesión caducó; se eliminó"

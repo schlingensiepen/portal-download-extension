@@ -10,13 +10,14 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const PORTAL = "https://portal.example/invoices";
 let world;
 function reset() {
-  world = { downloads: new Map(), next: 1, placed: {}, removed: [], tabs: new Map([[1, { id: 1, url: PORTAL }]]), closed: [], requested: [] };
+  world = { asked: [], downloads: new Map(), next: 1, placed: {}, removed: [], tabs: new Map([[1, { id: 1, url: PORTAL }]]), closed: [], requested: [] };
 }
 const dl = { onCreated: event(), onDeterminingFilename: event(),
   async download(opts) {
     // As Firefox without the "cookies" permission: naming a cookie store is refused.
     if (opts.cookieStoreId) throw new Error(`No permission for cookieStoreId: ${opts.cookieStoreId}`);
     world.requested.push(opts.url);
+    world.asked.push(opts);
     return start({ url: opts.url, byExtensionId: "ours", referrer: "", mime: opts.url.endsWith(".html") ? "text/html" : "application/pdf" });
   },
   async search({ id }) { const d = world.downloads.get(id); return d ? [{ ...d }] : []; },
@@ -32,7 +33,7 @@ function start(d) {
   setTimeout(() => {
     dl.onCreated.fire({ ...item });
     setTimeout(() => {
-      dl.onDeterminingFilename.fire({ ...item }, (s) => { world.placed[id] = s ? s.filename : null; });
+      dl.onDeterminingFilename?.fire({ ...item }, (s) => { world.placed[id] = s ? s.filename : null; });
       setTimeout(() => { item.state = "complete"; item.filename = `/home/u/Downloads/${world.placed[id] || item.filename}`; }, 20);
     }, late);
   }, 5);
@@ -66,6 +67,39 @@ test("in Firefox a link is downloaded from a normal tab and from a container tab
   world.tabs.get(1).cookieStoreId = "firefox-container-2";
   const c = await run([{ n: 2, url: "https://portal.example/doc/b.pdf" }]);
   assert.equal(c[2].ok, true, c[2].error);
+});
+
+// Firefox: no hook for the name; the server names the file only in its header.
+async function firefox(reply, fn) {
+  const hook = dl.onDeterminingFilename, before = globalThis.fetch;
+  dl.onDeterminingFilename = undefined;
+  globalThis.fetch = async () => reply();
+  try { return await fn(); } finally { dl.onDeterminingFilename = hook; globalThis.fetch = before; }
+}
+const RE_FD = "https://portal.example/postboxDocument/documentDownload?documentId=0050&fileName=Rechnung-23";
+
+test("in Firefox a link without a file name is saved under the server's name, into the job's folder", async () => {
+  const s = await firefox(() => new Response("%PDF-1.4", { headers: { "content-type": "application/pdf", "content-disposition": "attachment; filename=\"Rechnung-23.07.2024-10335932.pdf\"" } }),
+    () => run([{ n: 1, url: RE_FD }]));
+  assert.equal(s[1].ok, true, s[1].error);
+  assert.equal(world.asked.length, 1);
+  assert.match(world.asked[0].url, /^blob:/);
+  assert.equal(world.asked[0].filename, "Portal-Download/Strom/Rechnung-23.07.2024-10335932.pdf");
+});
+
+test("in Firefox a fetch that gives no document falls back to the browser's download", async () => {
+  const s = await firefox(() => new Response("<html>login</html>", { headers: { "content-type": "text/html" } }), () => run([{ n: 1, url: RE_FD }]));
+  assert.equal(s[1].ok, true, s[1].error);
+  assert.deepEqual(world.requested, [RE_FD]);
+});
+
+test("the server's name: quoted, plain, encoded, with a path, or none", async () => {
+  const { nameFromHeader } = await import(src);
+  assert.equal(nameFromHeader('attachment; filename="a b.PDF"'), "a b.pdf");
+  assert.equal(nameFromHeader("attachment; filename=x.pdf; size=3"), "x.pdf");
+  assert.equal(nameFromHeader("attachment; filename=\"x.pdf\"; filename*=UTF-8''Rechnung%20M%C3%BCller.pdf"), "Rechnung Müller.pdf");
+  assert.equal(nameFromHeader('attachment; filename="../../etc/passwd"'), "passwd");
+  assert.equal(nameFromHeader("inline"), "");
 });
 
 test("a button takes the portal's download, not one of another extension or site meanwhile", async () => {

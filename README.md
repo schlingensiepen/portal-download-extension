@@ -211,7 +211,7 @@ Once you are logged in to the portal, the extension can find the documents in th
 
 - **Links** are downloaded with the browser's download function and your login cookies of the portal.
 - **Buttons** are clicked in the page, as you would. The first download from the portal that follows counts as that document. If the button opens a new tab, a download from that tab counts; else the extension downloads the tab's address and closes the tab.
-- **In Firefox,** documents from buttons, and links whose address names no file, land in the download folder itself, not in the *Portal-Download* subfolder. Firefox lets an extension choose the subfolder only when the file name is known before the download starts.
+- **In Firefox,** documents from buttons land in the download folder itself, not in the *Portal-Download* subfolder: Firefox lets an extension choose the subfolder only when the file name is known before the download starts. A link whose address names no file is fetched by the extension itself and saved under the name the portal gives, in the subfolder; if that does not work (in a container tab, or if the portal refuses it), the browser downloads it into the download folder, named after the end of its address.
 
 **What the panel says beside a document:**
 

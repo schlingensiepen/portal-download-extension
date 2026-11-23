@@ -3,7 +3,8 @@
 //
 // A link is downloaded with the browser's download interface, with the browser's cookies for
 // the portal (in Firefox those of the tab's container), into "Portal-Download/<job>/" below the
-// download folder. A button is clicked in the page; the first download from the portal that
+// download folder. In Firefox a link without a file name in its address is fetched by the
+// extension and saved under the name the server gives (see viaFetch). A button is clicked in the page; the first download from the portal that
 // follows counts as its document, and in Chrome it is put into the same folder. A button that
 // opens a new tab: a download that tab starts counts, else the tab's address is downloaded and
 // the tab closed. A web page that comes back instead of a document (a login page after the
@@ -88,6 +89,18 @@ export function withEnding(name, mime) {
   return ending && !/\.[a-z0-9]{2,5}$/i.test(name) ? `${name}.${ending}` : name;
 }
 
+/** The file name the server gives in its Content-Disposition header, if any; safe on every system. */
+export function nameFromHeader(cd) {
+  const v = String(cd || "");
+  let n = "";
+  const star = /filename\*\s*=\s*([^']*)'[^']*'([^;]+)/i.exec(v);
+  if (star) { try { n = decodeURIComponent(star[2].trim().replace(/^"|"$/g, "")); } catch { n = ""; } }
+  if (!n) { const m = /filename\s*=\s*("([^"]*)"|[^;]+)/i.exec(v); if (m) n = (m[2] ?? m[1]).trim(); }
+  n = n.split(/[\\/]/).pop();
+  const m = /^(.*?)(\.[a-z0-9]{2,5})?$/i.exec(n);
+  return m && m[1] ? `${safeName(m[1], "document")}${(m[2] || "").toLowerCase()}` : "";
+}
+
 /** The file name a link would give, if its address ends in one; safe on every system. */
 function nameFromUrl(url) {
   try {
@@ -143,12 +156,34 @@ export async function runQueue({ items, tabId, pageUrl, folder, click, alive = n
     });
   };
 
+  // Firefox takes the name of a download an extension starts from the address only, not from the
+  // server's header: a link without a file name in its address would be saved as "documentDownload".
+  // There the extension fetches the document itself, with the browser's cookies for the portal,
+  // and saves it under the server's name into the job's folder. When that does not give a
+  // document (not logged in for the extension's request, an error), the browser's download as before.
+  const viaFetch = async (url) => {
+    let r;
+    try { r = await fetch(url, { credentials: "include", cache: "no-store" }); } catch { return null; }
+    const mime = r.headers.get("content-type") || "";
+    if (!r.ok || /^(text\/html|application\/xhtml\+xml)\b/i.test(mime)) return null;
+    let blob;
+    try { blob = await r.blob(); } catch { return null; }
+    const base = nameFromHeader(r.headers.get("content-disposition")) || nameFromUrl(r.url) || safeName(new URL(url).pathname.split("/").pop(), "document");
+    const href = URL.createObjectURL(blob);
+    try { return await settle(await api.downloads.download({ url: href, filename: `${folder}/${withEnding(base, mime)}`, conflictAction: "uniquify", saveAs: false })); }
+    finally { URL.revokeObjectURL(href); }
+  };
+  const link = async (url) => {
+    if (!canPlace && !jar.cookieStoreId && !nameFromUrl(url)) { const r = await viaFetch(url); if (r) return r; }
+    return settle(await download(url));
+  };
+
   try {
     for (const item of items) {
       if (stop()) break;
       await onStep(item.n, "running");
       let result;
-      try { result = item.url ? await settle(await download(item.url)) : await clickAndCatch(item); }
+      try { result = item.url ? await link(item.url) : await clickAndCatch(item); }
       catch (e) { result = { ok: false, error: String((e && e.message) || e) }; }
       await onStep(item.n, result);
       // The page went elsewhere: the remaining items are no longer there.

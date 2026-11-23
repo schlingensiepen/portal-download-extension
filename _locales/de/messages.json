@@ -534,7 +534,7 @@
     "message": "Diese Seite ist nicht über https erreichbar. Die Erweiterung durchsucht nur https-Seiten und http-Seiten auf diesem Computer."
   },
   "docs_folder_firefox": {
-    "message": "Links mit einem Dateinamen in der Adresse landen in $1 in Deinem Download-Ordner, alles andere direkt in Deinem Download-Ordner."
+    "message": "Links landen in $1 in Deinem Download-Ordner, Dokumente von Knöpfen direkt in Deinem Download-Ordner."
   },
   "docs_err_html": {
     "message": "statt eines Dokuments kam eine Webseite zurück, vielleicht weil die Anmeldung abgelaufen ist; sie wurde gelöscht"

@@ -534,7 +534,7 @@
     "message": "Esta página não usa https. A extensão só pesquisa páginas https e páginas http deste computador."
   },
   "docs_folder_firefox": {
-    "message": "As ligações com um nome de ficheiro no endereço são guardadas em $1 na sua pasta de transferências; tudo o resto, diretamente na sua pasta de transferências."
+    "message": "As ligações são guardadas em $1 na sua pasta de transferências; os documentos de botões, diretamente na sua pasta de transferências."
   },
   "docs_err_html": {
     "message": "voltou uma página web em vez de um documento, talvez porque a sessão expirou; foi eliminada"

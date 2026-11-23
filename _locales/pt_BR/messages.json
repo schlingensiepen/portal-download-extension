@@ -534,7 +534,7 @@
     "message": "Esta página não usa https. A extensão só pesquisa páginas https e páginas http deste computador."
   },
   "docs_folder_firefox": {
-    "message": "Links com um nome de arquivo no endereço são salvos em $1 na sua pasta de downloads; todo o resto, diretamente na sua pasta de downloads."
+    "message": "Links são salvos em $1 na sua pasta de downloads; documentos de botões, diretamente na sua pasta de downloads."
   },
   "docs_err_html": {
     "message": "voltou uma página web em vez de um documento, talvez porque o login expirou; ela foi excluída"

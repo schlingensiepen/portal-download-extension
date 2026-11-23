@@ -534,7 +534,7 @@
     "message": "Cette page n'est pas en https. L'extension ne parcourt que les pages https, et les pages http de cet ordinateur."
   },
   "docs_folder_firefox": {
-    "message": "Les liens dont l'adresse contient un nom de fichier sont enregistrés dans $1 de votre dossier de téléchargement ; tout le reste directement dans votre dossier de téléchargement."
+    "message": "Les liens sont enregistrés dans $1 de votre dossier de téléchargement ; les documents des boutons directement dans votre dossier de téléchargement."
   },
   "docs_err_html": {
     "message": "une page web est revenue au lieu d'un document, peut-être parce que la connexion a expiré ; elle a été supprimée"

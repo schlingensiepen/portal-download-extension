@@ -534,7 +534,7 @@
     "message": "This page is not on https. The extension searches only https pages, and http pages on this computer."
   },
   "docs_folder_firefox": {
-    "message": "Links with a file name in their address are saved into $1 in your download folder; everything else straight into your download folder."
+    "message": "Links are saved into $1 in your download folder; documents from buttons straight into your download folder."
   },
   "docs_err_html": {
     "message": "a web page came back instead of a document, perhaps because the login expired; it was deleted"
