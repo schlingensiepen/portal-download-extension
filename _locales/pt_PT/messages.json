@@ -621,6 +621,6 @@
     "message": "Abrir o formulário de comentários"
   },
   "watch_blind": {
-    "message": "Esta página não pode ser observada: o navegador não deixa as extensões entrar nela."
+    "message": "Esta página não pode ser observada: a extensão não consegue entrar nela (uma página do próprio navegador ou um site sem acesso)."
   }
 }

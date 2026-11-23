@@ -621,6 +621,6 @@
     "message": "Ouvrir le formulaire de retour"
   },
   "watch_blind": {
-    "message": "Cette page ne peut pas être observée : le navigateur n'y laisse pas entrer les extensions."
+    "message": "Cette page ne peut pas être observée : l'extension ne peut pas y entrer (une page du navigateur lui-même, ou un site sans accès)."
   }
 }

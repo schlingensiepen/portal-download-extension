@@ -621,6 +621,6 @@
     "message": "Rückmeldeformular öffnen"
   },
   "watch_blind": {
-    "message": "Diese Seite lässt sich nicht beobachten: Der Browser lässt Erweiterungen dort nicht hinein."
+    "message": "Diese Seite lässt sich nicht beobachten: Die Erweiterung kommt nicht hinein (eine Seite des Browsers selbst oder eine Website ohne Zugriff)."
   }
 }

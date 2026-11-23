@@ -45,6 +45,6 @@ body:
     id: version
     attributes:
       label: Extension version and browser
-      description: The version is at the bottom of the panel, for example "1.0.0, Firefox 147".
+      description: The version is at the bottom of the panel; the text from the panel names it in its first line, for example "1.1.0, Firefox 147".
     validations:
       required: true
