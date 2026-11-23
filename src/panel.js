@@ -552,18 +552,21 @@ async function startWatching() {
     if (!granted) { w.phase = "ask"; return toast(t("watch_refused"), true); }
     if (state.docs) { const d = state.docs; d.stop = true; state.docs = null; await unhighlight(d); }
     if (state.watch !== w) return;
-    Object.assign(w, { phase: "watching", token: crypto.randomUUID(), origin: site.origin, clicks: [], events: [], tabs: new Set([w.tabId]), seen: new Map([[w.tabId, w.url.split("#")[0]]]), origins: new Set([site.origin]), download: null, ended: "", blind: false, lastClick: 0, again: null });
+    Object.assign(w, { phase: "watching", token: crypto.randomUUID(), origin: site.origin, clicks: [], events: [], tabs: new Set([w.tabId]), seen: new Map([[w.tabId, w.url.split("#")[0]]]), origins: new Set([site.origin]), docs: new Map(), pending: new Map(), download: null, ended: "", blind: false, lastClick: 0, again: null });
     // The observer in every frame of a tab; true when it runs in the tab's page itself.
     const inject = async (tabId) => {
       const run = (func, args = []) => api.scripting.executeScript({ target: { tabId, allFrames: true }, func, args }).catch(() => api.scripting.executeScript({ target: { tabId }, func, args }));
       try {
         await run(scan);
-        if (w.phase !== "watching") return false;
+        if (w.phase !== "watching") return "";
         const r = await run(observe, [w.token]);
         // Ended meanwhile: the page stops noting again at once.
-        if (w.phase !== "watching") { run(unobserve).catch(() => {}); return false; }
-        return !!(r && r.some((x) => x.frameId === 0 && x.result === true));
-      } catch { return false; }
+        if (w.phase !== "watching") { run(unobserve).catch(() => {}); return ""; }
+        // The mark of the tab's own document, or "" when the page cannot be watched.
+        const top = r && r.find((x) => x.frameId === 0 && typeof x.result === "string");
+        if (top) w.docs.set(tabId, top.result);
+        return top ? top.result : "";
+      } catch { return ""; }
     };
     // "null" (about:blank, data:) is no site.
     const originOf = (u) => { try { const o = new URL(u).origin; return o === "null" ? "" : o; } catch { return ""; } };
@@ -588,14 +591,25 @@ async function startWatching() {
         // A page loaded anew needs the observer again; only a new address is worth telling.
         const url = info.url || (tab && tab.url) || "", bare = url.split("#")[0];
         // The first page of a new tab is part of "a new tab opened"; afterwards a new address is a new page.
-        if (url && w.seen.has(tabId) && w.seen.get(tabId) !== bare) w.events.push({ at: Date.now(), kind: "page" });
+        // Whether a page loaded or the page's script only changed the address is decided once the
+        // tab is complete: the same document as before is no new page.
+        if (url && w.seen.has(tabId) && w.seen.get(tabId) !== bare) {
+          const e = { at: Date.now(), kind: "page", before: w.docs.get(tabId) || "" };
+          w.events.push(e);
+          w.pending.set(tabId, e);
+        }
         w.seen.set(tabId, bare);
         // Downloads count from the sites of the portal's own tab only: Chrome names the active tab as
         // the opener of a tab the user opens themselves, so a new tab's site is no proof.
         if (tabId === w.tabId && originOf(url)) w.origins.add(originOf(url));
         // Only the latest injection tells whether the page can be watched.
         const n = tabId === w.tabId ? (w.injections = (w.injections || 0) + 1) : 0;
-        inject(tabId).then((ok) => { if (tabId === w.tabId && n === w.injections && w.blind !== !ok) { w.blind = !ok; if (state.view === "watch" && w.phase === "watching") render(); } });
+        inject(tabId).then((doc) => {
+          const e = w.pending.get(tabId);
+          if (doc && e && info.status === "complete") { if (doc === e.before) e.kind = "address"; w.pending.delete(tabId); }
+          const ok = !!doc;
+          if (tabId === w.tabId && n === w.injections && w.blind !== !ok) { w.blind = !ok; if (state.view === "watch" && w.phase === "watching") render(); }
+        });
       },
       created: (tab) => {
         // Only a tab the portal opened right after a click of the user. The click's message may

@@ -7,7 +7,7 @@
 // that a click that leaves the page is not lost. No address, id, class or script is noted, and
 // never what was typed: no value of a field, no text of a large area.
 
-/** Runs in the page: notes the clicks of this frame for the panel that sent the token. */
+/** Runs in the page: notes the clicks of this frame for the panel that sent the token; returns the mark of the document. */
 export function observe(token) {
   globalThis.__portalDownloadObserve?.off();
   const api = globalThis.browser ?? globalThis.chrome;
@@ -79,7 +79,10 @@ export function observe(token) {
   globalThis.__portalDownloadObserve = me;
   addEventListener("click", on, true);
   addEventListener("auxclick", on, true);
-  return true;
+  // A mark of this document: it stays through an address changed by the page's script (the same
+  // document) and is new after a page loaded, so the panel can tell the two apart.
+  if (!globalThis.__portalDownloadDoc) globalThis.__portalDownloadDoc = Math.random().toString(36).slice(2);
+  return globalThis.__portalDownloadDoc;
 }
 
 /** Runs in the page: stops noting clicks in this frame. */

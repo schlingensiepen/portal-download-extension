@@ -37,7 +37,7 @@ test("a click is its kind, its words and yes/no marks; no address, id, class or 
     clicks: [click({ at: 1, newTab: true, onclick: true, href: `${P}/api/doc?id=4711&token=s3cr3t`, id: "row-4711", cls: "secret-class" }),
       click({ at: 3, tag: "span", link: "", words: "", icon: true, verdict: { finder: "none", clickable: false } }),
       click({ at: 5, tag: "button", link: "", submits: true, words: "Speichern", verdict: { finder: "none", clickable: true } })],
-    events: [{ at: 2, kind: "tab" }, { at: 4, kind: "page" }],
+    events: [{ at: 2, kind: "tab" }, { at: 4, kind: "page" }, { at: 6, kind: "address" }],
     download: { mime: "application/pdf", filename: "/home/u/Downloads/Rechnung_4711.PDF", bytes: 245760 } }, { version: "1.1.0", browser: "Firefox 147" });
   assert.match(r, /Portal-Download 1\.1\.0, Firefox 147/);
   assert.match(r, /Portal: `www\.portal\.example`/);
@@ -46,6 +46,7 @@ test("a click is its kind, its words and yes/no marks; no address, id, class or 
   assert.match(r, /2\. an element `<span>` without words · has an icon · pointer cursor/);
   assert.match(r, /then a new page loaded/);
   assert.match(r, /3\. a submit button `"Speichern"`/);
+  assert.match(r, /then the page's script changed the address, without loading a new page/);
   assert.match(r, /\*\*Download:\*\* a PDF of 240 KB was downloaded\./);
   for (const bad of ["4711", "s3cr3t", "secret-class", "row-", "kunde", "rechnungen", "sid", "Rechnung_", "2026"]) assert.ok(!r.includes(bad), `${bad} in the report`);
 });

@@ -1,7 +1,7 @@
 // The text of a feedback on a portal, from what the observer noted (observer.js): per click the
 // kind of element, its words, a few yes/no marks and what the search made of it; then whether a
-// page loaded or a tab opened, and the download as kind and size. No address, id, class or script
-// is in it. In the words, digits become "#" and e-mail addresses "[e-mail]"; a name cannot be
+// page loaded, the page's script changed its address or a tab opened, and the download as kind
+// and size. No address, id, class or script is in it. In the words, digits become "#" and e-mail addresses "[e-mail]"; a name cannot be
 // recognised, so the user reads the text, may change it, and decides whether to copy it.
 //
 // The words stand in code spans, so that they cannot become a link, an image or a mention in the
@@ -84,7 +84,7 @@ const ENDED = { download: "a download started", timeout: "no download within two
 
 /**
  * The whole text. w: { url, clicks, events, download, ended }; events are pages loaded and tabs
- * opened ({ at, kind: "page" | "tab" }); only the last five clicks and what followed them are told.
+ * opened ({ at, kind: "page" | "address" | "tab" }; "address": the same document, its address changed by script); only the last five clicks and what followed them are told.
  */
 export function buildReport(w, { version = "", browser = "", namePortal = true } = {}) {
   const host = (() => { try { return new URL(w.url).host; } catch { return ""; } })();
@@ -105,7 +105,7 @@ export function buildReport(w, { version = "", browser = "", namePortal = true }
       out.push(...clickLines(k + 1, c));
       // What happened after it and before the next.
       const next = clicks[k + 1] ? clicks[k + 1].at : Infinity;
-      for (const e of events.filter((x) => x.at >= c.at && x.at < next)) out.push(e.kind === "tab" ? "   then a new tab opened" : "   then a new page loaded");
+      for (const e of events.filter((x) => x.at >= c.at && x.at < next)) out.push(e.kind === "tab" ? "   then a new tab opened" : e.kind === "address" ? "   then the page's script changed the address, without loading a new page" : "   then a new page loaded");
     });
   }
   // Of the download only what kind of file and how large: its name and address are not needed.
