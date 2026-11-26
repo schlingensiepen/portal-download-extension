@@ -41,6 +41,8 @@ After Mozilla's review, a release may also carry the same signed file as `portal
 
 **Chrome and Edge:** load it from the ZIP file of a [release](https://github.com/schlingensiepen/portal-download-extension/releases).
 
+Why not from the Edge Add-ons store: Microsoft's registration for new developers is broken at the moment. *Get started* for the Edge program leads back to the Partner Center's home page, and the registration form never appears. Many developers report the same ([#901](https://github.com/microsoft/MicrosoftEdge-Extensions/issues/901), [#905](https://github.com/microsoft/MicrosoftEdge-Extensions/issues/905), [#907](https://github.com/microsoft/MicrosoftEdge-Extensions/issues/907), [#908](https://github.com/microsoft/MicrosoftEdge-Extensions/issues/908), [Microsoft Q&A](https://learn.microsoft.com/en-us/answers/questions/6062521/microsoft-edge-program-get-started-redirects-to-pa)); Microsoft closed the reports without a fix and points to its Partner Center support. As soon as registration works, the extension goes there too.
+
 1. Download `portal-download-<version>.zip`.
 2. Unpack it into a folder that stays. The browser loads the extension from that folder at every start.
 3. Open `chrome://extensions` (Edge: `edge://extensions`).
@@ -398,9 +400,9 @@ Ich bitte um Verständnis, dass ich für ein kleines Hobbyprojekt nicht in das A
 
 ## Edge Add-ons
 
-Wegen der Unbenutzbarkeit des Microsoft Partner Center musste der Eintrag bei Edge Add-ons leider verschoben werden. Bis dahin lädt Edge die ZIP-Datei aus den Releases wie Chrome.
+Bei Microsoft kann man sich als neuer Entwickler gerade nicht registrieren (siehe *Installing*). Darum gibt es noch keinen Eintrag bei Edge Add-ons. Bis dahin lädt Edge die ZIP-Datei aus den Releases wie Chrome.
 
-*Because the Microsoft Partner Center proved unusable, the listing on Edge Add-ons had to be postponed. Until then, Edge loads the ZIP file from the releases, as Chrome does.*
+*Microsoft's registration for new developers is broken at the moment (see Installing). So there is no listing on Edge Add-ons yet. Until then, Edge loads the ZIP file from the releases, as Chrome does.*
 
 ## License
 
