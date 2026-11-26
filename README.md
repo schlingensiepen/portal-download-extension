@@ -31,17 +31,15 @@ The extension is for Chrome and Edge 121 or newer, and Firefox 140 or newer.
 2. Open `about:debugging#/runtime/this-firefox`.
 3. Click *Load Temporary Add-on…* and choose the file `manifest.json` in the unpacked folder.
 
-Firefox removes it again when it restarts. If a version from addons.mozilla.org is installed, that one is switched off meanwhile, comes back after the restart and keeps its stored data. If not, the temporary one's local store may be gone after the restart: keep your jobs on a service, or export them first (see *Exchanging jobs*).
+Firefox removes it again when it restarts. If a version from addons.mozilla.org is installed, that one is switched off meanwhile, comes back after the restart and keeps its stored data. If not, the temporary one's local store may be gone after the restart: keep your jobs on a service, or export them first (see [Exchanging jobs](#exchanging-jobs)).
 
-After Mozilla's review, a release may also carry the same signed file as `portal-download-<version>.xpi`. To install that file:
+A release may also carry the same signed file as `portal-download-<version>.xpi`. To install that file:
 
 1. Download it.
 2. Open `about:addons`.
 3. In the gear menu, choose *Install Add-on From File…* and pick the file.
 
 **Chrome and Edge:** load it from the ZIP file of a [release](https://github.com/schlingensiepen/portal-download-extension/releases).
-
-Why not from the Edge Add-ons store: Microsoft's registration for new developers is broken at the moment. *Get started* for the Edge program leads back to the Partner Center's home page, and the registration form never appears. Many developers report the same ([#901](https://github.com/microsoft/MicrosoftEdge-Extensions/issues/901), [#905](https://github.com/microsoft/MicrosoftEdge-Extensions/issues/905), [#907](https://github.com/microsoft/MicrosoftEdge-Extensions/issues/907), [#908](https://github.com/microsoft/MicrosoftEdge-Extensions/issues/908), [Microsoft Q&A](https://learn.microsoft.com/en-us/answers/questions/6062521/microsoft-edge-program-get-started-redirects-to-pa)); Microsoft closed the reports without a fix and points to its Partner Center support. As soon as registration works, the extension goes there too.
 
 1. Download `portal-download-<version>.zip`.
 2. Unpack it into a folder that stays. The browser loads the extension from that folder at every start.
@@ -51,13 +49,15 @@ Why not from the Edge Add-ons store: Microsoft's registration for new developers
 
 The browser reminds you now and then that a developer extension is active. It may also list two manifest keys it does not know; they are for Firefox. Both are harmless.
 
+**Why not from the Edge Add-ons store?** Microsoft's registration for new developers is broken at the moment. *Get started* for the Edge program leads back to the Partner Center's home page, and the registration form never appears. Many developers report the same ([#901](https://github.com/microsoft/MicrosoftEdge-Extensions/issues/901), [#905](https://github.com/microsoft/MicrosoftEdge-Extensions/issues/905), [#907](https://github.com/microsoft/MicrosoftEdge-Extensions/issues/907), [#908](https://github.com/microsoft/MicrosoftEdge-Extensions/issues/908), [Microsoft Q&A](https://learn.microsoft.com/en-us/answers/questions/6062521/microsoft-edge-program-get-started-redirects-to-pa)); Microsoft closed the reports without a fix and points to its Partner Center support. As soon as registration works, the extension goes there too.
+
 **From the source:** the browser can load the source folder as it is. Nothing has to be built first.
 
 1. Get the source from the [project page](https://github.com/schlingensiepen/portal-download-extension): click *Code*, then *Download ZIP*, and unpack it; or clone the repository with git.
-2. **Firefox:** open `about:debugging#/runtime/this-firefox`, click *Load Temporary Add-on…* and choose the file `manifest.json` in the top folder of the source (where `README.md` lies too). As with the ZIP file, Firefox removes it again when it restarts.
+2. **Firefox:** open `about:debugging#/runtime/this-firefox`, click *Load Temporary Add-on…* and choose the file `manifest.json` in the top folder of the source (where `README.md` is, too). As with the ZIP file, Firefox removes it again when it restarts.
 3. **Chrome and Edge:** open `chrome://extensions` (Edge: `edge://extensions`), switch on *Developer mode*, click *Load unpacked* and choose that top folder. The folder must stay where it is.
 
-**The toolbar button** opens the side panel (Firefox: the sidebar). In Chrome and Edge, pin it first: click the puzzle piece in the toolbar, then the pin beside *Portal-Download*.
+**The toolbar button** opens the side panel (Firefox: the sidebar). In Chrome and Edge, pin it first: click the puzzle piece in the toolbar, then the pin beside *Portal-Download*. In Firefox it starts in the Extensions menu: click the puzzle piece, then the gear beside *Portal-Download* and *Pin to Toolbar*.
 
 **Permissions.** The extension asks for these:
 
@@ -276,7 +276,7 @@ Firefox lets an extension choose the folder and the name only for a download the
 - **In a container tab,** links are not downloaded, neither by Firefox nor by the extension itself. The panel says why (see the table below). Buttons are clicked in the page and work as usual; only a button that opens the document in a new tab without downloading it fails with the same message. Open the portal in a normal tab.
 - **In a private window,** Firefox saves links privately, named after the end of their address as described under *If that does not work*. The extension does not fetch them itself there. Buttons work as usual.
 
-**Chrome and Edge in a private window** (incognito, InPrivate): links are not downloaded, and the panel says why. Buttons are clicked in the page and work as usual; only a button that opens the document in a new tab without downloading it fails with the same message. Open the portal in a normal window.
+**Chrome and Edge in a private window** (incognito, InPrivate): the extension runs there only if you switched on *Allow in Incognito* (Edge: *Allow in InPrivate*) under `chrome://extensions`, *Details*. Links are not downloaded, and the panel says why. Buttons are clicked in the page and work as usual; only a button that opens the document in a new tab without downloading it fails with the same message. Open the portal in a normal window.
 
 ### What the panel says beside a document
 
@@ -400,9 +400,9 @@ Ich bitte um Verständnis, dass ich für ein kleines Hobbyprojekt nicht in das A
 
 ## Edge Add-ons
 
-Bei Microsoft kann man sich als neuer Entwickler gerade nicht registrieren (siehe *Installing*). Darum gibt es noch keinen Eintrag bei Edge Add-ons. Bis dahin lädt Edge die ZIP-Datei aus den Releases wie Chrome.
+Bei Microsoft kann man sich als neuer Entwickler gerade nicht registrieren (siehe [Installing](#installing)). Darum gibt es noch keinen Eintrag bei Edge Add-ons. Bis dahin lädt Edge die ZIP-Datei aus den Releases wie Chrome.
 
-*Microsoft's registration for new developers is broken at the moment (see Installing). So there is no listing on Edge Add-ons yet. Until then, Edge loads the ZIP file from the releases, as Chrome does.*
+*Microsoft's registration for new developers is broken at the moment (see [Installing](#installing)). So there is no listing on Edge Add-ons yet. Until then, Edge loads the ZIP file from the releases, as Chrome does.*
 
 ## License
 
